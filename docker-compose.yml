@@ -1,0 +1,15 @@
+services:
+  
+  backend:
+    build: ./backend
+    container_name: red-tetris-backend
+    restart: always
+    networks:
+      - public
+    ports:
+      - "3000:3000"
+
+
+networks:
+  public:
+    driver: bridge
