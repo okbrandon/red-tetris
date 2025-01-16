@@ -1,11 +1,13 @@
 services:
-  
+
   backend:
     build: ./backend
     container_name: red-tetris-backend
     restart: always
     networks:
       - public
+    environment:
+      - DEBUG=backend:*
     ports:
       - "3000:3000"
 
