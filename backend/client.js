@@ -12,6 +12,10 @@ class Client {
 		this.connection.send(message);
 	}
 
+	emit(event, data) {
+		this.connection.emit(event, data);
+	}
+
 }
 
 module.exports = Client;
