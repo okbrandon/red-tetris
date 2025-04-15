@@ -2,16 +2,17 @@ const { createServer } = require("http")
 const { Server } = require("socket.io")
 const Client = require("./client");
 const Game = require("./game");
+const incomingEvents = require("./constants/incoming-events.js");
+const outgoingEvents = require("./constants/outgoing-events.js");
+
+const PORT = process.env.PORT || 3000;
 
 const httpServer = createServer((req, res) => {
 	res.writeHead(200, { "Content-Type": "text/plain" });
 	res.end("Hello World!");
 });
 const io = new Server(httpServer, {});
-
 const rooms = new Map;
-
-const PORT = process.env.PORT || 3000;
 
 const createRoom = (id) => {
 	if (rooms.has(id))
@@ -27,8 +28,7 @@ const broadcastRoom = (room) => {
 	const clients = [...room.clients];
 
 	clients.forEach(client => {
-		client.emit("room-broadcast", JSON.stringify({
-			type: 'room-broadcast',
+		client.emit(outgoingEvents.ROOM_BROADCAST, JSON.stringify({
 			room: room.id,
 			you: client.id,
 			clients: clients.map(c => ({
@@ -46,12 +46,16 @@ const joinRoom = (socket, room, client) => {
 		room.playerJoin(client);
 
 		socket.join(roomName);
-		socket.emit("room-joined", JSON.stringify({ type: 'room-joined', roomName }));
+		socket.emit(outgoingEvents.ROOM_JOINED, JSON.stringify({
+			roomName: roomName
+		}));
 
 		broadcastRoom(room);
 		console.log(`[${client.id}] Joined room ${roomName}`);
 	} catch (error) {
-		socket.send("error", JSON.stringify({ type: 'error', message: error.message }));
+		socket.send(outgoingEvents.ERROR, JSON.stringify({
+			message: error.message
+		}));
 	}
 }
 
@@ -67,10 +71,14 @@ const leaveRoom = (socket, room, client) => {
 			rooms.delete(room.id);
 		}
 
-		socket.emit("room-left", JSON.stringify({ type: 'room-left', roomName: room.id }));
+		socket.emit(outgoingEvents.ROOM_LEFT, JSON.stringify({
+			roomName: room.id
+		}));
 		console.log(`[${client.id}] Left room ${room.id}`);
 	} catch (error) {
-		socket.send("error", JSON.stringify({ type: 'error', message: error.message }));
+		socket.send(outgoingEvents.ERROR, JSON.stringify({
+			message: error.message
+		}));
 	}
 }
 
@@ -81,26 +89,35 @@ io.on("connection", (socket) => {
 
 	console.log("A user connected");
 
-	socket.on("client-update", (data) => {
+	socket.on(incomingEvents.CLIENT_UPDATE, (data) => {
 		if (!data.username) {
-			socket.send("error", JSON.stringify({ type: 'error', message: 'Username is required' }));
+			socket.send(outgoingEvents.ERROR, JSON.stringify({
+				message: 'Username is required'
+			}));
 			return;
 		}
 
 		client.username = data.username;
-		socket.emit("client-update", JSON.stringify({ type: 'client-update', id: client.id, username: client.username }));
+		socket.emit(outgoingEvents.CLIENT_UPDATED, JSON.stringify({
+			id: client.id,
+			username: client.username
+		}));
 		console.log(`[${client.id}] Updated username to ${client.username}`);
 	});
 
-	socket.on("room-join", (data) => {
+	socket.on(incomingEvents.ROOM_JOIN, (data) => {
 		const roomName = data.roomName;
 
 		if (!roomName) {
-			socket.send("error", JSON.stringify({ type: 'error', message: 'Room name is required' }));
+			socket.send(outgoingEvents.ERROR, JSON.stringify({
+				message: 'Room name is required'
+			}));
 			return;
 		}
 		if (!client.username) {
-			socket.send("error", JSON.stringify({ type: 'error', message: 'Username is required' }));
+			socket.send(outgoingEvents.ERROR, JSON.stringify({
+				message: 'Username is required'
+			}));
 			return;
 		}
 
@@ -113,9 +130,13 @@ io.on("connection", (socket) => {
 				room.playerJoin(client);
 
 				socket.join(roomName);
-				socket.emit("room-created", JSON.stringify({ type: 'room-created', roomName }));
+				socket.emit(outgoingEvents.ROOM_CREATED, JSON.stringify({
+					roomName: roomName
+				}));
 			} catch (error) {
-				socket.send("error", JSON.stringify({ type: 'error', message: error.message }));
+				socket.send(outgoingEvents.ERROR, JSON.stringify({
+					message: error.message
+				}));
 			}
 			return;
 		}
@@ -124,11 +145,13 @@ io.on("connection", (socket) => {
 		console.log(rooms);
 	});
 
-	socket.on("room-leave", (data) => {
+	socket.on(incomingEvents.ROOM_LEAVE, () => {
 		const room = client.room;
 
 		if (!room) {
-			socket.send("error", JSON.stringify({ type: 'error', message: 'Not in a room' }));
+			socket.send(outgoingEvents.ERROR, JSON.stringify({
+				message: 'Not in a room'
+			}));
 			return;
 		}
 
