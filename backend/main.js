@@ -33,7 +33,42 @@ const broadcastRoom = (room) => {
 				username: c.username
 			}))
 		}))
-	});
+	})
+}
+
+const joinRoom = (socket, room, client) => {
+	try {
+		const roomName = room.id;
+
+		room.playerJoin(client);
+
+		socket.join(roomName);
+		socket.send(JSON.stringify({ type: 'room-joined', roomName }));
+
+		broadcastRoom(room);
+		console.log(`[${client.id}] Joined room ${roomName}`);
+	} catch (error) {
+		socket.send(JSON.stringify({ type: 'error', message: error.message }));
+	}
+}
+
+const leaveRoom = (socket, room, client) => {
+	try {
+		room.playerLeave(client);
+		socket.leave(room.id);
+
+		broadcastRoom(room);
+
+		if (room.clients.size === 0) {
+			console.log(`Deleting room ${room.id}`);
+			rooms.delete(room.id);
+		}
+
+		socket.send(JSON.stringify({ type: 'room-left', roomName: room.id }));
+		console.log(`[${client.id}] Left room ${room.id}`);
+	} catch (error) {
+		socket.send(JSON.stringify({ type: 'error', message: error.message }));
+	}
 }
 
 const getRoom = (id) => rooms.get(id);
@@ -91,18 +126,18 @@ io.on("connection", (socket) => {
 				return;
 			}
 
-			try {
-				room.playerJoin(client);
+			joinRoom(socket, room, client);
+			console.log(rooms);
+		}
+		else if (data.type === 'room-leave') {
+			const room = client.room;
 
-				socket.join(roomName);
-				socket.send(JSON.stringify({ type: 'room-joined', roomName }));
-
-				broadcastRoom(room);
-				console.log(`[${client.id}] Joined room ${roomName}`);
-			} catch (error) {
-				socket.send(JSON.stringify({ type: 'error', message: error.message }));
+			if (!room) {
+				socket.send(JSON.stringify({ type: 'error', message: 'Not in a room' }));
+				return;
 			}
 
+			leaveRoom(socket, room, client);
 			console.log(rooms);
 		}
 	});
@@ -111,22 +146,7 @@ io.on("connection", (socket) => {
 		const room = client.room;
 
 		if (room) {
-			try {
-				room.playerLeave(client);
-				socket.leave(room.id);
-
-				broadcastRoom(room);
-
-				if (room.clients.size === 0) {
-					console.log(`Deleting room ${room.id}`);
-					rooms.delete(room.id);
-				}
-
-				socket.send(JSON.stringify({ type: 'room-left', roomName: room.id }));
-				console.log(`[${client.id}] Left room ${room.id}`);
-			} catch (error) {
-				socket.send(JSON.stringify({ type: 'error', message: error.message }));
-			}
+			leaveRoom(socket, room, client);
 		}
 
 		console.log("A user disconnected");

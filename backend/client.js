@@ -7,6 +7,11 @@ class Client {
 		this.room = null;
 	}
 
+	send(message) {
+		console.log('Sending message to client:', message);
+		this.connection.send(message);
+	}
+
 }
 
 module.exports = Client;
