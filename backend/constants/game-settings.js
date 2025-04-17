@@ -1,0 +1,11 @@
+const FRAME_COLS = 10;
+
+const FRAME_ROWS = 20;
+
+const DEFAULT_PIECE_COUNT = 1000;
+
+export {
+	FRAME_COLS,
+	FRAME_ROWS,
+	DEFAULT_PIECE_COUNT
+};

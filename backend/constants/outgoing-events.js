@@ -10,4 +10,17 @@ const ROOM_LEFT = 'room-left';
 
 const ROOM_BROADCAST = 'room-broadcast';
 
-export { ERROR, CLIENT_UPDATED, ROOM_CREATED, ROOM_JOINED, ROOM_LEFT, ROOM_BROADCAST };
+const GAME_STARTED = 'game-started';
+
+const GAME_STATE = 'game-state';
+
+export {
+	ERROR,
+	CLIENT_UPDATED,
+	ROOM_CREATED,
+	ROOM_JOINED,
+	ROOM_LEFT,
+	ROOM_BROADCAST,
+	GAME_STARTED,
+	GAME_STATE
+};

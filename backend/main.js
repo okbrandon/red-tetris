@@ -4,6 +4,7 @@ const Client = require("./client");
 const Game = require("./game");
 const incomingEvents = require("./constants/incoming-events.js");
 const outgoingEvents = require("./constants/outgoing-events.js");
+const gameStatus = require("./constants/game-status.js");
 
 const PORT = process.env.PORT || 3000;
 
@@ -53,7 +54,7 @@ const joinRoom = (socket, room, client) => {
 		broadcastRoom(room);
 		console.log(`[${client.id}] Joined room ${roomName}`);
 	} catch (error) {
-		socket.send(outgoingEvents.ERROR, JSON.stringify({
+		socket.emit(outgoingEvents.ERROR, JSON.stringify({
 			message: error.message
 		}));
 	}
@@ -76,7 +77,7 @@ const leaveRoom = (socket, room, client) => {
 		}));
 		console.log(`[${client.id}] Left room ${room.id}`);
 	} catch (error) {
-		socket.send(outgoingEvents.ERROR, JSON.stringify({
+		socket.emit(outgoingEvents.ERROR, JSON.stringify({
 			message: error.message
 		}));
 	}
@@ -91,7 +92,7 @@ io.on("connection", (socket) => {
 
 	socket.on(incomingEvents.CLIENT_UPDATE, (data) => {
 		if (!data.username) {
-			socket.send(outgoingEvents.ERROR, JSON.stringify({
+			socket.emit(outgoingEvents.ERROR, JSON.stringify({
 				message: 'Username is required'
 			}));
 			return;
@@ -109,13 +110,13 @@ io.on("connection", (socket) => {
 		const roomName = data.roomName;
 
 		if (!roomName) {
-			socket.send(outgoingEvents.ERROR, JSON.stringify({
+			socket.emit(outgoingEvents.ERROR, JSON.stringify({
 				message: 'Room name is required'
 			}));
 			return;
 		}
 		if (!client.username) {
-			socket.send(outgoingEvents.ERROR, JSON.stringify({
+			socket.emit(outgoingEvents.ERROR, JSON.stringify({
 				message: 'Username is required'
 			}));
 			return;
@@ -128,13 +129,14 @@ io.on("connection", (socket) => {
 				const room = createRoom(roomName);
 
 				room.playerJoin(client);
+				room.assignOwner(client);
 
 				socket.join(roomName);
 				socket.emit(outgoingEvents.ROOM_CREATED, JSON.stringify({
 					roomName: roomName
 				}));
 			} catch (error) {
-				socket.send(outgoingEvents.ERROR, JSON.stringify({
+				socket.emit(outgoingEvents.ERROR, JSON.stringify({
 					message: error.message
 				}));
 			}
@@ -149,7 +151,7 @@ io.on("connection", (socket) => {
 		const room = client.room;
 
 		if (!room) {
-			socket.send(outgoingEvents.ERROR, JSON.stringify({
+			socket.emit(outgoingEvents.ERROR, JSON.stringify({
 				message: 'Not in a room'
 			}));
 			return;
@@ -157,6 +159,55 @@ io.on("connection", (socket) => {
 
 		leaveRoom(socket, room, client);
 		console.log(rooms);
+	});
+
+	socket.on(incomingEvents.START_GAME, () => {
+		const room = client.room;
+
+		if (!room) {
+			socket.emit(outgoingEvents.ERROR, JSON.stringify({
+				message: 'Not in a room'
+			}));
+			return;
+		}
+
+		if (room.status === gameStatus.PLAYING) {
+			socket.emit(outgoingEvents.ERROR, JSON.stringify({
+				message: 'Game already started'
+			}));
+			return;
+		}
+
+		if (room.owner !== client) {
+			socket.emit(outgoingEvents.ERROR, JSON.stringify({
+				message: 'You are not the owner'
+			}));
+			return;
+		}
+
+		room.start();
+	});
+
+	socket.on(incomingEvents.MOVE_PIECE, (data) => {
+		const room = client.room;
+
+		if (!room) {
+			socket.emit(outgoingEvents.ERROR, JSON.stringify({
+				message: 'Not in a room'
+			}));
+			return;
+		}
+
+		const direction = data.direction;
+
+		if (!direction) {
+			socket.emit(outgoingEvents.ERROR, JSON.stringify({
+				message: 'Direction is required'
+			}));
+			return;
+		}
+
+		room.handlePieceMove(client, direction);
 	});
 
 	socket.on("disconnect", () => {
