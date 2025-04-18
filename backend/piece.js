@@ -13,8 +13,6 @@ class Piece {
 	}
 
 	rotate(clockwise = true) {
-		console.log(this.shape);
-
 		const size = this.shape.length;
 		const result = Array.from({ length: size }, () => Array(size).fill(0));
 

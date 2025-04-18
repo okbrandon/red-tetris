@@ -20,8 +20,15 @@ class Client {
 	}
 
 	emit(event, data) {
-		console.log('Emitting event:', event);
+		console.log('Emitting event to client:', event);
 		this.connection.emit(event, data);
+	}
+
+	sendGrid() {
+		this.emit(outgoingEvents.GAME_STATE, {
+			grid: this.grid,
+			piece: this.currentPiece,
+		});
 	}
 
 	nextPiece() {
@@ -38,94 +45,29 @@ class Client {
 	generateEmptyGrid() {
 		const grid = new Array(this.room.rows);
 		for (let i = 0; i < this.room.rows; i++) {
-			grid[i] = new Array(this.room.cols).fill({
-				filled: false,
-				color: 'transparent',
-			});
+			grid[i] = new Array(this.room.cols).fill({ filled: false, color: 'transparent' });
 		}
 		this.grid = grid;
 	}
 
-	isValidMove(piece, grid, position, direction = 'down') {
-		const shape = piece.shape;
+	isValidMove(piece, grid, position, rotate = false) {
+		const shape = rotate ? piece.rotate() : piece.shape;
 		const rows = this.room.rows;
 		const cols = this.room.cols;
 
-		if (direction === 'down') {
-			for (let y = 0; y < shape.length; y++) {
-				const row = shape[y];
-				for (let x = 0; x < row.length; x++) {
-					const cell = row[x];
-					if (cell) {
-						const gridX = position.x + x;
-						const gridY = position.y + y;
+		for (let y = 0; y < shape.length; y++) {
+			for (let x = 0; x < shape[y].length; x++) {
+				if (!shape[y][x]) continue;
 
-						if (gridY >= rows || gridY < 0 || gridX >= cols || gridX < 0) {
-							return false;
-						}
-						if (gridY < rows && grid[gridY][gridX] && grid[gridY][gridX].filled) {
-							return false;
-						}
-					}
+				const gridX = position.x + x;
+				const gridY = position.y + y;
+
+				if (gridX < 0 || gridX >= cols || gridY < 0 || gridY >= rows) {
+					return false;
 				}
-			}
-		}
-		else if (direction === 'left') {
-			for (let y = 0; y < shape.length; y++) {
-				const row = shape[y];
-				for (let x = 0; x < row.length; x++) {
-					const cell = row[x];
-					if (cell) {
-						const gridX = position.x + x;
-						const gridY = position.y + y;
 
-						if (gridX < 0 || gridY >= rows || gridY < 0 || gridX >= cols) {
-							return false;
-						}
-						if (gridY < rows && grid[gridY][gridX] && grid[gridY][gridX].filled) {
-							return false;
-						}
-					}
-				}
-			}
-		}
-		else if (direction === 'right') {
-			for (let y = 0; y < shape.length; y++) {
-				const row = shape[y];
-				for (let x = 0; x < row.length; x++) {
-					const cell = row[x];
-					if (cell) {
-						const gridX = position.x + x;
-						const gridY = position.y + y;
-
-						if (gridX >= cols || gridY >= rows || gridY < 0 || gridX < 0) {
-							return false;
-						}
-						if (gridY < rows && grid[gridY][gridX] && grid[gridY][gridX].filled) {
-							return false;
-						}
-					}
-				}
-			}
-		}
-		else if (direction === 'up') { // Piece rotation
-			const rotatedShape = piece.rotate();
-
-			for (let y = 0; y < rotatedShape.length; y++) {
-				const row = rotatedShape[y];
-				for (let x = 0; x < row.length; x++) {
-					const cell = row[x];
-					if (cell) {
-						const gridX = position.x + x;
-						const gridY = position.y + y;
-
-						if (gridY >= rows || gridY < 0 || gridX >= cols || gridX < 0) {
-							return false;
-						}
-						if (gridY < rows && grid[gridY][gridX] && grid[gridY][gridX].filled) {
-							return false;
-						}
-					}
+				if (grid[gridY][gridX]?.filled) {
+					return false;
 				}
 			}
 		}
@@ -133,30 +75,7 @@ class Client {
 		return true;
 	}
 
-	mergePieceIntoGrid(piece, grid) {
-		const shape = piece.shape;
-		const cols = this.room.cols;
-		const rows = this.room.rows;
-
-		shape.forEach((row, y) => {
-            row.forEach((cell, x) => {
-                if (cell) {
-                    const gridX = piece.position.x + x;
-                    const gridY = piece.position.y + y;
-
-					if (gridX >= 0 && gridX < cols && gridY >= 0 && gridY < rows) {
-						grid[gridY][gridX] = {
-							filled: true,
-							color: piece.color,
-						};
-                    }
-                }
-            });
-        });
-		return grid;
-	}
-
-	removePieceFromGrid(piece, grid) {
+	updatePieceOnGrid(piece, grid, updateCell) {
 		const shape = piece.shape;
 		const rows = this.room.rows;
 		const cols = this.room.cols;
@@ -168,22 +87,27 @@ class Client {
 					const gridY = piece.position.y + y;
 
 					if (gridX >= 0 && gridX < cols && gridY >= 0 && gridY < rows) {
-						grid[gridY][gridX] = {
-							filled: false,
-							color: 'transparent',
-						};
+						grid[gridY][gridX] = updateCell(piece);
 					}
 				}
 			});
 		});
+
 		return grid;
 	}
 
-	sendGrid() {
-		this.emit(outgoingEvents.GAME_STATE, {
-			grid: this.grid,
-			piece: this.currentPiece,
-		});
+	mergePieceIntoGrid(piece, grid) {
+		return this.updatePieceOnGrid(piece, grid, (piece) => ({
+			filled: true,
+			color: piece.color,
+		}));
+	}
+
+	removePieceFromGrid(piece, grid) {
+		return this.updatePieceOnGrid(piece, grid, () => ({
+			filled: false,
+			color: 'transparent',
+		}));
 	}
 
 	clearFullLines() {
@@ -192,28 +116,27 @@ class Client {
 
 		const rows = this.room.rows;
 		const cols = this.room.cols;
+		const newGrid = [];
+
 		let clearedLines = 0;
 
 		for (let y = 0; y < rows; y++) {
-			let fullLine = true;
+			const row = this.grid[y];
+			const isFull = row.every(cell => cell.filled);
 
-			for (let x = 0; x < cols; x++) {
-				if (!this.grid[y][x].filled) {
-					fullLine = false;
-					break;
-				}
-			}
-
-			if (fullLine) {
-				this.grid.splice(y, 1);
-				this.grid.unshift(new Array(cols).fill({
-					filled: false,
-					color: 'transparent',
-				}));
+			if (isFull) {
 				clearedLines++;
+			}
+			else {
+				newGrid.push(row);
 			}
 		}
 
+		while (newGrid.length < rows) {
+			newGrid.unshift(new Array(cols).fill({ filled: false, color: 'transparent' }));
+		}
+
+		this.grid = newGrid;
 		console.log(`Cleared ${clearedLines} lines`);
 	}
 
@@ -242,71 +165,70 @@ class Client {
 	}
 
 	movePiece(direction = 'down') {
-		if (!this.currentPiece) {
-			console.log('No current piece to move down');
+		if (!this.currentPiece)
 			return;
+
+		const { position } = this.currentPiece;
+		let newPosition = { ...position };
+		let rotate = false;
+		let hardDrop = false;
+
+		switch (direction) {
+			case 'down':
+				newPosition.y += 1;
+				break;
+			case 'left':
+				newPosition.x -= 1;
+				break;
+			case 'right':
+				newPosition.x += 1;
+				break;
+			case 'up':
+				rotate = true;
+				break;
+			case 'space':
+				hardDrop = true;
+				break;
+			default:
+				return;
 		}
 
-		console.log(this.currentPiece.shape);
+		this.grid = this.removePieceFromGrid(this.currentPiece, this.grid);
 
-		if (direction === 'down') {
-			const newPosition = { ...this.currentPiece.position,
-				y: this.currentPiece.position.y + 1 };
-
-			this.grid = this.removePieceFromGrid(this.currentPiece, this.grid);
-			if (this.isValidMove(this.currentPiece, this.grid, newPosition)) {
-				this.currentPiece.position = newPosition;
-				this.grid = this.mergePieceIntoGrid(this.currentPiece, this.grid);
-			} else {
-				this.grid = this.mergePieceIntoGrid(this.currentPiece, this.grid);
-				this.handlePieceLanding();
-			}
-		}
-		else if (direction === 'left') {
-			const newPosition = { ...this.currentPiece.position,
-				x: this.currentPiece.position.x - 1 };
-
-			this.grid = this.removePieceFromGrid(this.currentPiece, this.grid);
-			if (this.isValidMove(this.currentPiece, this.grid, newPosition, 'left')) {
-				this.currentPiece.position = newPosition;
-			}
-			this.grid = this.mergePieceIntoGrid(this.currentPiece, this.grid);
-		}
-		else if (direction === 'right') {
-			const newPosition = { ...this.currentPiece.position,
-				x: this.currentPiece.position.x + 1 };
-
-			this.grid = this.removePieceFromGrid(this.currentPiece, this.grid);
-			if (this.isValidMove(this.currentPiece, this.grid, newPosition, 'right')) {
-				this.currentPiece.position = newPosition;
-			}
-			this.grid = this.mergePieceIntoGrid(this.currentPiece, this.grid);
-		}
-		else if (direction === 'up') {
+		if (rotate) {
 			const rotatedShape = this.currentPiece.rotate();
 
-			this.grid = this.removePieceFromGrid(this.currentPiece, this.grid);
-			if (this.isValidMove(this.currentPiece, this.grid, this.currentPiece.position, 'up')) {
+			if (this.isValidMove(this.currentPiece, this.grid, position, true)) {
 				this.currentPiece.shape = rotatedShape;
 			}
-			this.grid = this.mergePieceIntoGrid(this.currentPiece, this.grid);
 		}
-		else if (direction === 'space') {
-			this.grid = this.removePieceFromGrid(this.currentPiece, this.grid);
-			let y = this.currentPiece.position.y;
+		else if (hardDrop) {
+			let y = position.y;
 
-			while (true) {
-				const newPosition = { ...this.currentPiece.position,
-					y: y };
-
-				if (this.isValidMove(this.currentPiece, this.grid, newPosition)) {
-					y++;
-				}
-				else break;
+			while (this.isValidMove(this.currentPiece, this.grid, { ...position, y })) {
+				y++;
 			}
+
 			this.currentPiece.position.y = y - 1;
 			this.grid = this.mergePieceIntoGrid(this.currentPiece, this.grid);
 			this.handlePieceLanding();
+		}
+		else {
+			if (this.isValidMove(this.currentPiece, this.grid, newPosition)) {
+				this.currentPiece.position = newPosition;
+				this.grid = this.mergePieceIntoGrid(this.currentPiece, this.grid);
+			}
+			else {
+				this.grid = this.mergePieceIntoGrid(this.currentPiece, this.grid);
+
+				if (direction === 'down') {
+					this.handlePieceLanding();
+				}
+			}
+		}
+
+		if (!hardDrop) {
+			this.grid = this.mergePieceIntoGrid(this.currentPiece, this.grid);
 		}
 
 		this.sendGrid();
