@@ -103,7 +103,7 @@ socket.on("game-state", (data) => {
 //   socket.emit("input", key.name);
 // });
 
-screen.key(['left', 'right', 'up', 'down'], function (ch, key) {
+screen.key(['left', 'right', 'up', 'down', 'space'], function (ch, key) {
   const direction = key.name;
   socket.emit("move-piece", {
     direction: direction,
