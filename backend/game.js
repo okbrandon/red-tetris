@@ -57,12 +57,11 @@ class Game {
 			const nextPiece = client.nextPiece();
 			const offsetY = nextPiece.getLeadingEmptyRows();
 
+			client.generateEmptyGrid();
+
 			nextPiece.position.y -= offsetY;
 			client.currentPiece = nextPiece;
-
-			client.generateEmptyGrid();
-			client.sendGrid();
-			client.startInterval();
+			client.grid = client.mergePieceIntoGrid(nextPiece, client.grid, nextPiece.position);
 
 			client.emit(outgoingEvents.GAME_STARTED, JSON.stringify({
 				room: this.id,
@@ -77,6 +76,9 @@ class Game {
 					position: piece.position
 				})),
 			}))
+
+			client.sendGrid();
+			client.startInterval();
 		});
 	}
 
