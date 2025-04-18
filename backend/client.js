@@ -291,6 +291,23 @@ class Client {
 			}
 			this.grid = this.mergePieceIntoGrid(this.currentPiece, this.grid);
 		}
+		else if (direction === 'space') {
+			this.grid = this.removePieceFromGrid(this.currentPiece, this.grid);
+			let y = this.currentPiece.position.y;
+
+			while (true) {
+				const newPosition = { ...this.currentPiece.position,
+					y: y };
+
+				if (this.isValidMove(this.currentPiece, this.grid, newPosition)) {
+					y++;
+				}
+				else break;
+			}
+			this.currentPiece.position.y = y - 1;
+			this.grid = this.mergePieceIntoGrid(this.currentPiece, this.grid);
+			this.handlePieceLanding();
+		}
 
 		this.sendGrid();
 	}
