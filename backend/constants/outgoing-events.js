@@ -14,6 +14,8 @@ const GAME_STARTED = 'game-started';
 
 const GAME_STATE = 'game-state';
 
+const GAME_OVER = 'game-over';
+
 export {
 	ERROR,
 	CLIENT_UPDATED,
@@ -22,5 +24,6 @@ export {
 	ROOM_LEFT,
 	ROOM_BROADCAST,
 	GAME_STARTED,
-	GAME_STATE
+	GAME_STATE,
+	GAME_OVER,
 };

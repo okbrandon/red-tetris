@@ -15,11 +15,18 @@ const httpServer = createServer((req, res) => {
 const io = new Server(httpServer, {});
 const rooms = new Map;
 
+const deleteRoom = (room) => {
+	if (room.updateInterval)
+		clearInterval(room.updateInterval);
+	rooms.delete(room.id);
+	console.log(`Deleting room ${room.id}`);
+}
+
 const createRoom = (id) => {
 	if (rooms.has(id))
 		throw new Error('Game already exists');
 
-	const room = new Game(id);
+	const room = new Game(id, null, deleteRoom);
 
 	rooms.set(id, room);
 	return room;
@@ -68,8 +75,7 @@ const leaveRoom = (socket, room, client) => {
 		broadcastRoom(room);
 
 		if (room.clients.size === 0) {
-			console.log(`Deleting room ${room.id}`);
-			rooms.delete(room.id);
+			deleteRoom(room);
 		}
 
 		socket.emit(outgoingEvents.ROOM_LEFT, JSON.stringify({

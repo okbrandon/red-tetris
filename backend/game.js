@@ -5,7 +5,7 @@ const gameSettings = require('./constants/game-settings.js')
 
 class Game {
 
-	constructor(id, owner = null) {
+	constructor(id, owner = null, endCallback) {
 		this.id = id;
 		this.owner = owner;
 		this.status = gameStatus.WAITING;
@@ -14,6 +14,8 @@ class Game {
 		this.cols = gameSettings.FRAME_COLS;
 		this.rows = gameSettings.FRAME_ROWS;
 		this.tetromino = new Tetromino();
+		this.updateInterval = null;
+		this.endCallback = endCallback;
 	}
 
 	assignOwner(client) {
@@ -39,6 +41,25 @@ class Game {
 			clearInterval(client.updateInterval);
 		client.room = null;
 		this.clients.delete(client);
+	}
+
+	startInterval() {
+		if (this.updateInterval)
+			return;
+
+		this.updateInterval = setInterval(() => {
+			const clients = [...this.clients];
+
+			if (clients.length === 0) {
+				this.stop();
+				this.endCallback(this);
+				return;
+			}
+
+			clients.forEach(client => {
+				client.tickInterval();
+			});
+		}, 1000);
 	}
 
 	start() {
@@ -78,8 +99,21 @@ class Game {
 			}))
 
 			client.sendGrid();
-			client.startInterval();
 		});
+
+		this.startInterval();
+	}
+
+	stop() {
+		if (this.updateInterval)
+			clearInterval(this.updateInterval);
+		this.updateInterval = null;
+
+		this.clients.forEach(client => {
+			client.sendGameOver();
+		});
+
+		this.status = gameStatus.FINISHED;
 	}
 
 	handlePieceMove(client, direction) {

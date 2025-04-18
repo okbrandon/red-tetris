@@ -11,7 +11,6 @@ class Client {
 		this.currentPiece = null;
 		this.currentPieceIndex = 0;
 		this.grid = null;
-		this.updateInterval = null;
 	}
 
 	send(message) {
@@ -28,6 +27,13 @@ class Client {
 		this.emit(outgoingEvents.GAME_STATE, {
 			grid: this.grid,
 			piece: this.currentPiece,
+		});
+	}
+
+	sendGameOver() {
+		this.room.playerLeave(this);
+		this.emit(outgoingEvents.GAME_OVER, {
+			message: 'Game Over',
 		});
 	}
 
@@ -149,9 +155,7 @@ class Client {
 
 		this.clearFullLines();
 		if (!this.isValidMove(nextPiece, this.grid, nextPiece.position)) {
-			if (this.updateInterval)
-				clearInterval(this.updateInterval);
-			console.log('Game Over for player ' + this.username);
+			this.sendGameOver();
 			return;
 		}
 
@@ -234,17 +238,13 @@ class Client {
 		this.sendGrid();
 	}
 
-	startInterval() {
+	tickInterval() {
 		if (!this.room) {
 			console.log('No room to start interval');
 			return;
 		}
-		if (this.updateInterval)
-			clearInterval(this.updateInterval);
 
-		this.updateInterval = setInterval(() => {
-			this.movePiece();
-		}, 1000);
+		this.movePiece();
 	}
 
 }
