@@ -30,6 +30,18 @@ class Piece {
 		return result;
 	}
 
+	getLeadingEmptyRows() {
+		let count = 0;
+		for (let row of this.shape) {
+			if (row.every(cell => cell === 0)) {
+				count++;
+			} else {
+				break;
+			}
+		}
+		return count;
+	}
+
 	clone() {
 		const clonedShape = this.shape.map(row => [...row]);
 		return new Piece(clonedShape, this.color, { ...this.position });

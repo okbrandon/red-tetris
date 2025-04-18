@@ -180,19 +180,6 @@ class Client {
 	}
 
 	sendGrid() {
-		if (this.currentPiece && this.currentPiece.position.y === 0) {
-			const clonedPiece = this.currentPiece.clone();
-
-			this.grid = this.removePieceFromGrid(this.currentPiece, this.grid);
-			for (let y = 0; y < clonedPiece.shape.length; y++) {
-				if (clonedPiece.shape[y].every(cell => cell === 0)) {
-					clonedPiece.shape.splice(y, 1);
-					y--;
-				}
-			}
-			this.grid = this.mergePieceIntoGrid(clonedPiece, this.grid);
-		}
-
 		this.emit(outgoingEvents.GAME_STATE, {
 			grid: this.grid,
 			piece: this.currentPiece,
@@ -235,6 +222,7 @@ class Client {
 			return;
 
 		const nextPiece = this.nextPiece();
+		const offsetY = nextPiece.getLeadingEmptyRows();
 
 		this.clearFullLines();
 		if (!this.isValidMove(nextPiece, this.grid, nextPiece.position)) {
@@ -244,7 +232,13 @@ class Client {
 			return;
 		}
 
+		nextPiece.position.y -= offsetY;
 		this.currentPiece = nextPiece;
+
+		if (this.isValidMove(this.currentPiece, this.grid, this.currentPiece.position)) {
+			this.grid = this.mergePieceIntoGrid(this.currentPiece, this.grid);
+		}
+		this.sendGrid();
 	}
 
 	movePiece(direction = 'down') {

@@ -53,7 +53,13 @@ class Game {
 			this.tetromino.pieces.forEach(piece => {
 				client.pieces.add(piece.clone());
 			});
-			client.currentPiece = client.nextPiece();
+
+			const nextPiece = client.nextPiece();
+			const offsetY = nextPiece.getLeadingEmptyRows();
+
+			nextPiece.position.y -= offsetY;
+			client.currentPiece = nextPiece;
+
 			client.generateEmptyGrid();
 			client.sendGrid();
 			client.startInterval();
