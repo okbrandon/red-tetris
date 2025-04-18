@@ -149,7 +149,14 @@ io.on("connection", (socket) => {
 			return;
 		}
 
-		joinRoom(socket, room, client);
+		try {
+			joinRoom(socket, room, client);
+		} catch (error) {
+			socket.emit(outgoingEvents.ERROR, JSON.stringify({
+				message: error.message
+			}));
+			return;
+		}
 		console.log(rooms);
 	});
 

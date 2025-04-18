@@ -28,6 +28,8 @@ class Game {
 	playerJoin(client) {
 		if (client.room)
 			throw new Error('Client already in a room');
+		if (this.status !== gameStatus.WAITING)
+			throw new Error('Game has already started');
 
 		client.room = this;
 		this.clients.add(client);
