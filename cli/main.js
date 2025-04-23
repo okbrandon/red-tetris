@@ -30,12 +30,22 @@ const box = blessed.box({
 screen.append(box);
 screen.render();
 
+function createRandomString(length) {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
+
 socket.on("connect", () => {
   box.setLabel("Connected");
   box.setContent("Waiting for instructions...");
   screen.render();
   socket.emit("client-update", {
-    username: "brandon",
+    username: "c-" + createRandomString(5),
   });
 });
 
@@ -59,10 +69,14 @@ socket.on("room-created", (data) => {
   box.setLabel("Connected");
   box.setContent(`Joined room ${parsedData.roomName}. You are owner!`);
   screen.render();
+});
 
-  setTimeout(() => {
-    socket.emit("start-game");
-  }, 1000);
+socket.on("room-joined", (data) => {
+  const parsedData = JSON.parse(data);
+
+  box.setLabel("Connected");
+  box.setContent(`Joined room ${parsedData.roomName}. You are player!`);
+  screen.render();
 });
 
 socket.on("game-started", (data) => {
@@ -79,7 +93,7 @@ socket.on("game-started", (data) => {
 function formatBoard(board) {
   let formattedBoard = "";
   for (let row of board) {
-    formattedBoard += row.map(cell => cell.filled ? '1' : '0').join(' ') + "\n";
+    formattedBoard += row.map(cell => cell.filled ? (cell.indestructible ? 'X' : '1') : '0').join(' ') + "\n";
   }
   return formattedBoard;
 }
@@ -108,6 +122,10 @@ screen.key(['left', 'right', 'up', 'down', 'space'], function (ch, key) {
   socket.emit("move-piece", {
     direction: direction,
   });
+});
+
+screen.key(['s'], function (ch, key) {
+  socket.emit("start-game");
 });
 
 screen.key(['q', 'C-c'], function () {
