@@ -11,15 +11,14 @@ class Client {
 		this.currentPiece = null;
 		this.currentPieceIndex = 0;
 		this.grid = null;
+		this.hasLost = false;
 	}
 
 	send(message) {
-		console.log('Sending message to client:', message);
 		this.connection.send(message);
 	}
 
 	emit(event, data) {
-		console.log('Emitting event to client:', event);
 		this.connection.emit(event, data);
 	}
 
@@ -31,7 +30,10 @@ class Client {
 	}
 
 	sendGameOver() {
-		this.room.playerLeave(this);
+		if (this.hasLost)
+			return;
+		console.log('Client ' + this.username + ' has lost.');
+		this.hasLost = true;
 		this.emit(outgoingEvents.GAME_OVER, {
 			message: 'Game Over',
 		});
@@ -51,7 +53,11 @@ class Client {
 	generateEmptyGrid() {
 		const grid = new Array(this.room.rows);
 		for (let i = 0; i < this.room.rows; i++) {
-			grid[i] = new Array(this.room.cols).fill({ filled: false, color: 'transparent' });
+			grid[i] = new Array(this.room.cols).fill({
+				filled: false,
+				color: 'transparent',
+				indestructible: false,
+			});
 		}
 		this.grid = grid;
 	}
@@ -93,6 +99,10 @@ class Client {
 					const gridY = piece.position.y + y;
 
 					if (gridX >= 0 && gridX < cols && gridY >= 0 && gridY < rows) {
+
+						if (grid[gridY][gridX]?.indestructible)
+							return;
+
 						grid[gridY][gridX] = updateCell(piece);
 					}
 				}
@@ -106,6 +116,7 @@ class Client {
 		return this.updatePieceOnGrid(piece, grid, (piece) => ({
 			filled: true,
 			color: piece.color,
+			indestructible: false,
 		}));
 	}
 
@@ -113,7 +124,36 @@ class Client {
 		return this.updatePieceOnGrid(piece, grid, () => ({
 			filled: false,
 			color: 'transparent',
+			indestructible: false,
 		}));
+	}
+
+	penalize(penalties) {
+		if (!this.grid)
+			return;
+
+		const rows = this.room.rows;
+		const cols = this.room.cols;
+
+		const newPenaltyLines = Array.from({ length: penalties }, () =>
+			Array.from({ length: cols }, () => ({
+				filled: true,
+				color: 'gray',
+				indestructible: true,
+			}))
+		);
+
+		const existingPenaltyLines = this.grid.filter(row =>
+			row.every(cell => cell.indestructible)
+		);
+
+		const spaceForNormalRows = rows - (existingPenaltyLines.length + newPenaltyLines.length);
+
+		const normalRows = this.grid
+			.filter(row => !row.every(cell => cell.indestructible))
+			.slice(0, Math.max(0, spaceForNormalRows));
+
+		this.grid = [...normalRows, ...existingPenaltyLines, ...newPenaltyLines].slice(-rows);
 	}
 
 	clearFullLines() {
@@ -128,7 +168,7 @@ class Client {
 
 		for (let y = 0; y < rows; y++) {
 			const row = this.grid[y];
-			const isFull = row.every(cell => cell.filled);
+			const isFull = row.every(cell => cell.filled && !cell.indestructible);
 
 			if (isFull) {
 				clearedLines++;
@@ -139,11 +179,17 @@ class Client {
 		}
 
 		while (newGrid.length < rows) {
-			newGrid.unshift(new Array(cols).fill({ filled: false, color: 'transparent' }));
+			newGrid.unshift(new Array(cols).fill({
+				filled: false,
+				color: 'transparent',
+				indestructible: false,
+			}));
 		}
 
 		this.grid = newGrid;
-		console.log(`Cleared ${clearedLines} lines`);
+
+		if (clearedLines - 1 > 0)
+			this.room.handlePenalties(this, clearedLines - 1);
 	}
 
 	handlePieceLanding() {
@@ -243,6 +289,8 @@ class Client {
 			console.log('No room to start interval');
 			return;
 		}
+		if (this.hasLost)
+			return;
 
 		this.movePiece();
 	}

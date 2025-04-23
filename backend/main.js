@@ -16,6 +16,8 @@ const io = new Server(httpServer, {});
 const rooms = new Map;
 
 const deleteRoom = (room) => {
+	if (!room || !rooms.has(room.id))
+		return;
 	if (room.updateInterval)
 		clearInterval(room.updateInterval);
 	rooms.delete(room.id);
@@ -220,7 +222,14 @@ io.on("connection", (socket) => {
 			return;
 		}
 
-		room.handlePieceMove(client, direction);
+		try {
+			room.handlePieceMove(client, direction);
+		} catch (error) {
+			socket.emit(outgoingEvents.ERROR, JSON.stringify({
+				message: error.message
+			}));
+			return;
+		}
 	});
 
 	socket.on("disconnect", () => {

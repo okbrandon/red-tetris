@@ -77,7 +77,7 @@ class Tetromino {
 	}
 
 	getRandomPiece() {
-		const random = Math.floor(Math.random() * 7);
+		const random = Math.floor(Math.random() * this.templates.length);
 		const template = this.templates[random];
 
 		try {
