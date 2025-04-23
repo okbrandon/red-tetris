@@ -135,25 +135,22 @@ class Client {
 		const rows = this.room.rows;
 		const cols = this.room.cols;
 
-		const newPenaltyLines = Array.from({ length: penalties }, () =>
+		const createPenaltyLine = () =>
 			Array.from({ length: cols }, () => ({
 				filled: true,
 				color: 'gray',
 				indestructible: true,
-			}))
-		);
+			}));
+	
+		const isPenaltyRow = row => row.every(cell => cell.indestructible);
 
-		const existingPenaltyLines = this.grid.filter(row =>
-			row.every(cell => cell.indestructible)
-		);
-
-		const spaceForNormalRows = rows - (existingPenaltyLines.length + newPenaltyLines.length);
-
+		const newPenalties = Array.from({ length: penalties }, createPenaltyLine);
+		const existingPenalties = this.grid.filter(isPenaltyRow);
 		const normalRows = this.grid
-			.filter(row => !row.every(cell => cell.indestructible))
-			.slice(0, Math.max(0, spaceForNormalRows));
+			.filter(row => !isPenaltyRow(row))
+			.slice(0, Math.max(0, rows - newPenalties.length - existingPenalties.length));
 
-		this.grid = [...normalRows, ...existingPenaltyLines, ...newPenaltyLines].slice(-rows);
+		this.grid = [...normalRows, ...existingPenalties, ...newPenalties].slice(-rows);
 	}
 
 	clearFullLines() {
