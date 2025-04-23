@@ -93,7 +93,7 @@ socket.on("game-started", (data) => {
 function formatBoard(board) {
   let formattedBoard = "";
   for (let row of board) {
-    formattedBoard += row.map(cell => cell.filled ? (cell.indestructible ? 'X' : '1') : '0').join(' ') + "\n";
+    formattedBoard += row.map(cell => cell.filled ? (cell.indestructible ? 'X' : cell.ghost ? 'G' : '1') : '0').join(' ') + "\n";
   }
   return formattedBoard;
 }
