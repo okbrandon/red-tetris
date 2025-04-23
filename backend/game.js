@@ -161,8 +161,6 @@ class Game {
 			client.penalize(penalties);
 			client.sendGrid();
 		});
-
-		console.log('PENALTIES caused by ' + author.username + ': ' + penalties);
 	}
 
 }

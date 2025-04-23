@@ -23,8 +23,13 @@ class Client {
 	}
 
 	sendGrid() {
+		const gridWithoutCurrent = this.removePieceFromGrid(this.currentPiece, structuredClone(this.grid));
+		const ghost = this.getGhostPiece(gridWithoutCurrent);
+		const gridWithGhost = this.mergePieceIntoGrid(ghost, gridWithoutCurrent, true);
+		const finalGrid = this.mergePieceIntoGrid(this.currentPiece, gridWithGhost);
+
 		this.emit(outgoingEvents.GAME_STATE, {
-			grid: this.grid,
+			grid: finalGrid,
 			piece: this.currentPiece,
 		});
 	}
@@ -50,6 +55,22 @@ class Client {
 		return piece;
 	}
 
+	getGhostPiece(gridWithoutCurrent) {
+		if (!this.currentPiece)
+			return null;
+
+		const ghostPiece = this.currentPiece.clone();
+		const position = { ...ghostPiece.position };
+
+		while (this.isValidMove(ghostPiece, gridWithoutCurrent, position)) {
+			position.y++;
+		}
+
+		ghostPiece.position.y = position.y - 1;
+
+		return ghostPiece;
+	}
+
 	generateEmptyGrid() {
 		const grid = new Array(this.room.rows);
 		for (let i = 0; i < this.room.rows; i++) {
@@ -57,6 +78,7 @@ class Client {
 				filled: false,
 				color: 'transparent',
 				indestructible: false,
+				ghost: false,
 			});
 		}
 		this.grid = grid;
@@ -112,11 +134,12 @@ class Client {
 		return grid;
 	}
 
-	mergePieceIntoGrid(piece, grid) {
+	mergePieceIntoGrid(piece, grid, isGhost = false) {
 		return this.updatePieceOnGrid(piece, grid, (piece) => ({
 			filled: true,
 			color: piece.color,
 			indestructible: false,
+			ghost: isGhost,
 		}));
 	}
 
@@ -125,6 +148,7 @@ class Client {
 			filled: false,
 			color: 'transparent',
 			indestructible: false,
+			ghost: false,
 		}));
 	}
 
@@ -140,8 +164,9 @@ class Client {
 				filled: true,
 				color: 'gray',
 				indestructible: true,
+				ghost: false,
 			}));
-	
+
 		const isPenaltyRow = row => row.every(cell => cell.indestructible);
 
 		const newPenalties = Array.from({ length: penalties }, createPenaltyLine);
@@ -180,6 +205,7 @@ class Client {
 				filled: false,
 				color: 'transparent',
 				indestructible: false,
+				ghost: false,
 			}));
 		}
 
