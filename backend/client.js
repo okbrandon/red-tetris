@@ -23,17 +23,14 @@ class Client {
 	}
 
 	sendGrid() {
-		const gridWithoutCurrent = this.removePieceFromGrid(this.currentPiece, structuredClone(this.grid));
-		const ghost = this.getGhostPiece(gridWithoutCurrent);
-		const gridWithGhost = this.mergePieceIntoGrid(ghost, gridWithoutCurrent, true);
+		const gridClone = structuredClone(this.grid);
+		const gridWithoutCurrent = this.removePieceFromGrid(this.currentPiece, gridClone);
+		const gridWithGhost = this.mergePieceIntoGrid(this.getGhostPiece(gridWithoutCurrent), gridWithoutCurrent, true);
 		const finalGrid = this.mergePieceIntoGrid(this.currentPiece, gridWithGhost);
 
-		const nextPieces = Array.from(this.pieces).slice(this.currentPieceIndex % this.pieces.size, this.currentPieceIndex % this.pieces.size + 3);
-		const nextPiecesData = nextPieces.map(piece => ({
-			shape: piece.shape,
-			color: piece.color,
-			position: piece.position,
-		}));
+		const nextPiecesData = Array.from(this.pieces)
+			.slice(this.currentPieceIndex % this.pieces.size, this.currentPieceIndex % this.pieces.size + 3)
+			.map(({ shape, color, position }) => ({ shape, color, position }));
 
 		const clients = [...this.room.clients].filter(client => client !== this);
 		const clientsData = clients.map(client => ({
