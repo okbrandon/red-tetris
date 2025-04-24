@@ -5,7 +5,7 @@ const gameSettings = require('./constants/game-settings.js')
 
 class Game {
 
-	constructor(id, owner = null, endCallback) {
+	constructor(id, owner = null) {
 		this.id = id;
 		this.owner = owner;
 		this.status = gameStatus.WAITING;
@@ -16,7 +16,6 @@ class Game {
 		this.tetromino = new Tetromino();
 		this.soloJourney = false;
 		this.updateInterval = null;
-		this.endCallback = endCallback;
 	}
 
 	assignOwner(client) {
@@ -42,22 +41,37 @@ class Game {
 
 		if (client.updateInterval)
 			clearInterval(client.updateInterval);
+
 		client.room = null;
 		this.clients.delete(client);
+
+		if (this.status == gameStatus.PLAYING)
+			this.shouldEndGame();
 	}
 
 	shouldEndGame() {
-		if (this.clients.length === 0) {
-			return true;
-		}
+		if (this.clients.length === 0) return true;
 
 		const clients = [...this.clients];
 
-		for (const client of clients) {
-			if (!client.hasLost)
-				continue;
+		if (this.soloJourney) {
+			if (clients.length === 1) {
+				if (clients[0].hasLost) {
+					return true;
+				}
+			}
+		} else {
+			const losers = clients.filter(client => client.hasLost);
 
-			return true;
+			if (losers.length === clients.length - 1) {
+				const winner = clients.find(client => !client.hasLost);
+
+				clients.forEach(client => {
+					client.sendGameOver(winner.id === client.id ? 'You win!' : 'You lose!');
+				});
+
+				return true;
+			}
 		}
 
 		return false;
@@ -73,7 +87,6 @@ class Game {
 			if (this.shouldEndGame()) {
 				console.log('[' + this.id + '] GAME OVER');
 				this.stop();
-				this.endCallback(this);
 				return;
 			}
 
@@ -128,6 +141,18 @@ class Game {
 		this.startInterval();
 	}
 
+	restart() {
+		if (this.status !== gameStatus.FINISHED)
+			throw new Error('Game is not finished');
+
+		const clients = [...this.clients];
+
+		clients.forEach(client => client.reset());
+
+		this.status = gameStatus.WAITING;
+		this.start();
+	}
+
 	stop() {
 		if (this.updateInterval)
 			clearInterval(this.updateInterval);
@@ -138,6 +163,8 @@ class Game {
 		});
 
 		this.status = gameStatus.FINISHED;
+
+		console.log('[' + this.id + '] GAME STOPPED');
 	}
 
 	handlePieceMove(client, direction) {

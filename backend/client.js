@@ -64,13 +64,22 @@ class Client {
 		});
 	}
 
-	sendGameOver() {
+	sendGameOver(message = 'Game Over') {
 		if (this.hasLost)
 			return;
-		console.log('Client ' + this.username + ' has lost.');
+		console.log('Client ' + this.username + ' has lost. (' + message + ')');
 		this.hasLost = true;
 		this.emit(outgoingEvents.GAME_OVER, {
-			message: 'Game Over',
+			room: {
+				id: this.room.id,
+				owner: {
+					id: this.room.owner.id,
+					username: this.room.owner.username,
+				},
+				status: this.room.status,
+				soloJourney: this.room.soloJourney
+			},
+			message: message,
 		});
 	}
 
@@ -368,6 +377,14 @@ class Client {
 			return;
 
 		this.movePiece();
+	}
+
+	reset() {
+		this.pieces.clear();
+		this.currentPiece = null;
+		this.currentPieceIndex = 0;
+		this.grid = null;
+		this.hasLost = false;
 	}
 
 }

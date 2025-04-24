@@ -28,7 +28,7 @@ const createRoom = (id) => {
 	if (rooms.has(id))
 		throw new Error('Game already exists');
 
-	const room = new Game(id, null, deleteRoom);
+	const room = new Game(id, null);
 
 	rooms.set(id, room);
 	return room;
@@ -202,6 +202,40 @@ io.on("connection", (socket) => {
 
 		room.start();
 	});
+
+	socket.on(incomingEvents.RESTART_GAME, () => {
+		const room = client.room;
+
+		if (!room) {
+			socket.emit(outgoingEvents.ERROR, JSON.stringify({
+				message: 'Not in a room'
+			}));
+			return;
+		}
+
+		if (room.status === gameStatus.PLAYING) {
+			socket.emit(outgoingEvents.ERROR, JSON.stringify({
+				message: 'Game already started'
+			}));
+			return;
+		}
+
+		if (room.owner !== client) {
+			socket.emit(outgoingEvents.ERROR, JSON.stringify({
+				message: 'You are not the owner'
+			}));
+			return;
+		}
+
+		try {
+			room.restart();
+		} catch (error) {
+			socket.emit(outgoingEvents.ERROR, JSON.stringify({
+				message: error.message
+			}));
+			return;
+		}
+	})
 
 	socket.on(incomingEvents.MOVE_PIECE, (data) => {
 		const room = client.room;
