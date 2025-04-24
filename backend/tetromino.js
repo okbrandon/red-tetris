@@ -103,6 +103,10 @@ class Tetromino {
 		console.log(`Tetromino generated ${n} pieces`);
 	}
 
+	reset() {
+		this.pieces.clear();
+	}
+
 }
 
 module.exports = Tetromino;

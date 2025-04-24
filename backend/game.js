@@ -45,11 +45,16 @@ class Game {
 		client.room = null;
 		this.clients.delete(client);
 
-		if (this.status == gameStatus.PLAYING)
-			this.shouldEndGame();
+		if (this.status == gameStatus.PLAYING) {
+			if (this.shouldEndGame()) {
+				console.log('[' + this.id + '] GAME OVER (NO MORE PLAYERS)');
+				this.stop();
+			}
+		}
 	}
 
 	shouldEndGame() {
+		if (this.status === gameStatus.FINISHED) return true;
 		if (this.clients.length === 0) return true;
 
 		const clients = [...this.clients];
@@ -85,7 +90,7 @@ class Game {
 			const clients = [...this.clients];
 
 			if (this.shouldEndGame()) {
-				console.log('[' + this.id + '] GAME OVER');
+				console.log('[' + this.id + '] GAME OVER (END GAME CHECK)');
 				this.stop();
 				return;
 			}
@@ -150,6 +155,7 @@ class Game {
 		clients.forEach(client => client.reset());
 
 		this.status = gameStatus.WAITING;
+		this.tetromino.reset();
 		this.start();
 	}
 
