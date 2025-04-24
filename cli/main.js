@@ -165,6 +165,10 @@ screen.key(['s'], function (ch, key) {
   socket.emit("start-game");
 });
 
+screen.key(['r'], function (ch, key) {
+  socket.emit("restart-game");
+});
+
 screen.key(['q', 'C-c'], function () {
   return process.exit(0);
 });
