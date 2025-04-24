@@ -28,9 +28,39 @@ class Client {
 		const gridWithGhost = this.mergePieceIntoGrid(ghost, gridWithoutCurrent, true);
 		const finalGrid = this.mergePieceIntoGrid(this.currentPiece, gridWithGhost);
 
+		const nextPieces = Array.from(this.pieces).slice(this.currentPieceIndex % this.pieces.size, this.currentPieceIndex % this.pieces.size + 3);
+		const nextPiecesData = nextPieces.map(piece => ({
+			shape: piece.shape,
+			color: piece.color,
+			position: piece.position,
+		}));
+
+		const clients = [...this.room.clients].filter(client => client !== this);
+		const clientsData = clients.map(client => ({
+			id: client.id,
+			username: client.username,
+			specter: client.getLandSpecter(),
+		}));
+
 		this.emit(outgoingEvents.GAME_STATE, {
+			room: {
+				id: this.room.id,
+				owner: {
+					id: this.room.owner.id,
+					username: this.room.owner.username,
+				},
+				status: this.room.status,
+				soloJourney: this.room.soloJourney
+			},
 			grid: finalGrid,
-			piece: this.currentPiece,
+			currentPiece: this.currentPiece,
+			nextPieces: nextPiecesData,
+			you: {
+				id: this.id,
+				username: this.username,
+				specter: this.getLandSpecter(),
+			},
+			clients: clientsData
 		});
 	}
 
@@ -69,6 +99,28 @@ class Client {
 		ghostPiece.position.y = position.y - 1;
 
 		return ghostPiece;
+	}
+
+	getLandSpecter() {
+		if (!this.grid || !this.currentPiece)
+			return null;
+
+		const gridWithoutCurrent = this.removePieceFromGrid(this.currentPiece, structuredClone(this.grid));
+
+		gridWithoutCurrent.forEach((row, y) => {
+			row.forEach((cell, x) => {
+				if (cell.filled) {
+					gridWithoutCurrent[y][x] = {
+						filled: true,
+						color: 'gray',
+						indestructible: cell.indestructible,
+						ghost: false,
+					};
+				}
+			});
+		})
+
+		return gridWithoutCurrent;
 	}
 
 	generateEmptyGrid() {
