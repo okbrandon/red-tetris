@@ -27,7 +27,47 @@ const box = blessed.box({
   },
 });
 
+const nextBox = blessed.box({
+  top: 'center',
+  left: '5%',
+  width: '20%',
+  height: '100%',
+  label: 'Next Pieces',
+  content: '',
+  tags: true,
+  border: {
+    type: 'line',
+  },
+  style: {
+    fg: 'white',
+    border: {
+      fg: '#f0f0f0',
+    },
+  },
+});
+
+const spectersBox = blessed.box({
+  top: 'center',
+  left: '75%',
+  width: '20%',
+  height: '100%',
+  label: 'Specters',
+  content: '',
+  tags: true,
+  border: {
+    type: 'line',
+  },
+  style: {
+    fg: 'white',
+    border: {
+      fg: '#f0f0f0',
+    },
+  },
+});
+
 screen.append(box);
+screen.append(nextBox);
+screen.append(spectersBox);
 screen.render();
 
 function createRandomString(length) {
@@ -39,6 +79,13 @@ function createRandomString(length) {
   return result;
 }
 
+function formatBoard(board) {
+  let formattedBoard = "";
+  for (let row of board) {
+    formattedBoard += row.map(cell => cell.filled ? (cell.indestructible ? 'X' : cell.ghost ? 'G' : '1') : '0').join(' ') + "\n";
+  }
+  return formattedBoard;
+}
 
 socket.on("connect", () => {
   box.setLabel("Connected");
@@ -81,41 +128,31 @@ socket.on("room-joined", (data) => {
 
 socket.on("game-started", (data) => {
   const parsedData = JSON.parse(data);
-  const pieces = parsedData.pieces;
 
   box.setLabel(`${parsedData.room} - Game started`);
-  box.setContent(`Clients: ${parsedData.clients.map((client) => {
-    return client.username + ", ";
-  })}\n-- First piece --\n* shape: ${pieces[0].shape}\n* color: ${pieces[0].color}\n* position: (x=${pieces[0].position.x}, y=${pieces[0].position.y})`);
   screen.render();
 });
-
-function formatBoard(board) {
-  let formattedBoard = "";
-  for (let row of board) {
-    formattedBoard += row.map(cell => cell.filled ? (cell.indestructible ? 'X' : cell.ghost ? 'G' : '1') : '0').join(' ') + "\n";
-  }
-  return formattedBoard;
-}
 
 socket.on("game-state", (data) => {
   const grid = data.grid;
   const board = formatBoard(grid);
+  const roomLabel = `${data.room.id}@${data.room.owner.username} - ${data.room.status}`;
 
-  box.setLabel(`${data.room} - Game started`);
+  box.setLabel(`${roomLabel}`);
   box.setContent(`-- Board --\n${board}`);
+
+  const nextPiecesText = data.nextPieces
+    .map((piece, i) => `Piece #${i + 1}:\n${piece.shape.map(row => row.join(' ')).join('\n')}`)
+    .join('\n\n');
+  nextBox.setContent(nextPiecesText);
+
+  const spectersText = data.clients
+    .map(client => `> ${client.username}\n${(client.specter ? formatBoard(client.specter) : 'Loading...')}`)
+    .join('\n\n');
+  spectersBox.setContent(spectersText);
+
   screen.render();
 });
-
-// socket.on("gameUpdate", (data) => {
-//   const board = formatBoard(data.board);
-//   box.setContent(board);
-//   screen.render();
-// });
-
-// screen.key(['left', 'right', 'up', 'down', 'space'], function (ch, key) {
-//   socket.emit("input", key.name);
-// });
 
 screen.key(['left', 'right', 'up', 'down', 'space'], function (ch, key) {
   const direction = key.name;
