@@ -1,3 +1,4 @@
+const { DEFAULT_EMPTY_GRID } = require('./constants/game-settings.js');
 const outgoingEvents = require('./constants/outgoing-events.js');
 
 class Client {
@@ -109,7 +110,7 @@ class Client {
 
 	getLandSpecter() {
 		if (!this.grid || !this.currentPiece)
-			return null;
+			return DEFAULT_EMPTY_GRID;
 
 		const gridWithoutCurrent = this.removePieceFromGrid(this.currentPiece, structuredClone(this.grid));
 
@@ -130,16 +131,7 @@ class Client {
 	}
 
 	generateEmptyGrid() {
-		const grid = new Array(this.room.rows);
-		for (let i = 0; i < this.room.rows; i++) {
-			grid[i] = new Array(this.room.cols).fill({
-				filled: false,
-				color: 'transparent',
-				indestructible: false,
-				ghost: false,
-			});
-		}
-		this.grid = grid;
+		this.grid = structuredClone(DEFAULT_EMPTY_GRID);
 	}
 
 	isValidMove(piece, grid, position, rotate = false) {
