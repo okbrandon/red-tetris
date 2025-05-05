@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Main server file for the multiplayer game.
+ * Sets up the HTTP server, Socket.IO, game logic, and player interactions.
+ */
+
 const { createServer } = require("http")
 const { Server } = require("socket.io")
 const Player = require("./player");
@@ -8,13 +13,30 @@ const gameStatus = require("./constants/game-status.js");
 
 const PORT = process.env.PORT || 3000;
 
+/**
+ * HTTP server for simple GET response.
+ */
 const httpServer = createServer((req, res) => {
 	res.writeHead(200, { "Content-Type": "text/plain" });
 	res.end("Hello World!");
 });
+
+/**
+ * Socket.IO server instance.
+ * @type {Server}
+ */
 const io = new Server(httpServer, {});
+
+/**
+ * Active game rooms stored by ID.
+ * @type {Map<string, Game>}
+ */
 const rooms = new Map;
 
+/**
+ * Deletes a game room.
+ * @param {Game} room - The game room to delete.
+ */
 const deleteRoom = (room) => {
 	if (!room || !rooms.has(room.id))
 		return;
@@ -24,6 +46,12 @@ const deleteRoom = (room) => {
 	console.log(`Deleting room ${room.id}`);
 }
 
+/**
+ * Creates a new game room.
+ * @param {string} id - Room ID.
+ * @returns {Game} - The created Game instance.
+ * @throws {Error} - If the room already exists.
+ */
 const createRoom = (id) => {
 	if (rooms.has(id))
 		throw new Error('Game already exists');
@@ -34,6 +62,12 @@ const createRoom = (id) => {
 	return room;
 }
 
+/**
+ * Adds a player to a room.
+ * @param {Socket} socket - The player's socket.
+ * @param {Game} room - The room to join.
+ * @param {Player} client - The Player instance.
+ */
 const joinRoom = (socket, room, client) => {
 	try {
 		const roomName = room.id;
@@ -54,6 +88,12 @@ const joinRoom = (socket, room, client) => {
 	}
 }
 
+/**
+ * Removes a player from a room.
+ * @param {Socket} socket - The player's socket.
+ * @param {Game} room - The room to leave.
+ * @param {Player} client - The Player instance.
+ */
 const leaveRoom = (socket, room, client) => {
 	try {
 		room.playerLeave(client);
@@ -75,13 +115,20 @@ const leaveRoom = (socket, room, client) => {
 	}
 }
 
+/**
+ * Retrieves a room by its ID.
+ * @param {string} id - The room ID.
+ * @returns {Game | undefined}
+ */
 const getRoom = (id) => rooms.get(id);
 
+// Socket.IO connection handler
 io.on("connection", (socket) => {
+	/** @type {Player} */
 	const client = new Player(socket, socket.id);
-
 	console.log("A user connected");
 
+	// Handle client update
 	socket.on(incomingEvents.CLIENT_UPDATE, (data) => {
 		if (!data.username) {
 			socket.emit(outgoingEvents.ERROR, JSON.stringify({
@@ -98,6 +145,7 @@ io.on("connection", (socket) => {
 		console.log(`[${client.id}] Updated username to ${client.username}`);
 	});
 
+	// Handle room joining
 	socket.on(incomingEvents.ROOM_JOIN, (data) => {
 		const roomName = data.roomName;
 
@@ -147,6 +195,7 @@ io.on("connection", (socket) => {
 		console.log(rooms);
 	});
 
+	// Handle room leaving
 	socket.on(incomingEvents.ROOM_LEAVE, () => {
 		const room = client.room;
 
@@ -161,6 +210,7 @@ io.on("connection", (socket) => {
 		console.log(rooms);
 	});
 
+	// Handle game starting
 	socket.on(incomingEvents.START_GAME, () => {
 		const room = client.room;
 
@@ -188,6 +238,7 @@ io.on("connection", (socket) => {
 		room.start();
 	});
 
+	// Handle game restarting
 	socket.on(incomingEvents.RESTART_GAME, () => {
 		const room = client.room;
 
@@ -222,6 +273,7 @@ io.on("connection", (socket) => {
 		}
 	})
 
+	// Handle piece movement
 	socket.on(incomingEvents.MOVE_PIECE, (data) => {
 		const room = client.room;
 
@@ -251,6 +303,7 @@ io.on("connection", (socket) => {
 		}
 	});
 
+	// Handle disconnection
 	socket.on("disconnect", () => {
 		const room = client.room;
 
@@ -262,6 +315,10 @@ io.on("connection", (socket) => {
 	});
 });
 
+
+/**
+ * Starts the HTTP server.
+ */
 httpServer.listen(PORT, () => {
 	console.log(`Server running at http://localhost:${PORT}/`);
 });
