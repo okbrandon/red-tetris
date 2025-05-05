@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Game class for managing game state and player interactions.
+ */
+
 const Tetromino = require('./tetromino.js')
 const outgoingEvents = require('./constants/outgoing-events.js')
 const gameStatus = require('./constants/game-status.js')
@@ -5,19 +9,38 @@ const gameSettings = require('./constants/game-settings.js')
 
 class Game {
 
+	/**
+	 * @param {string} id - Unique ID for the game room.
+	 * @param {Object} [owner=null] - Initial owner of the game room.
+	 */
 	constructor(id, owner = null) {
+		/** @type {string} */
 		this.id = id;
+		/** @type {Object|null} */
 		this.owner = owner;
+		/** @type {string} */
 		this.status = gameStatus.WAITING;
-		this.clients = new Set;
-		this.grids = new Map;
+		/** @type {Set<Object>} */
+		this.clients = new Set();
+		/** @type {Map<string, any>} */
+		this.grids = new Map();
+		/** @type {number} */
 		this.cols = gameSettings.FRAME_COLS;
+		/** @type {number} */
 		this.rows = gameSettings.FRAME_ROWS;
+		/** @type {Tetromino} */
 		this.tetromino = new Tetromino();
+		/** @type {boolean} */
 		this.soloJourney = false;
+		/** @type {NodeJS.Timeout|null} */
 		this.updateInterval = null;
 	}
 
+	/**
+	 * Assigns a client as the game owner.
+	 * @param {Object} client
+	 * @throws Will throw if the game already has an owner.
+	 */
 	assignOwner(client) {
 		if (this.owner)
 			throw new Error('Game already has an owner');
@@ -25,6 +48,11 @@ class Game {
 		this.owner = client;
 	}
 
+	/**
+	 * Adds a player to the game.
+	 * @param {Object} client
+	 * @throws If the client is already in a room or game has started.
+	 */
 	playerJoin(client) {
 		if (client.room)
 			throw new Error('Client already in a room');
@@ -35,6 +63,11 @@ class Game {
 		this.clients.add(client);
 	}
 
+	/**
+	 * Removes a player from the game.
+	 * Handles game end logic and ownership transfer.
+	 * @param {Object} client
+	 */
 	playerLeave(client) {
 		if (client.room !== this)
 			throw new Error('Client not in a room');
@@ -62,6 +95,9 @@ class Game {
 		}
 	}
 
+	/**
+	 * Sends updated room info to all clients.
+	 */
 	broadcastRoom() {
 		const clients = [...this.clients];
 
@@ -84,6 +120,10 @@ class Game {
 		});
 	}
 
+	/**
+	 * Determines if the game should end based on player state.
+	 * @returns {boolean}
+	 */
 	shouldEndGame() {
 		if (this.status === gameStatus.FINISHED) return true;
 		if (this.clients.length === 0) return true;
@@ -113,6 +153,9 @@ class Game {
 		return false;
 	}
 
+	/**
+	 * Starts the game update tick loop.
+	 */
 	startInterval() {
 		if (this.updateInterval)
 			return;
@@ -134,6 +177,10 @@ class Game {
 		}, 1000);
 	}
 
+	/**
+	 * Starts the game and sends initial state to all players.
+	 * @throws If the game is already started.
+	 */
 	start() {
 		if (this.status !== gameStatus.WAITING)
 			throw new Error('Game has already started');
@@ -180,6 +227,10 @@ class Game {
 		this.startInterval();
 	}
 
+	/**
+	 * Restarts the game after it's finished.
+	 * @throws If the game is not finished.
+	 */
 	restart() {
 		if (this.status !== gameStatus.FINISHED)
 			throw new Error('Game is not finished');
@@ -193,6 +244,9 @@ class Game {
 		this.start();
 	}
 
+	/**
+	 * Stops the game and notifies all players.
+	 */
 	stop() {
 		if (this.updateInterval)
 			clearInterval(this.updateInterval);
@@ -207,6 +261,12 @@ class Game {
 		console.log('[' + this.id + '] GAME STOPPED');
 	}
 
+	/**
+	 * Handles a player's piece movement.
+	 * @param {Object} client - The player moving a piece.
+	 * @param {string} direction - Direction to move (e.g., 'left', 'right', 'down').
+	 * @throws If the game isn't running or the player has no active piece.
+	 */
 	handlePieceMove(client, direction) {
 		if (this.status !== gameStatus.PLAYING)
 			throw new Error('Game is not in progress');
@@ -216,6 +276,11 @@ class Game {
 		client.movePiece(direction);
 	}
 
+	/**
+	 * Sends penalties to other players (e.g. after line clears).
+	 * @param {Object} author - The player causing the penalty.
+	 * @param {number} penalties - Number of penalty lines to apply.
+	 */
 	handlePenalties(author, penalties) {
 		if (this.soloJourney)
 			return;
