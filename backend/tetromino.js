@@ -1,9 +1,20 @@
+/**
+ * @fileoverview Tetromino manager for Tetris game.
+ * This module handles the creation and management of Tetris pieces.
+ */
+
 const Piece = require('./piece.js');
 const gameSettings = require('./constants/game-settings.js');
 
+/**
+ * Initializes the Tetromino manager with predefined templates and an empty piece set.
+ */
 class Tetromino {
 
 	constructor() {
+		/**
+		 * @type {Array<{shape: number[][], color: string, position: {x: number, y: number}}>}
+		 */
 		this.templates = [
 			{
 				shape: [
@@ -66,9 +77,16 @@ class Tetromino {
 			...template,
 			position: this.getDefaultPosition(template.shape[0].length)
 		}));
+
+		/** @type {Set<Piece>} */
 		this.pieces = new Set;
 	}
 
+	/**
+	 * Calculates the default horizontal spawn position (centered).
+	 * @param {number} size - Width of the piece.
+	 * @returns {{x: number, y: number}} The default spawn coordinates.
+	 */
 	getDefaultPosition(size) {
 		return {
 			x: Math.floor((gameSettings.FRAME_COLS - size) / 2),
@@ -76,6 +94,10 @@ class Tetromino {
 		}
 	}
 
+	/**
+	 * Selects a random template and creates a new Piece from it.
+	 * @returns {Piece|null} A new Piece instance, or null if creation fails.
+	 */
 	getRandomPiece() {
 		const random = Math.floor(Math.random() * this.templates.length);
 		const template = this.templates[random];
@@ -88,6 +110,10 @@ class Tetromino {
 		}
 	}
 
+	/**
+	 * Generates a number of random pieces and stores them in the set.
+	 * @param {number} n - Number of pieces to generate.
+	 */
 	generate(n) {
 		for (let i = 0; i < n; i++) {
 			try {
@@ -103,6 +129,9 @@ class Tetromino {
 		console.log(`Tetromino generated ${n} pieces`);
 	}
 
+	/**
+	 * Clears all generated pieces.
+	 */
 	reset() {
 		this.pieces.clear();
 	}
