@@ -1,8 +1,19 @@
+/**
+ * @fileoverview Player class for managing player state and interactions in the game.
+ * This class handles player connections, game state updates, piece movements,
+ * and game over conditions.
+ */
+
 const { DEFAULT_EMPTY_GRID } = require('./constants/game-settings.js');
 const outgoingEvents = require('./constants/outgoing-events.js');
 
 class Player {
 
+	/**
+	 * @param {Socket} connection - The player's socket connection.
+	 * @param {string} id - Unique player ID.
+	 * @param {string|null} [username=null] - Optional username.
+	 */
 	constructor(connection, id, username = null) {
 		this.connection = connection;
 		this.id = id;
@@ -15,14 +26,26 @@ class Player {
 		this.hasLost = false;
 	}
 
+	/**
+	 * Sends a raw message to the player's socket.
+	 * @param {*} message
+	 */
 	send(message) {
 		this.connection.send(message);
 	}
 
+	/**
+	 * Emits a socket event to the client.
+	 * @param {string} event - Event name.
+	 * @param {*} data - Event data.
+	 */
 	emit(event, data) {
 		this.connection.emit(event, data);
 	}
 
+	/**
+	 * Sends the current game state to the player.
+	 */
 	sendGrid() {
 		const gridClone = structuredClone(this.grid);
 		const gridWithoutCurrent = this.removePieceFromGrid(this.currentPiece, gridClone);
@@ -63,6 +86,10 @@ class Player {
 		});
 	}
 
+	/**
+	 * Triggers game over for this player.
+	 * @param {string} [message='Game Over'] - Reason for game over.
+	 */
 	sendGameOver(message = 'Game Over') {
 		if (this.hasLost)
 			return;
@@ -82,6 +109,10 @@ class Player {
 		});
 	}
 
+	/**
+	 * Retrieves the next piece from the queue.
+	 * @returns {Piece|null} - The next piece or null if no pieces are available.
+	 */
 	nextPiece() {
 		if (this.pieces.size === 0)
 			return null;
@@ -93,6 +124,11 @@ class Player {
 		return piece;
 	}
 
+	/**
+	 * Calculates ghost piece for UI visualization.
+	 * @param {Array<Array<Object>>} gridWithoutCurrent - Grid without the current piece.
+	 * @returns {Piece|null} - The ghost piece or null if no current piece.
+	 */
 	getGhostPiece(gridWithoutCurrent) {
 		if (!this.currentPiece)
 			return null;
@@ -109,6 +145,10 @@ class Player {
 		return ghostPiece;
 	}
 
+	/**
+	 * Generates a gray overlay grid (land specter) for other players to see.
+	 * @returns {Array<Array<Object>>} - The land specter grid.
+	 */
 	getLandSpecter() {
 		if (!this.grid || !this.currentPiece)
 			return DEFAULT_EMPTY_GRID;
@@ -131,10 +171,21 @@ class Player {
 		return gridWithoutCurrent;
 	}
 
+	/**
+	 * Initializes a new empty grid for the player.
+	 */
 	generateEmptyGrid() {
 		this.grid = structuredClone(DEFAULT_EMPTY_GRID);
 	}
 
+	/**
+	 * Checks if a piece can legally move to a position.
+	 * @param {Piece} piece - The piece to check.
+	 * @param {Array<Array<Object>>} grid - The game grid.
+	 * @param {{x: number, y: number}} position - The target position.
+	 * @param {boolean} [rotate=false] - If true, check for rotated position.
+	 * @returns {boolean} - True if the move is valid, false otherwise.
+	 */
 	isValidMove(piece, grid, position, rotate = false) {
 		const shape = rotate ? piece.rotate() : piece.shape;
 		const rows = this.room.rows;
@@ -160,6 +211,13 @@ class Player {
 		return true;
 	}
 
+	/**
+	 * Modifies grid cells based on the provided piece and update function.
+	 * @param {Piece} piece - The piece to update.
+	 * @param {Array<Array<Object>>} grid - The game grid.
+	 * @param {Function} updateCell - Function to update each cell.
+	 * @returns {Array<Array<Object>>} - The updated grid.
+	 */
 	updatePieceOnGrid(piece, grid, updateCell) {
 		const shape = piece.shape;
 		const rows = this.room.rows;
@@ -185,6 +243,13 @@ class Player {
 		return grid;
 	}
 
+	/**
+	 * Adds a piece to the grid.
+	 * @param {Piece} piece - The piece to add.
+	 * @param {Array<Array<Object>>} grid - The game grid.
+	 * @param {boolean} [isGhost=false] - If true, treat the piece as a ghost.
+	 * @returns {Array<Array<Object>>} - The updated grid.
+	 */
 	mergePieceIntoGrid(piece, grid, isGhost = false) {
 		return this.updatePieceOnGrid(piece, grid, (piece) => ({
 			filled: true,
@@ -194,6 +259,12 @@ class Player {
 		}));
 	}
 
+	/**
+	 * Removes a piece from the grid.
+	 * @param {Piece} piece - The piece to remove.
+	 * @param {Array<Array<Object>>} grid - The game grid.
+	 * @returns {Array<Array<Object>>} - The updated grid.
+	 */
 	removePieceFromGrid(piece, grid) {
 		return this.updatePieceOnGrid(piece, grid, () => ({
 			filled: false,
@@ -203,6 +274,10 @@ class Player {
 		}));
 	}
 
+	/**
+	 * Adds penalty lines to the player's grid.
+	 * @param {number} penalties - Number of lines to add.
+	 */
 	penalize(penalties) {
 		if (!this.grid)
 			return;
@@ -229,6 +304,9 @@ class Player {
 		this.grid = [...normalRows, ...existingPenalties, ...newPenalties].slice(-rows);
 	}
 
+	/**
+	 * Clears all full lines and applies penalties to others.
+	 */
 	clearFullLines() {
 		if (!this.grid)
 			return;
@@ -266,6 +344,9 @@ class Player {
 			this.room.handlePenalties(this, clearedLines - 1);
 	}
 
+	/**
+	 * Handles what happens when a piece lands.
+	 */
 	handlePieceLanding() {
 		if (!this.currentPiece)
 			return;
@@ -288,6 +369,10 @@ class Player {
 		this.sendGrid();
 	}
 
+	/**
+	 * Moves, rotates, or drops the current piece.
+	 * @param {'down' | 'left' | 'right' | 'up' | 'space'} [direction='down'] - The direction to move the piece.
+	 */
 	movePiece(direction = 'down') {
 		if (!this.currentPiece)
 			return;
@@ -358,6 +443,9 @@ class Player {
 		this.sendGrid();
 	}
 
+	/**
+	 * Advances the game by one tick.
+	 */
 	tickInterval() {
 		if (!this.room) {
 			console.log('No room to start interval');
@@ -369,6 +457,9 @@ class Player {
 		this.movePiece();
 	}
 
+	/**
+	 * Resets the player's state.
+	 */
 	reset() {
 		this.pieces.clear();
 		this.currentPiece = null;
