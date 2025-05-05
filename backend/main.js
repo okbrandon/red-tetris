@@ -1,6 +1,6 @@
 const { createServer } = require("http")
 const { Server } = require("socket.io")
-const Client = require("./client");
+const Player = require("./player");
 const Game = require("./game");
 const incomingEvents = require("./constants/incoming-events.js");
 const outgoingEvents = require("./constants/outgoing-events.js");
@@ -94,7 +94,7 @@ const leaveRoom = (socket, room, client) => {
 const getRoom = (id) => rooms.get(id);
 
 io.on("connection", (socket) => {
-	const client = new Client(socket, socket.id);
+	const client = new Player(socket, socket.id);
 
 	console.log("A user connected");
 

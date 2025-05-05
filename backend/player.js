@@ -1,7 +1,7 @@
 const { DEFAULT_EMPTY_GRID } = require('./constants/game-settings.js');
 const outgoingEvents = require('./constants/outgoing-events.js');
 
-class Client {
+class Player {
 
 	constructor(connection, id, username = null) {
 		this.connection = connection;
@@ -378,4 +378,4 @@ class Client {
 
 }
 
-module.exports = Client;
+module.exports = Player;
