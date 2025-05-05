@@ -56,6 +56,7 @@ class Player {
 			you: {
 				id: this.id,
 				username: this.username,
+				hasLost: this.hasLost,
 				specter: this.getLandSpecter(),
 			},
 			clients: clientsData

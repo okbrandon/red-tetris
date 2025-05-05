@@ -48,9 +48,40 @@ class Game {
 		if (this.status == gameStatus.PLAYING) {
 			if (this.shouldEndGame()) {
 				console.log('[' + this.id + '] GAME OVER (NO MORE PLAYERS)');
+
 				this.stop();
+				return;
 			}
 		}
+
+		if (this.owner.id === client.id) {
+			if (this.clients.size > 0) {
+				this.owner = [...this.clients][0];
+				this.broadcastRoom();
+			}
+		}
+	}
+
+	broadcastRoom() {
+		const clients = [...this.clients];
+
+		clients.forEach(client => {
+			client.emit(outgoingEvents.ROOM_BROADCAST, JSON.stringify({
+				room: this.id,
+				owner: {
+					id: this.owner.id,
+					username: this.owner.username
+				},
+				you: {
+					id: client.id,
+					username: client.username
+				},
+				clients: clients.map(c => ({
+					id: c.id,
+					username: c.username
+				}))
+			}));
+		});
 	}
 
 	shouldEndGame() {
@@ -128,7 +159,10 @@ class Game {
 
 			client.emit(outgoingEvents.GAME_STARTED, JSON.stringify({
 				room: this.id,
-				you: client.id,
+				you: {
+					id: client.id,
+					username: client.username,
+				},
 				clients: clients.map(c => ({
 					id: c.id,
 					username: c.username

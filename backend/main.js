@@ -34,21 +34,6 @@ const createRoom = (id) => {
 	return room;
 }
 
-const broadcastRoom = (room) => {
-	const clients = [...room.clients];
-
-	clients.forEach(client => {
-		client.emit(outgoingEvents.ROOM_BROADCAST, JSON.stringify({
-			room: room.id,
-			you: client.id,
-			clients: clients.map(c => ({
-				id: c.id,
-				username: c.username
-			}))
-		}))
-	})
-}
-
 const joinRoom = (socket, room, client) => {
 	try {
 		const roomName = room.id;
@@ -60,7 +45,7 @@ const joinRoom = (socket, room, client) => {
 			roomName: roomName
 		}));
 
-		broadcastRoom(room);
+		room.broadcastRoom();
 		console.log(`[${client.id}] Joined room ${roomName}`);
 	} catch (error) {
 		socket.emit(outgoingEvents.ERROR, JSON.stringify({
@@ -72,9 +57,8 @@ const joinRoom = (socket, room, client) => {
 const leaveRoom = (socket, room, client) => {
 	try {
 		room.playerLeave(client);
+		room.broadcastRoom();
 		socket.leave(room.id);
-
-		broadcastRoom(room);
 
 		if (room.clients.size === 0) {
 			deleteRoom(room);
@@ -143,6 +127,7 @@ io.on("connection", (socket) => {
 				socket.emit(outgoingEvents.ROOM_CREATED, JSON.stringify({
 					roomName: roomName
 				}));
+				room.broadcastRoom();
 			} catch (error) {
 				socket.emit(outgoingEvents.ERROR, JSON.stringify({
 					message: error.message
