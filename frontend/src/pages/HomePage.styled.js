@@ -62,3 +62,24 @@ export const StartButton = styled.button`
         box-shadow: 0 0 10px #a259ff, 0 0 20px #a259ff44;
     }
 `;
+
+export const Input = styled.input`
+    background: none;
+    border: 2px solid #a259ff;
+    color: #ffffff;
+    padding: 0.8rem 1.2rem;
+    font-size: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    outline: none;
+    z-index: 1;
+    text-align: center;
+
+    &::placeholder {
+        color: #a259ff88;
+    }
+
+    &:focus {
+        box-shadow: 0 0 8px #a259ffcc;
+    }
+`;
