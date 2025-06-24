@@ -3,7 +3,6 @@ import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { setUsername } from '../features/user/userSlice';
 import { Wrapper, Glow, Title, StartButton, Input } from './HomePage.styled';
-import ParticlesBackground from '../components/ParticlesBackground';
 
 const HomePage = () => {
     const navigate = useNavigate();
@@ -21,7 +20,6 @@ const HomePage = () => {
 
     return (
         <Wrapper>
-            <ParticlesBackground />
             <Glow className="top-left" />
             <Glow className="bottom-right" />
             <Title>Red-Tetris</Title>
