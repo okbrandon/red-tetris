@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { setUsername } from '../features/user/userSlice';
-import { Wrapper, Glow, Title, StartButton, Input } from './HomePage.styled';
+import { Wrapper, Title, StartButton, Input } from './HomePage.styled';
+import AnimatedBackground from '../components/AnimatedBackground';
 
 const HomePage = () => {
     const navigate = useNavigate();
@@ -20,8 +21,7 @@ const HomePage = () => {
 
     return (
         <Wrapper>
-            <Glow className="top-left" />
-            <Glow className="bottom-right" />
+            <AnimatedBackground />
             <Title>Red-Tetris</Title>
 
             <Input

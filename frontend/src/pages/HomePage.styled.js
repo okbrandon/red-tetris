@@ -13,30 +13,6 @@ export const Wrapper = styled.div`
     overflow: hidden;
 `;
 
-export const Glow = styled.div`
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(100px);
-    opacity: 0.3;
-    z-index: 0;
-    background: radial-gradient(circle, #a259ff, transparent);
-    pointer-events: none;
-
-    &.top-left {
-        top: -100px;
-        left: -100px;
-        width: 300px;
-        height: 300px;
-    }
-
-    &.bottom-right {
-        bottom: -100px;
-        right: -100px;
-        width: 400px;
-        height: 400px;
-    }
-`;
-
 export const Title = styled.h1`
     font-size: 3rem;
     margin-bottom: 2rem;
