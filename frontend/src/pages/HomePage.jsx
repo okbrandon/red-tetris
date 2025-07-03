@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { setUsername } from '../features/user/userSlice';
-import { Wrapper, Title, StartButton, Input } from './HomePage.styled';
+import { Wrapper, StartButton, Input, LogoTitle } from './HomePage.styled';
 import AnimatedBackground from '../components/AnimatedBackground';
 
 const HomePage = () => {
@@ -22,7 +22,7 @@ const HomePage = () => {
     return (
         <Wrapper>
             <AnimatedBackground />
-            <Title>Red-Tetris</Title>
+            <LogoTitle>Red-Tetris</LogoTitle>
 
             <Input
                 type="text"

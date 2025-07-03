@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 
 export const Wrapper = styled.div`
     height: 100vh;
@@ -13,11 +13,21 @@ export const Wrapper = styled.div`
     overflow: hidden;
 `;
 
-export const Title = styled.h1`
+const glow = keyframes`
+    0% { text-shadow: 0 0 10px #a259ff, 0 0 20px #6f42c1, 0 0 30px #a259ff; }
+    50% { text-shadow: 0 0 20px #a259ff, 0 0 30px #6f42c1, 0 0 40px #a259ff; }
+    100% { text-shadow: 0 0 10px #a259ff, 0 0 20px #6f42c1, 0 0 30px #a259ff; }
+`;
+
+export const LogoTitle = styled.h1`
+    font-family: 'Press Start 2P', monospace;
     font-size: 3rem;
-    margin-bottom: 2rem;
     color: #ffffff;
-    text-shadow: 0 0 10px #a259ff, 0 0 20px #a259ff33;
+    text-align: center;
+    margin-bottom: 2rem;
+    animation: ${glow} 3s ease-in-out infinite;
+    letter-spacing: 4px;
+    text-transform: uppercase;
     z-index: 1;
 `;
 
