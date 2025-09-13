@@ -28,25 +28,52 @@ All work is done in **feature branches** branched from `dev`.
 
 We keep commits **short, clear, and consistent**.
 
-**Format**
+**Format (lightweight)**
 
-[AREA] short description
+[AREA][TYPE] short description
 
-- AREA = `FE` (frontend), `BE` (backend), `FULL` (fullstack)
-- Keep the description imperative: "add", "fix", "polish", "refactor"
-- If the commit relates to an issue, include `(#id)` at the end
+- **AREA** = `FE` (frontend), `BE` (backend), `FULL` (fullstack). If the change isn't FE/BE/FULL (e.g., docs, tooling), you may **omit AREA**.
+- **TYPE** = one of the types below.
+- If the commit relates to an issue, append `(#id)` at the end: `... (#12)`
 
 **Examples**
 
-[FE] add tetris grid component (#12)<br/>
-[BE] implement lobby join endpoint (#21)<br>
-[FULL] sync game state between frontend and backend (#33)<br/>
-[FE] polish homepage layout<br/>
+[FE][FEAT] add tetris grid component (#12)<br/>
+[FE][STYLE] polish homepage layout<br/>
+[BE][FIX] correct lobby join payload (#21)<br/>
+[FULL][CHORE] align FE services with BE socket events<br/>
+[DOCS] add contributing guidelines<br/>
+
+### Commit Types (what to choose and when)
+- **FEAT** – user-visible feature; adds new functionality
+  _e.g., render falling tetrominoes, add lobby UI_
+- **FIX** – bug fix; corrects incorrect behavior
+  _e.g., rotation collision bug_
+- **CHORE** – maintenance, dependencies, configs, scripts, repo hygiene
+  _e.g., update ESLint/Prettier, GitHub Actions, .gitignore_
+- **REFACTOR** – improve code structure without changing behavior
+  _e.g., split Game.jsx, extract helpers_
+- **TEST** – add/update tests (unit/integration/e2e)
+- **STYLE** – visual/UI polish or code formatting (no logic changes)
+  _e.g., CSS tweaks, layout spacing_
+- **DOCS** – documentation only
+  _e.g., README, CONTRIBUTING, API notes_
+- **PERF** – performance improvements
+  _e.g., memoization, reduce renders_
+- **BUILD** – build tooling changes (Vite/Webpack, npm scripts)
+- **CI** – CI/CD pipeline changes
+- **CONFIG** – environment or project config changes
+- **REVERT** – revert a previous commit
+- **WIP** – work in progress (use on feature branches; avoid merging WIP)
+
+**CHORE vs REFACTOR (quick rule)**
+- Touching configs/tooling/docs/deps? → **CHORE**
+- Restructuring app code with same behavior? → **REFACTOR**
 
 ---
 
 ## Pull Requests (PRs)
-- Always open PRs **into `dev`**, not `main`
+- Open PRs **into `dev`**, not `main`
 - PR title format:
 [AREA] short description (#issue)
 - PR description:
@@ -55,7 +82,7 @@ We keep commits **short, clear, and consistent**.
   - Feature PRs to `dev`: `Relates to #id`
   - Sprint/release PR (`dev → main`): `Closes #id, #id, ...`
 
-**Example**
+**Example PR body**
 
 Title: [FE] Polish homepage (#12)
 
