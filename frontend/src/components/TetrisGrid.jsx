@@ -50,15 +50,31 @@ const defaultColors = {
 };
 
 const TetrisGrid = ({ rows = 20, cols = 10, cellSize = 24, matrix, showGrid = true, colors = defaultColors }) => {
-    const data = matrix && matrix.length ? matrix : Array.from({ length: rows }, () => Array(cols).fill(0));
+  const data = matrix && matrix.length ? matrix : Array.from({ length: rows }, () => Array(cols).fill(0));
 
-    return (
-        <Board style={{ gridTemplateColumns: `repeat(${cols}, ${cellSize}px)`, gridTemplateRows: `repeat(${rows}, ${cellSize}px)` }}>
+  return (
+        <Board
+            role="grid"
+            aria-rowcount={rows}
+            aria-colcount={cols}
+            style={{ gridTemplateColumns: `repeat(${cols}, ${cellSize}px)`, gridTemplateRows: `repeat(${rows}, ${cellSize}px)` }}
+        >
             {data.map((r, y) =>
                 r.map((v, x) => {
                     const filled = v > 0;
                     const color = colors[v] || 'rgba(162,89,255,1)';
-                    return <Cell key={`${y}-${x}`} size={cellSize} filled={filled} color={color} showGrid={showGrid} />;
+                    return (
+                        <Cell
+                            key={`${y}-${x}`}
+                            role="gridcell"
+                            data-testid="cell"
+                            data-filled={filled ? 'true' : 'false'}
+                            size={cellSize}
+                            filled={filled}
+                            color={color}
+                            showGrid={showGrid}
+                        />
+                    );
                 })
             )}
         </Board>
