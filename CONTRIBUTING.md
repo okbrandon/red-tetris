@@ -1,149 +1,116 @@
-# Contributing Guidelines - Red Tetris
+# Contributing Guidelines — Red Tetris
 
-This document explains how we work together on this project.
-
----
-
-## Branching
-
-We use two permanent branches:
-- **`main`** -> always stable, release-ready
-- **`dev`** -> integration branch for all features
-
-All work is done in **feature branches** branched from `dev`.
-
-**Branch naming convention**
-
-> \<area>/\<issue>-\<short-name>
-
-- `fe/12-polish-homepage`
-- `be/21-lobby-socket`
-- `full/33-multiplayer-sync`
-
-`fe` = frontend | `be` = backend | `full` = fullstack
+This guide standardizes how we collaborate using a dev‑based GitHub workflow, Conventional Commits, and pull requests. It covers branch names, commit messages, and PR conventions so automation (links, changelogs) works smoothly.
 
 ---
 
-## Commits
+## Branching (Dev‑based Flow)
 
-We keep commits **short, clear, and consistent**.
+- Branch from `dev` (integration branch).
+- Open a PR from your feature branch into `dev` when ready.
+- Keep branches small and short‑lived; rebase/sync from `dev` as needed.
 
-**Format (lightweight)**
+Branch naming convention
 
-[AREA][TYPE] short description
+> \<type>/\<issue-id-optional>-\<short-kebab-summary>
 
-- **AREA** = `FE` (frontend), `BE` (backend), `FULL` (fullstack). If the change isn't FE/BE/FULL (e.g., docs, tooling), you may **omit AREA**.
-- **TYPE** = one of the types below.
-- If the commit relates to an issue, append `(#id)` at the end: `... (#12)`
+Types: `feature`, `fix`, `chore`, `docs`, `refactor`, `perf`, `test`, `build`, `ci`.
 
-**Examples**
+Examples
 
-[FE][FEAT] add tetris grid component (#12)<br/>
-[FE][STYLE] polish homepage layout<br/>
-[BE][FIX] correct lobby join payload (#21)<br/>
-[FULL][CHORE] align FE services with BE socket events<br/>
-[DOCS] add contributing guidelines<br/>
+- `feature/123-polish-homepage`
+- `fix/lobby-socket-timeout`
+- `docs/update-contributing`
 
-### Commit Types (what to choose and when)
-- **FEAT** – user-visible feature; adds new functionality
-  _e.g., render falling tetrominoes, add lobby UI_
-- **FIX** – bug fix; corrects incorrect behavior
-  _e.g., rotation collision bug_
-- **CHORE** – maintenance, dependencies, configs, scripts, repo hygiene
-  _e.g., update ESLint/Prettier, GitHub Actions, .gitignore_
-- **REFACTOR** – improve code structure without changing behavior
-  _e.g., split Game.jsx, extract helpers_
-- **TEST** – add/update tests (unit/integration/e2e)
-- **STYLE** – visual/UI polish or code formatting (no logic changes)
-  _e.g., CSS tweaks, layout spacing_
-- **DOCS** – documentation only
-  _e.g., README, CONTRIBUTING, API notes_
-- **PERF** – performance improvements
-  _e.g., memoization, reduce renders_
-- **BUILD** – build tooling changes (Vite/Webpack, npm scripts)
-- **CI** – CI/CD pipeline changes
-- **CONFIG** – environment or project config changes
-- **REVERT** – revert a previous commit
-- **WIP** – work in progress (use on feature branches; avoid merging WIP)
+Rules
 
-**CHORE vs REFACTOR (quick rule)**
-- Touching configs/tooling/docs/deps? → **CHORE**
-- Restructuring app code with same behavior? → **REFACTOR**
+- Use lowercase kebab‑case for the summary.
+- Include an issue ID when available (preferred).
 
 ---
 
-## Pull Requests (PRs)
-- Open PRs **into `dev`**, not `main`
-- PR title format:
-[AREA] short description (#issue)
-- PR description:
-- Short bullet list of changes
-- Link the issue:
-  - Feature PRs to `dev`: `Relates to #id`
-  - Sprint/release PR (`dev → main`): `Closes #id, #id, ...`
+## Commits (Conventional Commits 1.0)
 
-**Example PR body**
+Format
 
-Title: [FE] Polish homepage (#12)
+> type(scope)!: short, imperative subject<br/>
+> body (motivation, contrast)<br/>
+> footer (Closes #123, Co-authored-by, BREAKING CHANGE, etc.)
 
-Description:
+Allowed types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`.
 
-Improved header layout
+Guidelines
 
-Added CTA button navigation
+- Subject ≤ 72 chars, no period. Use imperative mood ("add", "fix").
+- Use `scope` to denote area like `frontend`, `backend`, `lobby`, `game`.
+- Reference issues in the footer with keywords: `Closes #123`, `Relates to #456`.
+- For breaking changes add `!` after type/scope and a `BREAKING CHANGE:` footer.
 
-Responsive design
+Examples
 
-Relates to #12
+- `feat(frontend): add animated tetris background`
+- `fix(backend): correct lobby join payload (Closes #21)`
+- `refactor(game): extract rotation helpers`
+- `docs: update contributing with GitHub Flow`
 
----
+Squash merging
 
-## Issues & Project Board
-
-We manage tasks with the GitHub Project board.
-
-**Columns**
-- **Backlog** – ideas, drafts, future tasks (use Draft issues)
-- **Todo** – selected issues for this sprint
-- **In Progress** – someone is actively working on it
-- **Review** – PR is open, waiting for review/merge
-- **Done** – merged into `dev`
-  (we close issues only when merged into `main`)
-
-**Workflow**
-1. Pick an issue → move it to **In Progress**
-2. Create a feature branch → work & commit
-3. Open a PR into `dev`, move issue to **Review**
-4. After merge into `dev`, issue stays open until `dev` → `main`
-5. On sprint release PR (`dev → main`), add `Closes #id` → issues auto-close
+- Prefer "Squash and merge". The PR title will become the single commit message; keep it Conventional.
 
 ---
 
-## Labels
+## Pull Requests
 
-We use labels to quickly filter issues:
+Target branch
 
-- `frontend` → UI, React, styling, Redux
-- `backend` → server, WebSocket, API, game logic
-- `fullstack` → touches both FE & BE
-- `bug` → unexpected behavior
-- `enhancement` → nice-to-have improvements
-- `testing` → tests (unit, integration, e2e)
+- Open feature PRs into `dev`.
+
+Title (Conventional Commit style)
+
+> type(scope): short description (Closes #id)
+
+Description checklist
+
+- What changed and why (bullets ok)
+- Screenshots/GIFs for UI changes
+- Any breaking changes or follow‑ups
+- Link issues with `Closes #id` or `Relates to #id`
+
+Process
+
+- Draft the PR early if helpful; convert to Ready for review when stable.
+- Ensure checks pass (lint, tests, build).
+- Keep diffs focused; out‑of‑scope changes should go to a separate PR.
+- Use "Squash and merge" and delete the branch.
+
+Release PRs (dev → main)
+
+- When releasing, open a PR from `dev` to `main`.
+- Title: `chore(release): vX.Y.Z` (SemVer).
+- Body: high‑level changelog (features, fixes, breaking), and reference issues with `Closes #id` so they auto‑close on merge to `main`.
+- After merge, tag `main` with `vX.Y.Z` and publish a GitHub Release.
+
+Example PR
+
+Title: `feat(frontend): polish homepage hero (Closes #123)`
+
+Body:
+- Add glassmorphic card and CTA grid
+- Subtle grid background and drifting pieces
+- Keyboard: Enter to start
+
+---
+
+## Issues & Labels (brief)
+
+- Use issues for all work. Keep them small, outcome‑oriented, and label them.
+- Suggested labels: `frontend`, `backend`, `fullstack`, `bug`, `enhancement`, `good first issue`, `help wanted`.
 
 ---
 
 ## Releases
 
-- We tag a release at the end of each sprint or major milestone
-- Tag format: `v0.1.0`, `v0.2.0`, … (Semantic Versioning)
-- Release notes include new features, fixes, and setup instructions
-
----
-
-With this setup:
-- Issues → track all tasks
-- Branches → isolate work
-- Commits → simple + readable
-- PRs → always clear and linked
-- Project board → shows progress at a glance
-- Issues close only when shipped to `main`
+- Releases are cut from `main` using SemVer (e.g., `v0.1.0`).
+- Use a release PR (`dev` → `main`) titled `chore(release): vX.Y.Z`.
+- After merging the release PR, tag `main` and publish a GitHub Release.
+- Conventional Commits allow automated changelog generation if desired.
