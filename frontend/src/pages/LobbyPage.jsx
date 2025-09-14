@@ -1,14 +1,7 @@
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import {
-    Wrapper,
-    Glow,
-    Title,
-    Username,
-    PlayerList,
-    Player,
-    StartButton,
-} from './LobbyPage.styled';
+import { Wrapper, Card, Subtitle, StartButton, LogoTitle } from './HomePage.styled';
+import { PlayerList, Player } from './LobbyPage.styled';
 
 const LobbyPage = () => {
     const username = useSelector((state) => state.user.username);
@@ -23,19 +16,20 @@ const LobbyPage = () => {
 
     return (
         <Wrapper>
-            <Glow className="top-right" />
-            <Glow className="bottom-left" />
 
-            <Title>Lobby</Title>
-            <Username>Welcome, {username || 'Anonymous'}</Username>
+            <LogoTitle>Lobby</LogoTitle>
 
-            <PlayerList>
-                {players.map((player, index) => (
-                <Player key={index}>{player}</Player>
-                ))}
-            </PlayerList>
+            <Card>
+                <Subtitle>Welcome, {username || 'Anonymous'}</Subtitle>
 
-            <StartButton onClick={handleStartGame}>Start Game</StartButton>
+                <PlayerList>
+                    {players.map((player, index) => (
+                        <Player key={index}>{player}</Player>
+                    ))}
+                </PlayerList>
+
+                <StartButton onClick={handleStartGame}>Start Game</StartButton>
+            </Card>
         </Wrapper>
     );
 };

@@ -24,10 +24,10 @@ const fall = keyframes`
 `;
 
 const Background = styled.div`
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
     background: radial-gradient(120% 80% at 50% 0%, rgba(255,255,255,0.04), rgba(14,14,14,0.0) 60%),
                 linear-gradient(180deg, #0b0b0f 0%, #0e0e13 100%);
 
