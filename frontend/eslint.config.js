@@ -34,5 +34,6 @@ export default [
         { allowConstantExport: true },
       ],
     },
+    env: { 'vitest/globals': true }
   },
 ]
