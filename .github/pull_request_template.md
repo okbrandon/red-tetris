@@ -1,17 +1,21 @@
-## Description
+<!-- Title format (Conventional Commits): type(scope): short description -->
+<!-- Example: feat(frontend): polish homepage hero (Closes #123) -->
 
-- [ ] Linked to the correct issue (`Closes #id` or `Relates to #id`)
-- [ ] Clear, focused commits
-
-## Changes
--
--
--
+## Summary
+- What changed and why (short bullets)
+- 
 
 ## Screenshots / Demo
 
+## Breaking Changes / Follow-ups
+- 
+
+## Issue Links
+- Closes #
+- Relates to #
+
 ## Checklist
-- [ ] Code compiles and runs
+- [ ] Targets the correct branch (feature PRs → dev)
+- [ ] Lint/tests/build pass
 - [ ] Tests added/updated (if needed)
-- [ ] Linting/formatting passes
-- [ ] Documentation updated (if needed)
+- [ ] Docs updated (if needed)
