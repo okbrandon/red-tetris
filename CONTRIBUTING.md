@@ -101,10 +101,31 @@ Body:
 
 ---
 
-## Issues & Labels (brief)
+## Issues & Labels
 
 - Use issues for all work. Keep them small, outcome‑oriented, and label them.
-- Suggested labels: `frontend`, `backend`, `fullstack`, `bug`, `enhancement`, `good first issue`, `help wanted`.
+
+Issue title convention
+
+- Format: Area: concise outcome in sentence case
+  - Prefer clear outcomes over solutions.
+  - Keep under ~60 characters when possible.
+  - Examples:
+    - Frontend: Unify homepage and lobby styles
+    - Backend: Fix lobby socket reconnect on timeout
+    - Docs: Update README quick start
+
+Description checklist
+
+- Problem/goal in 1–2 sentences
+- Acceptance criteria (bullets)
+- Optional: Proposed approach, out of scope
+
+Suggested labels
+
+- `frontend`, `backend`, `fullstack`
+- `bug`, `enhancement`, `design`
+- `good first issue`, `help wanted`
 
 ---
 
