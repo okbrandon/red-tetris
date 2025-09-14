@@ -107,13 +107,15 @@ Body:
 
 Issue title convention
 
-- Format: Area: concise outcome in sentence case
+- Format: [AREA] concise outcome in sentence case
+  - AREA codes: `FE` (frontend), `BE` (backend), `FULL` (full‑stack), `DOCS`, `CI`, `BUILD`.
   - Prefer clear outcomes over solutions.
   - Keep under ~60 characters when possible.
   - Examples:
-    - Frontend: Unify homepage and lobby styles
-    - Backend: Fix lobby socket reconnect on timeout
-    - Docs: Update README quick start
+    - [FE] Unify homepage and lobby styles
+    - [BE] Fix lobby socket reconnect on timeout
+    - [DOCS] Update README quick start
+    - [CI] Stabilize test workflow on main
 
 Description checklist
 
