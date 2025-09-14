@@ -1,197 +1,202 @@
 import styled, { keyframes } from 'styled-components';
 
-const hii = keyframes`
-    0% {
-        backdrop-filter: var(--f) hue-rotate(0deg);
+const floatA = keyframes`
+    0% { transform: translate(-20%, -15%) scale(1); }
+    50% { transform: translate(5%, 10%) scale(1.05); }
+    100% { transform: translate(-20%, -15%) scale(1); }
+`;
+
+const floatB = keyframes`
+    0% { transform: translate(15%, 5%) scale(1.1); }
+    50% { transform: translate(-10%, -10%) scale(1.03); }
+    100% { transform: translate(15%, 5%) scale(1.1); }
+`;
+
+const panGrid = keyframes`
+    0% { background-position: 0 0, 0 0; }
+    100% { background-position: 0 480px, 480px 0; }
+`;
+
+const fall = keyframes`
+    0% { transform: translate(calc(var(--x, 0vw)), -20vh) rotate(var(--rStart, 0deg)) scale(var(--scale, 1)); opacity: 0; }
+    5% { opacity: var(--alpha, 0.7); }
+    100% { transform: translate(calc(var(--xEnd, 0vw)), 120vh) rotate(var(--rEnd, 15deg)) scale(var(--scale, 1)); opacity: 0; }
+`;
+
+const Background = styled.div`
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: radial-gradient(120% 80% at 50% 0%, rgba(255,255,255,0.04), rgba(14,14,14,0.0) 60%),
+                linear-gradient(180deg, #0b0b0f 0%, #0e0e13 100%);
+
+    &::before,
+    &::after {
+        content: '';
+        position: absolute;
+        width: min(70vw, 700px);
+        height: min(70vh, 700px);
+        border-radius: 50%;
+        filter: blur(60px);
+        opacity: 0.35;
+        will-change: transform;
     }
-    to {
-        backdrop-filter: var(--f) hue-rotate(360deg);
+
+    &::before {
+        top: -10vh;
+        left: -10vw;
+        background: radial-gradient(closest-side, rgba(162, 89, 255, 0.65), rgba(162, 89, 255, 0) 70%);
+        animation: ${floatA} 28s ease-in-out infinite alternate;
+    }
+
+    &::after {
+        bottom: -15vh;
+        right: -10vw;
+        background: radial-gradient(closest-side, rgba(111, 66, 193, 0.6), rgba(111, 66, 193, 0) 70%);
+        animation: ${floatB} 36s ease-in-out infinite alternate;
     }
 `;
 
-const hi = keyframes`
-    0% {
-        background-position:
-            0px 220px,
-            3px 220px,
-            151.5px 337.5px,
-            25px 24px,
-            28px 24px,
-            176.5px 150px,
-            50px 16px,
-            53px 16px,
-            201.5px 91px,
-            75px 224px,
-            78px 224px,
-            226.5px 350.5px,
-            100px 19px,
-            103px 19px,
-            251.5px 121px,
-            125px 120px,
-            128px 120px,
-            276.5px 187px,
-            150px 31px,
-            153px 31px,
-            301.5px 120.5px,
-            175px 235px,
-            178px 235px,
-            326.5px 384.5px,
-            200px 121px,
-            203px 121px,
-            351.5px 228.5px,
-            225px 224px,
-            228px 224px,
-            376.5px 364.5px,
-            250px 26px,
-            253px 26px,
-            401.5px 105px,
-            275px 75px,
-            278px 75px,
-            426.5px 180px;
-    }
+const Grid = styled.div`
+    position: absolute;
+    inset: 0;
+    opacity: 0.14;
+    filter: saturate(110%);
+    background-image:
+        repeating-linear-gradient(
+            to bottom,
+            rgba(199, 168, 255, 0.12) 0px,
+            rgba(199, 168, 255, 0.12) 1px,
+            transparent 1px,
+            transparent 40px
+        ),
+        repeating-linear-gradient(
+            to right,
+            rgba(199, 168, 255, 0.12) 0px,
+            rgba(199, 168, 255, 0.12) 1px,
+            transparent 1px,
+            transparent 40px
+        );
+    animation: ${panGrid} 60s linear infinite;
+`;
 
-    to {
-        background-position:
-            0px 6800px,
-            3px 6800px,
-            151.5px 6917.5px,
-            25px 13632px,
-            28px 13632px,
-            176.5px 13758px,
-            50px 5416px,
-            53px 5416px,
-            201.5px 5491px,
-            75px 17175px,
-            78px 17175px,
-            226.5px 17301.5px,
-            100px 5119px,
-            103px 5119px,
-            251.5px 5221px,
-            125px 8428px,
-            128px 8428px,
-            276.5px 8495px,
-            150px 9876px,
-            153px 9876px,
-            301.5px 9965.5px,
-            175px 13391px,
-            178px 13391px,
-            326.5px 13540.5px,
-            200px 14741px,
-            203px 14741px,
-            351.5px 14848.5px,
-            225px 18770px,
-            228px 18770px,
-            376.5px 18910.5px,
-            250px 5082px,
-            253px 5082px,
-            401.5px 5161px,
-            275px 6375px,
-            278px 6375px,
-            426.5px 6480px;
-    }
-`
+const Pieces = styled.div`
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+`;
 
-const Background = styled.div`
-    &::after {
-        content: "";
+const Piece = styled.div`
+    position: absolute;
+    top: 0;
+    left: 50%;
+    opacity: 0;
+    animation: ${fall} linear infinite;
+    animation-duration: var(--dur, 22s);
+    animation-delay: var(--delay, 0s);
+    will-change: transform, opacity;
+    filter: drop-shadow(0 8px 12px rgba(0,0,0,0.45));
+`;
+
+const Tile = styled.div`
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    background: ${({ color }) => `${color}`};
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.45),
+        inset 0 -1px 0 rgba(0,0,0,0.45),
+        0 0 10px rgba(162,89,255,0.25);
+    outline: 1px solid rgba(255,255,255,0.06);
+
+    &::before {
+        content: '';
         position: absolute;
         inset: 0;
-        z-index: 1;
-        background-image: radial-gradient(
-            circle at 50% 50%,
-            #0000 0,
-            #0000 2px,
-            hsl(0 0 4%) 2px
-        );
-        background-size: 8px 8px;
-        --f: blur(1em) brightness(3);
-        animation: ${hii} 10s linear infinite;
+        border-radius: inherit;
+        background:
+        radial-gradient(120% 80% at 25% 20%, rgba(255,255,255,0.35), rgba(255,255,255,0) 55%),
+        linear-gradient(160deg, rgba(255,255,255,0.15), rgba(0,0,0,0.2));
+        mix-blend-mode: screen;
+        pointer-events: none;
     }
+`;
 
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    --c: #09f;
-    background-color: #000;
-    background-image: radial-gradient(4px 100px at 0px 235px, var(--c), #0000),
-        radial-gradient(4px 100px at 300px 235px, var(--c), #0000),
-        radial-gradient(3px 3px at 150px 117.5px, var(--c) 100%, #0000 150%),
-        radial-gradient(4px 100px at 0px 252px, var(--c), #0000),
-        radial-gradient(4px 100px at 300px 252px, var(--c), #0000),
-        radial-gradient(3px 3px at 150px 126px, var(--c) 100%, #0000 150%),
-        radial-gradient(4px 100px at 0px 150px, var(--c), #0000),
-        radial-gradient(4px 100px at 300px 150px, var(--c), #0000),
-        radial-gradient(3px 3px at 150px 75px, var(--c) 100%, #0000 150%),
-        radial-gradient(4px 100px at 0px 253px, var(--c), #0000),
-        radial-gradient(4px 100px at 300px 253px, var(--c), #0000),
-        radial-gradient(3px 3px at 150px 126.5px, var(--c) 100%, #0000 150%),
-        radial-gradient(4px 100px at 0px 204px, var(--c), #0000),
-        radial-gradient(4px 100px at 300px 204px, var(--c), #0000),
-        radial-gradient(3px 3px at 150px 102px, var(--c) 100%, #0000 150%),
-        radial-gradient(4px 100px at 0px 134px, var(--c), #0000),
-        radial-gradient(4px 100px at 300px 134px, var(--c), #0000),
-        radial-gradient(3px 3px at 150px 67px, var(--c) 100%, #0000 150%),
-        radial-gradient(4px 100px at 0px 179px, var(--c), #0000),
-        radial-gradient(4px 100px at 300px 179px, var(--c), #0000),
-        radial-gradient(3px 3px at 150px 89.5px, var(--c) 100%, #0000 150%),
-        radial-gradient(4px 100px at 0px 299px, var(--c), #0000),
-        radial-gradient(4px 100px at 300px 299px, var(--c), #0000),
-        radial-gradient(3px 3px at 150px 149.5px, var(--c) 100%, #0000 150%),
-        radial-gradient(4px 100px at 0px 215px, var(--c), #0000),
-        radial-gradient(4px 100px at 300px 215px, var(--c), #0000),
-        radial-gradient(3px 3px at 150px 107.5px, var(--c) 100%, #0000 150%),
-        radial-gradient(4px 100px at 0px 281px, var(--c), #0000),
-        radial-gradient(4px 100px at 300px 281px, var(--c), #0000),
-        radial-gradient(3px 3px at 150px 140.5px, var(--c) 100%, #0000 150%),
-        radial-gradient(4px 100px at 0px 158px, var(--c), #0000),
-        radial-gradient(4px 100px at 300px 158px, var(--c), #0000),
-        radial-gradient(3px 3px at 150px 79px, var(--c) 100%, #0000 150%),
-        radial-gradient(4px 100px at 0px 210px, var(--c), #0000),
-        radial-gradient(4px 100px at 300px 210px, var(--c), #0000),
-        radial-gradient(3px 3px at 150px 105px, var(--c) 100%, #0000 150%);
-    background-size:
-        300px 235px,
-        300px 235px,
-        300px 235px,
-        300px 252px,
-        300px 252px,
-        300px 252px,
-        300px 150px,
-        300px 150px,
-        300px 150px,
-        300px 253px,
-        300px 253px,
-        300px 253px,
-        300px 204px,
-        300px 204px,
-        300px 204px,
-        300px 134px,
-        300px 134px,
-        300px 134px,
-        300px 179px,
-        300px 179px,
-        300px 179px,
-        300px 299px,
-        300px 299px,
-        300px 299px,
-        300px 215px,
-        300px 215px,
-        300px 215px,
-        300px 281px,
-        300px 281px,
-        300px 281px,
-        300px 158px,
-        300px 158px,
-        300px 158px,
-        300px 210px,
-        300px 210px,
-        300px 210px;
-    animation: ${hi} 150s linear infinite;
-`
+const SHAPES = {
+    I: [[0,0],[1,0],[2,0],[3,0]],
+    L: [[0,0],[0,1],[1,1],[2,1]],
+    J: [[1,0],[1,1],[0,1],[0,2]],
+    Z: [[0,0],[1,0],[1,1],[2,1]],
+    S: [[1,0],[2,0],[0,1],[1,1]],
+    T: [[1,0],[0,1],[1,1],[2,1]],
+    O: [[0,0],[1,0],[0,1],[1,1]],
+};
+
+const size = 14;
 
 const AnimatedBackground = () => {
+    const items = [
+        // Far left to center-left
+        { shape: 'I', color: 'rgba(162,89,255,0.95)', vars: { x: '-48vw', xEnd: '-44vw', dur: '26s', delay: '0s', rStart: '-4deg', rEnd: '12deg', scale: '1.0', alpha: '0.6' } },
+        { shape: 'J', color: 'rgba(173,115,255,0.95)', vars: { x: '-30vw', xEnd: '-26vw', dur: '32s', delay: '8s', rStart: '8deg', rEnd: '-6deg', scale: '0.9', alpha: '0.55' } },
+        { shape: 'L', color: 'rgba(140,70,230,0.95)', vars: { x: '-16vw', xEnd: '-12vw', dur: '24s', delay: '6s', rStart: '2deg', rEnd: '-10deg', scale: '1.1', alpha: '0.7' } },
+
+        // Center area (both small and large for depth)
+        { shape: 'Z', color: 'rgba(186,120,255,0.95)', vars: { x: '-2vw', xEnd: '2vw', dur: '28s', delay: '3s', rStart: '-6deg', rEnd: '8deg', scale: '1.6', alpha: '0.5' } },
+        { shape: 'O', color: 'rgba(150,80,240,0.95)', vars: { x: '0vw', xEnd: '0vw', dur: '40s', delay: '18s', rStart: '0deg', rEnd: '0deg', scale: '0.85', alpha: '0.45' } },
+
+        // Right side
+        { shape: 'T', color: 'rgba(132,88,255,0.95)', vars: { x: '18vw', xEnd: '24vw', dur: '30s', delay: '12s', rStart: '0deg', rEnd: '15deg', scale: '1.0', alpha: '0.65' } },
+        { shape: 'S', color: 'rgba(155,95,255,0.95)', vars: { x: '32vw', xEnd: '36vw', dur: '26s', delay: '9s', rStart: '-3deg', rEnd: '10deg', scale: '1.25', alpha: '0.6' } },
+        { shape: 'O', color: 'rgba(150,80,240,0.95)', vars: { x: '46vw', xEnd: '44vw', dur: '34s', delay: '15s', rStart: '5deg', rEnd: '-8deg', scale: '0.85', alpha: '0.55' } },
+
+        // Foreground large pieces for depth effect (left and right)
+        { shape: 'I', color: 'rgba(162,89,255,0.9)', vars: { x: '-22vw', xEnd: '-18vw', dur: '36s', delay: '2s', rStart: '-2deg', rEnd: '6deg', scale: '2.2', alpha: '0.38' } },
+        { shape: 'T', color: 'rgba(132,88,255,0.9)', vars: { x: '22vw', xEnd: '18vw', dur: '42s', delay: '5s', rStart: '4deg', rEnd: '-4deg', scale: '3.0', alpha: '0.32' } },
+    ];
+
     return (
-        <Background />
+        <Background>
+            <Grid />
+            <Pieces>
+                {items.map((p, i) => {
+                const coords = SHAPES[p.shape] || SHAPES.O;
+                const maxX = Math.max(...coords.map(([x]) => x));
+                const maxY = Math.max(...coords.map(([, y]) => y));
+                const width = (maxX + 1) * size;
+                const height = (maxY + 1) * size;
+
+                return (
+                    <Piece
+                    key={i}
+                    style={{
+                        '--x': p.vars.x,
+                        '--xEnd': p.vars.xEnd,
+                        '--dur': p.vars.dur,
+                        '--delay': p.vars.delay,
+                        '--rStart': p.vars.rStart,
+                        '--rEnd': p.vars.rEnd,
+                        '--scale': p.vars.scale,
+                        '--alpha': p.vars.alpha,
+                        width: `${width}px`,
+                        height: `${height}px`,
+                    }}
+                    >
+                    {coords.map(([x, y], idx) => (
+                        <Tile
+                        key={idx}
+                        color={p.color}
+                        style={{ left: `${x * size}px`, top: `${y * size}px` }}
+                        />
+                    ))}
+                    </Piece>
+                );
+                })}
+            </Pieces>
+        </Background>
     );
 };
 

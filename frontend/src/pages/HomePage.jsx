@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { setUsername } from '../features/user/userSlice';
-import { Wrapper, StartButton, Input, LogoTitle } from './HomePage.styled';
+import { Wrapper, StartButton, Input, LogoTitle, Card, Subtitle, FormRow, HintText } from './HomePage.styled';
 import AnimatedBackground from '../components/AnimatedBackground';
 
 const HomePage = () => {
@@ -22,16 +22,31 @@ const HomePage = () => {
     return (
         <Wrapper>
             <AnimatedBackground />
+
             <LogoTitle>Red-Tetris</LogoTitle>
 
-            <Input
-                type="text"
-                value={name}
-                placeholder="Enter your name"
-                onChange={(e) => setName(e.target.value)}
-            />
+            <Card>
+                <Subtitle>Fast, neon, multiplayer — drop in and play.</Subtitle>
 
-            <StartButton onClick={handleStart}>Start</StartButton>
+                <FormRow>
+                    <Input
+                        type="text"
+                        value={name}
+                        placeholder="Enter your name"
+                        aria-label="Enter your name"
+                        onChange={(e) => setName(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleStart();
+                        }}
+                    />
+
+                    <StartButton onClick={handleStart} disabled={!name.trim()}>
+                        Start
+                    </StartButton>
+                </FormRow>
+
+                <HintText>Press Enter to start</HintText>
+            </Card>
         </Wrapper>
     );
 };
