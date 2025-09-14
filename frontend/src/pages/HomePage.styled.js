@@ -3,13 +3,14 @@ import styled, { keyframes } from 'styled-components';
 export const Wrapper = styled.div`
     height: 100vh;
     width: 100vw;
-    background-color: #0e0e0e;
+    background-color: transparent;
     color: #f0f0f0;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     position: relative;
+    z-index: 1; /* sit above fixed background */
     overflow: hidden;
 `;
 

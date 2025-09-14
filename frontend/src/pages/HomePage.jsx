@@ -3,7 +3,6 @@ import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { setUsername } from '../features/user/userSlice';
 import { Wrapper, StartButton, Input, LogoTitle, Card, Subtitle, FormRow, HintText } from './HomePage.styled';
-import AnimatedBackground from '../components/AnimatedBackground';
 
 const HomePage = () => {
     const navigate = useNavigate();
@@ -21,7 +20,6 @@ const HomePage = () => {
 
     return (
         <Wrapper>
-            <AnimatedBackground />
 
             <LogoTitle>Red-Tetris</LogoTitle>
 
