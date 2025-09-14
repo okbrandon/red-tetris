@@ -13,18 +13,16 @@ const Board = styled.div`
 `;
 
 const Cell = styled.div`
-    width: ${({ size }) => size}px;
-    height: ${({ size }) => size}px;
+    width: ${({ $size }) => $size}px;
+    height: ${({ $size }) => $size}px;
     box-sizing: border-box;
     position: relative;
-    background: ${({ filled, color }) =>
-        filled
-        ? `linear-gradient(145deg, ${color} 0%, rgba(255,255,255,0.9) 140%)`
-        : 'rgba(20,20,25,0.35)'};
-    border: ${({ showGrid }) => (showGrid ? '1px solid rgba(199,168,255,0.08)' : '1px solid transparent')};
-    border-radius: ${({ filled }) => (filled ? 3 : 0)}px;
-    box-shadow: ${({ filled, color }) =>
-        filled ? `0 0 10px ${color.replace('1)', '0.35)')}` : 'none'};
+    background: ${({ $filled, $color }) =>
+        $filled ? `linear-gradient(145deg, ${$color} 0%, rgba(255,255,255,0.9) 140%)` : 'rgba(20,20,25,0.35)'};
+    border: ${({ $showGrid }) => ($showGrid ? '1px solid rgba(199,168,255,0.08)' : '1px solid transparent')};
+    border-radius: ${({ $filled }) => ($filled ? 3 : 0)}px;
+    box-shadow: ${({ $filled, $color }) =>
+        $filled ? `0 0 10px ${$color.replace('1)', '0.35)')}` : 'none'};
 
     &::after {
         content: '';
@@ -32,8 +30,8 @@ const Cell = styled.div`
         inset: 0;
         border-radius: inherit;
         pointer-events: none;
-        background: ${({ filled }) =>
-        filled
+        background: ${({ $filled }) =>
+        $filled
             ? 'radial-gradient(120% 80% at 25% 20%, rgba(255,255,255,0.35), rgba(255,255,255,0) 55%)'
             : 'none'};
     }
@@ -50,15 +48,31 @@ const defaultColors = {
 };
 
 const TetrisGrid = ({ rows = 20, cols = 10, cellSize = 24, matrix, showGrid = true, colors = defaultColors }) => {
-    const data = matrix && matrix.length ? matrix : Array.from({ length: rows }, () => Array(cols).fill(0));
+  const data = matrix && matrix.length ? matrix : Array.from({ length: rows }, () => Array(cols).fill(0));
 
-    return (
-        <Board style={{ gridTemplateColumns: `repeat(${cols}, ${cellSize}px)`, gridTemplateRows: `repeat(${rows}, ${cellSize}px)` }}>
+  return (
+        <Board
+            role="grid"
+            aria-rowcount={rows}
+            aria-colcount={cols}
+            style={{ gridTemplateColumns: `repeat(${cols}, ${cellSize}px)`, gridTemplateRows: `repeat(${rows}, ${cellSize}px)` }}
+        >
             {data.map((r, y) =>
                 r.map((v, x) => {
-                    const filled = v > 0;
+                    const isFilled = v > 0;
                     const color = colors[v] || 'rgba(162,89,255,1)';
-                    return <Cell key={`${y}-${x}`} size={cellSize} filled={filled} color={color} showGrid={showGrid} />;
+                    return (
+                        <Cell
+                            key={`${y}-${x}`}
+                            role="gridcell"
+                            data-testid="cell"
+                            data-filled={isFilled ? 'true' : 'false'}
+                            $size={cellSize}
+                            $filled={isFilled}
+                            $color={color}
+                            $showGrid={showGrid}
+                        />
+                    );
                 })
             )}
         </Board>
@@ -66,7 +80,7 @@ const TetrisGrid = ({ rows = 20, cols = 10, cellSize = 24, matrix, showGrid = tr
 };
 TetrisGrid.propTypes = {
     rows: PropTypes.number,
-    cols: PropTypes.number.isRequired,
+    cols: PropTypes.number,
     cellSize: PropTypes.number,
     matrix: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)),
     showGrid: PropTypes.bool,
