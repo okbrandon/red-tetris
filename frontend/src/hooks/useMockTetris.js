@@ -66,6 +66,58 @@ export function useMockTetris({ rows = 20, cols = 10, speedMs = 650 } = {}) {
     const posRef = useRef({ x: 0, y: 0 });
     const rowsCols = useMemo(() => ({ rows, cols }), [rows, cols]);
 
+    const redraw = () => {
+        const piece = pieceRef.current;
+        if (piece) setMatrix(mergePiece(landedGrid, piece, posRef.current));
+        else setMatrix(landedGrid);
+    };
+
+    const attemptMove = (dx, dy) => {
+        const piece = pieceRef.current; if (!piece) return false;
+        const pos = posRef.current; const grid = landedGrid;
+        const nextPos = { x: pos.x + dx, y: pos.y + dy };
+        if (canPlace(grid, piece, nextPos)) {
+            posRef.current = nextPos;
+            redraw();
+            return true;
+        }
+        return false;
+    };
+
+    const rotateBlocksCW = (blocks) => {
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        for (const [x, y] of blocks) { if (x < minX) minX = x; if (y < minY) minY = y; if (x > maxX) maxX = x; if (y > maxY) maxY = y; }
+        const width = maxX - minX + 1;
+        const norm = blocks.map(([x, y]) => [x - minX, y - minY]);
+        return norm.map(([x, y]) => [y, (width - 1) - x]);
+    };
+
+    const rotateBlocksCCW = (blocks) => {
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        for (const [x, y] of blocks) { if (x < minX) minX = x; if (y < minY) minY = y; if (x > maxX) maxX = x; if (y > maxY) maxY = y; }
+        const height = maxY - minY + 1;
+        const norm = blocks.map(([x, y]) => [x - minX, y - minY]);
+        return norm.map(([x, y]) => [(height - 1) - y, x]);
+    };
+
+    const attemptRotate = (dir = 'cw') => {
+        const piece = pieceRef.current; if (!piece) return false;
+        const grid = landedGrid; const pos = posRef.current;
+        const rotatedBlocks = dir === 'cw' ? rotateBlocksCW(piece.blocks) : rotateBlocksCCW(piece.blocks);
+        const candidate = { ...piece, blocks: rotatedBlocks };
+        const kicks = [[0,0],[1,0],[-1,0],[2,0],[-2,0],[0,-1]];
+        for (const [kx, ky] of kicks) {
+            const testPos = { x: pos.x + kx, y: pos.y + ky };
+            if (canPlace(grid, candidate, testPos)) {
+                pieceRef.current = candidate;
+                posRef.current = testPos;
+                redraw();
+                return true;
+            }
+        }
+        return false;
+    };
+
     const spawnPiece = () => {
         const queue = [...nextQueue];
         const piece = queue.shift() || randomPiece();
@@ -112,11 +164,7 @@ export function useMockTetris({ rows = 20, cols = 10, speedMs = 650 } = {}) {
     useEffect(() => { spawnPiece(); }, []);
 
     useEffect(() => {
-        if (pieceRef.current) {
-            setMatrix(mergePiece(landedGrid, pieceRef.current, posRef.current));
-        } else {
-            setMatrix(landedGrid);
-        }
+        redraw();
         const id = setInterval(() => {
             step();
         }, speedMs);
@@ -127,6 +175,25 @@ export function useMockTetris({ rows = 20, cols = 10, speedMs = 650 } = {}) {
         matrix,
         score,
         nextPieces: nextQueue.slice(0, 3),
+        moveLeft: () => attemptMove(-1, 0),
+        moveRight: () => attemptMove(1, 0),
+        rotateCW: () => attemptRotate('cw'),
+        rotateCCW: () => attemptRotate('ccw'),
+        hardDrop: () => {
+            const piece = pieceRef.current; if (!piece) return false;
+            const x = posRef.current.x;
+            let y = posRef.current.y;
+            while (canPlace(landedGrid, piece, { x, y: y + 1 })) y += 1;
+            posRef.current = { x, y };
+            const locked = mergePiece(landedGrid, piece, posRef.current);
+            const { grid: clearedGrid, cleared } = clearLines(locked);
+            if (cleared > 0) setScore((s) => s + cleared * 100);
+            setLandedGrid(clearedGrid);
+            pieceRef.current = null;
+            posRef.current = { x: 0, y: 0 };
+            spawnPiece();
+            return true;
+        },
     };
 }
 

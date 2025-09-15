@@ -25,7 +25,21 @@ const GamePage = () => {
         return () => window.removeEventListener('resize', onResize);
     }, []);
 
-    const { matrix, score, nextPieces } = useMockTetris({ rows: 20, cols: 10, speedMs: 650 });
+    const { matrix, score, nextPieces, moveLeft, moveRight, rotateCW, rotateCCW, hardDrop } = useMockTetris({ rows: 20, cols: 10, speedMs: 650 });
+
+    useEffect(() => {
+        const onKeyDown = (e) => {
+            const tag = e.target?.tagName?.toLowerCase();
+            if (tag === 'input' || tag === 'textarea' || e.target?.isContentEditable) return;
+            if (e.code === 'ArrowLeft') { e.preventDefault(); moveLeft(); }
+            else if (e.code === 'ArrowRight') { e.preventDefault(); moveRight(); }
+            else if (e.code === 'ArrowUp') { e.preventDefault(); rotateCW(); }
+            else if (e.code === 'ArrowDown') { e.preventDefault(); rotateCCW(); }
+            else if (e.code === 'Space') { e.preventDefault(); hardDrop(); }
+        };
+        window.addEventListener('keydown', onKeyDown);
+        return () => window.removeEventListener('keydown', onKeyDown);
+    }, [moveLeft, moveRight, rotateCW, rotateCCW, hardDrop]);
 
     return (
         <Wrapper>
