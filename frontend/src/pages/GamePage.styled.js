@@ -28,6 +28,10 @@ export const NextBox = styled.div`
     border: 1px solid rgba(255,255,255,0.08);
     background: rgba(15,15,20,0.45);
     backdrop-filter: blur(8px);
+    display: grid;
+    place-items: center;
+    padding: 4px;
+    box-sizing: border-box;
 `;
 
 export const ScoreBox = styled.div`
