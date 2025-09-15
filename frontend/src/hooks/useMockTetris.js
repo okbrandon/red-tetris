@@ -24,7 +24,7 @@ const getPieceWidth = (blocks) => {
 
 const randomPiece = () => {
     const idx = Math.floor(Math.random() * PIECES.length);
-    return { ...PIECES[idx], blocks: PIECES[idx].blocks.map(([x,y]) => [x,y]) };
+    return { ...PIECES[idx], blocks: PIECES[idx].blocks.map(([x,y]) => [x,y]), orientation: 0 };
 };
 
 const canPlace = (grid, piece, pos) => {
@@ -61,15 +61,21 @@ export function useMockTetris({ rows = 20, cols = 10, speedMs = 650 } = {}) {
     const [matrix, setMatrix] = useState(() => createEmptyGrid(rows, cols));
     const [score, setScore] = useState(0);
     const [nextQueue, setNextQueue] = useState(() => Array.from({ length: 5 }, randomPiece));
+    const [dropAnimMs, setDropAnimMs] = useState(0);
+    const [justSpawned, setJustSpawned] = useState(false);
+    const [clearingRows, setClearingRows] = useState([]);
+    const [clearAnimMs] = useState(220);
 
     const pieceRef = useRef(null);
     const posRef = useRef({ x: 0, y: 0 });
+    const droppingRef = useRef(false);
+    const clearingRef = useRef(false);
     const rowsCols = useMemo(() => ({ rows, cols }), [rows, cols]);
 
     const redraw = () => {
-        const piece = pieceRef.current;
-        if (piece) setMatrix(mergePiece(landedGrid, piece, posRef.current));
-        else setMatrix(landedGrid);
+        // Keep only landed cells in matrix; active piece is rendered as overlay.
+        // Force re-render even when landedGrid reference is unchanged.
+        setMatrix(landedGrid.slice());
     };
 
     const attemptMove = (dx, dy) => {
@@ -84,30 +90,45 @@ export function useMockTetris({ rows = 20, cols = 10, speedMs = 650 } = {}) {
         return false;
     };
 
-    const rotateBlocksCW = (blocks) => {
-        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-        for (const [x, y] of blocks) { if (x < minX) minX = x; if (y < minY) minY = y; if (x > maxX) maxX = x; if (y > maxY) maxY = y; }
-        const width = maxX - minX + 1;
-        const norm = blocks.map(([x, y]) => [x - minX, y - minY]);
-        return norm.map(([x, y]) => [y, (width - 1) - x]);
+    const rotateBlocksCW = (blocks) => blocks.map(([x, y]) => [y, 3 - x]);
+    const rotateBlocksCCW = (blocks) => blocks.map(([x, y]) => [3 - y, x]);
+
+    // SRS kick tables for JLSTZ and I pieces
+    const getJLSTZKicks = (from, to) => {
+        if (from === 0 && to === 1) return [[0,0], [-1,0], [-1,1], [0,-2], [-1,-2]];
+        if (from === 1 && to === 2) return [[0,0], [1,0], [1,-1], [0,2], [1,2]];
+        if (from === 2 && to === 3) return [[0,0], [1,0], [1,1], [0,-2], [1,-2]];
+        if (from === 3 && to === 0) return [[0,0], [-1,0], [-1,-1], [0,2], [-1,2]];
+        if (from === 0 && to === 3) return [[0,0], [1,0], [1,1], [0,-2], [1,-2]];
+        if (from === 3 && to === 2) return [[0,0], [1,0], [1,-1], [0,2], [1,2]];
+        if (from === 2 && to === 1) return [[0,0], [-1,0], [-1,1], [0,-2], [-1,-2]];
+        if (from === 1 && to === 0) return [[0,0], [-1,0], [-1,-1], [0,2], [-1,2]];
+        return [[0,0]];
     };
 
-    const rotateBlocksCCW = (blocks) => {
-        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-        for (const [x, y] of blocks) { if (x < minX) minX = x; if (y < minY) minY = y; if (x > maxX) maxX = x; if (y > maxY) maxY = y; }
-        const height = maxY - minY + 1;
-        const norm = blocks.map(([x, y]) => [x - minX, y - minY]);
-        return norm.map(([x, y]) => [(height - 1) - y, x]);
+    const getIKicks = (from, to) => {
+        if (from === 0 && to === 1) return [[0,0], [-2,0], [1,0], [-2,-1], [1,2]];
+        if (from === 1 && to === 2) return [[0,0], [-1,0], [2,0], [-1,2], [2,-1]];
+        if (from === 2 && to === 3) return [[0,0], [2,0], [-1,0], [2,1], [-1,-2]];
+        if (from === 3 && to === 0) return [[0,0], [1,0], [-2,0], [1,-2], [-2,1]];
+        if (from === 0 && to === 3) return [[0,0], [-1,0], [2,0], [-1,2], [2,-1]];
+        if (from === 3 && to === 2) return [[0,0], [2,0], [-1,0], [2,1], [-1,-2]];
+        if (from === 2 && to === 1) return [[0,0], [1,0], [-2,0], [1,-2], [-2,1]];
+        if (from === 1 && to === 0) return [[0,0], [-2,0], [1,0], [-2,-1], [1,2]];
+        return [[0,0]];
     };
 
     const attemptRotate = (dir = 'cw') => {
         const piece = pieceRef.current; if (!piece) return false;
+        if (piece.id === 5) return true; // O piece: rotation does not change shape
         const grid = landedGrid; const pos = posRef.current;
+        const from = piece.orientation || 0;
+        const to = dir === 'cw' ? (from + 1) % 4 : (from + 3) % 4;
         const rotatedBlocks = dir === 'cw' ? rotateBlocksCW(piece.blocks) : rotateBlocksCCW(piece.blocks);
-        const candidate = { ...piece, blocks: rotatedBlocks };
-        const kicks = [[0,0],[1,0],[-1,0],[2,0],[-2,0],[0,-1]];
-        for (const [kx, ky] of kicks) {
-            const testPos = { x: pos.x + kx, y: pos.y + ky };
+        const candidate = { ...piece, blocks: rotatedBlocks, orientation: to };
+        const kicks = (piece.id === 1 ? getIKicks : getJLSTZKicks)(from, to);
+        for (const [dx, dy] of kicks) {
+            const testPos = { x: pos.x + dx, y: pos.y + dy };
             if (canPlace(grid, candidate, testPos)) {
                 pieceRef.current = candidate;
                 posRef.current = testPos;
@@ -129,6 +150,8 @@ export function useMockTetris({ rows = 20, cols = 10, speedMs = 650 } = {}) {
         const startY = 0;
         pieceRef.current = piece;
         posRef.current = { x: startX, y: startY };
+        // Disable animation for the initial appearance of a new piece
+        setJustSpawned(true);
 
         setLandedGrid((g) => {
             if (!canPlace(g, piece, posRef.current)) {
@@ -137,9 +160,16 @@ export function useMockTetris({ rows = 20, cols = 10, speedMs = 650 } = {}) {
             }
             return g;
         });
+        // After the new piece has appeared, re-enable animation on next frame
+        if (typeof window !== 'undefined' && window.requestAnimationFrame) {
+            requestAnimationFrame(() => setJustSpawned(false));
+        } else {
+            setTimeout(() => setJustSpawned(false), 0);
+        }
     };
 
     const step = () => {
+        if (droppingRef.current || clearingRef.current) return;
         const piece = pieceRef.current;
         if (!piece) { spawnPiece(); return; }
 
@@ -149,15 +179,35 @@ export function useMockTetris({ rows = 20, cols = 10, speedMs = 650 } = {}) {
 
         if (canPlace(grid, piece, nextPos)) {
             posRef.current = nextPos;
-            setMatrix(mergePiece(grid, piece, nextPos));
+            redraw();
         } else {
             const locked = mergePiece(grid, piece, pos);
-            const { grid: clearedGrid, cleared } = clearLines(locked);
-            if (cleared > 0) setScore((s) => s + cleared * 100);
-            setLandedGrid(clearedGrid);
+            // identify full rows
+            const full = [];
+            for (let y = 0; y < locked.length; y++) {
+                if (locked[y].every((v) => v !== 0)) full.push(y);
+            }
+
+            setLandedGrid(locked);
             pieceRef.current = null;
             posRef.current = { x: 0, y: 0 };
-            spawnPiece();
+
+            if (full.length > 0) {
+                setClearingRows(full);
+                clearingRef.current = true;
+                setTimeout(() => {
+                    const remaining = locked.filter((_, y) => !full.includes(y));
+                    const extra = Array.from({ length: full.length }, () => Array(locked[0].length).fill(0));
+                    const finalGrid = [...extra, ...remaining];
+                    setLandedGrid(finalGrid);
+                    setClearingRows([]);
+                    clearingRef.current = false;
+                    setScore((s) => s + full.length * 100);
+                    spawnPiece();
+                }, clearAnimMs);
+            } else {
+                spawnPiece();
+            }
         }
     };
 
@@ -179,19 +229,84 @@ export function useMockTetris({ rows = 20, cols = 10, speedMs = 650 } = {}) {
         moveRight: () => attemptMove(1, 0),
         rotateCW: () => attemptRotate('cw'),
         rotateCCW: () => attemptRotate('ccw'),
+        currentPiece: pieceRef.current,
+        position: posRef.current,
+        animateMs: justSpawned ? 0 : (dropAnimMs || 180),
+        clearingRows,
+        clearAnimMs,
         hardDrop: () => {
             const piece = pieceRef.current; if (!piece) return false;
+            if (droppingRef.current) return false;
             const x = posRef.current.x;
             let y = posRef.current.y;
             while (canPlace(landedGrid, piece, { x, y: y + 1 })) y += 1;
+            const distance = y - posRef.current.y;
+
+            if (distance <= 0) {
+                const locked = mergePiece(landedGrid, piece, posRef.current);
+                // determine full rows and animate
+                const full = [];
+                for (let yy = 0; yy < locked.length; yy++) {
+                    if (locked[yy].every((v) => v !== 0)) full.push(yy);
+                }
+                setLandedGrid(locked);
+                pieceRef.current = null;
+                posRef.current = { x: 0, y: 0 };
+                setDropAnimMs(0);
+                if (full.length > 0) {
+                    setClearingRows(full);
+                    clearingRef.current = true;
+                    setTimeout(() => {
+                        const remaining = locked.filter((_, yy) => !full.includes(yy));
+                        const extra = Array.from({ length: full.length }, () => Array(locked[0].length).fill(0));
+                        const finalGrid = [...extra, ...remaining];
+                        setLandedGrid(finalGrid);
+                        setClearingRows([]);
+                        clearingRef.current = false;
+                        setScore((s) => s + full.length * 100);
+                        spawnPiece();
+                    }, clearAnimMs);
+                } else {
+                    spawnPiece();
+                }
+                return true;
+            }
+
+            const duration = Math.min(600, 60 + distance * 22);
+            droppingRef.current = true;
+            setDropAnimMs(duration);
             posRef.current = { x, y };
-            const locked = mergePiece(landedGrid, piece, posRef.current);
-            const { grid: clearedGrid, cleared } = clearLines(locked);
-            if (cleared > 0) setScore((s) => s + cleared * 100);
-            setLandedGrid(clearedGrid);
-            pieceRef.current = null;
-            posRef.current = { x: 0, y: 0 };
-            spawnPiece();
+            redraw();
+            setTimeout(() => {
+                if (!pieceRef.current || droppingRef.current === false) return;
+                const locked = mergePiece(landedGrid, piece, posRef.current);
+                // determine full rows and animate
+                const full = [];
+                for (let yy = 0; yy < locked.length; yy++) {
+                    if (locked[yy].every((v) => v !== 0)) full.push(yy);
+                }
+                setLandedGrid(locked);
+                pieceRef.current = null;
+                posRef.current = { x: 0, y: 0 };
+                setDropAnimMs(0);
+                droppingRef.current = false;
+                if (full.length > 0) {
+                    setClearingRows(full);
+                    clearingRef.current = true;
+                    setTimeout(() => {
+                        const remaining = locked.filter((_, yy) => !full.includes(yy));
+                        const extra = Array.from({ length: full.length }, () => Array(locked[0].length).fill(0));
+                        const finalGrid = [...extra, ...remaining];
+                        setLandedGrid(finalGrid);
+                        setClearingRows([]);
+                        clearingRef.current = false;
+                        setScore((s) => s + full.length * 100);
+                        spawnPiece();
+                    }, clearAnimMs);
+                } else {
+                    spawnPiece();
+                }
+            }, duration);
             return true;
         },
     };

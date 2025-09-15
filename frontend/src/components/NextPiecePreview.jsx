@@ -22,13 +22,13 @@ const Cell = styled.div`
 `;
 
 const defaultColors = {
-    1: 'rgba(162,89,255,1)',   // I
-    2: 'rgba(140,70,230,1)',   // L
-    3: 'rgba(173,115,255,1)',  // J
-    4: 'rgba(186,120,255,1)',  // Z
-    5: 'rgba(150,80,240,1)',   // O
-    6: 'rgba(132,88,255,1)',   // T
-    7: 'rgba(155,95,255,1)',   // S
+    1: 'rgba(0,229,255,1)',    // I - cyan
+    2: 'rgba(255,149,0,1)',    // L - orange
+    3: 'rgba(0,122,255,1)',    // J - blue
+    4: 'rgba(255,59,48,1)',    // Z - red
+    5: 'rgba(255,214,10,1)',   // O - yellow
+    6: 'rgba(191,90,242,1)',   // T - purple
+    7: 'rgba(52,199,89,1)',    // S - green
 };
 
 const buildPreviewMatrix = (piece) => {

@@ -25,7 +25,7 @@ const GamePage = () => {
         return () => window.removeEventListener('resize', onResize);
     }, []);
 
-    const { matrix, score, nextPieces, moveLeft, moveRight, rotateCW, rotateCCW, hardDrop } = useMockTetris({ rows: 20, cols: 10, speedMs: 650 });
+    const { matrix, score, nextPieces, moveLeft, moveRight, rotateCW, rotateCCW, hardDrop, currentPiece, position, animateMs, clearingRows, clearAnimMs } = useMockTetris({ rows: 20, cols: 10, speedMs: 650 });
 
     useEffect(() => {
         const onKeyDown = (e) => {
@@ -47,7 +47,18 @@ const GamePage = () => {
             <GameCard>
                 <Subtitle>ready to play</Subtitle>
                 <Row>
-                    <TetrisGrid rows={20} cols={10} cellSize={cellSize} showGrid={true} matrix={matrix} />
+                    <TetrisGrid
+                        rows={20}
+                        cols={10}
+                        cellSize={cellSize}
+                        showGrid={true}
+                        matrix={matrix}
+                        activePiece={currentPiece}
+                        activePos={position}
+                        animateMs={animateMs}
+                        clearingRows={clearingRows}
+                        clearAnimMs={clearAnimMs}
+                    />
                     {/* Placeholder for next/score panel */}
                     <SidePanel>
                         <PanelTitle>Next</PanelTitle>
