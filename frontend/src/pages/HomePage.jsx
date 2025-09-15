@@ -12,7 +12,7 @@ const HomePage = () => {
     const handleStart = () => {
         if (name.trim()) {
             dispatch(setUsername(name));
-            navigate('/lobby');
+            navigate('/menu');
         } else {
             alert('Please enter a name');
         }
