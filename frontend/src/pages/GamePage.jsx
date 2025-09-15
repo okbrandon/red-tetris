@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import TetrisGrid from '../components/TetrisGrid';
 import { Wrapper, Subtitle, LogoTitle, GameCard } from './HomePage.styled';
 import { Row, SidePanel, PanelTitle, NextBox, ScoreBox } from './GamePage.styled';
+import { useMockTetris } from '../hooks/useMockTetris'; // to remove after backend integration
+import NextPiecePreview from '../components/NextPiecePreview';
 
 const GamePage = () => {
     const computeCellSize = () => {
@@ -9,11 +11,11 @@ const GamePage = () => {
         const w = window.innerWidth;
         const h = window.innerHeight;
         // Conservative sizing to avoid overflow on typical viewports
-        const maxCellByWidth = (w * 0.6) / 10;  // ~60% of viewport width
-        const maxCellByHeight = (h * 0.75) / 20; // ~75% of viewport height
+        const maxCellByWidth = (w * 0.55) / 10;  // ~55% of viewport width
+        const maxCellByHeight = (h * 0.65) / 20; // ~65% of viewport height
         const raw = Math.floor(Math.min(maxCellByWidth, maxCellByHeight));
         // Reasonable cap to prevent stretching on large screens
-        return Math.max(24, Math.min(raw, 48));
+        return Math.max(22, Math.min(raw, 44));
     };
 
     const [cellSize, setCellSize] = useState(computeCellSize());
@@ -23,19 +25,48 @@ const GamePage = () => {
         return () => window.removeEventListener('resize', onResize);
     }, []);
 
+    const { matrix, score, nextPieces, moveLeft, moveRight, rotateCW, rotateCCW, hardDrop, currentPiece, position, animateMs, clearingRows, clearAnimMs } = useMockTetris({ rows: 20, cols: 10, speedMs: 650 });
+
+    useEffect(() => {
+        const onKeyDown = (e) => {
+            const tag = e.target?.tagName?.toLowerCase();
+            if (tag === 'input' || tag === 'textarea' || e.target?.isContentEditable) return;
+            if (e.code === 'ArrowLeft') { e.preventDefault(); moveLeft(); }
+            else if (e.code === 'ArrowRight') { e.preventDefault(); moveRight(); }
+            else if (e.code === 'ArrowUp') { e.preventDefault(); rotateCW(); }
+            else if (e.code === 'ArrowDown') { e.preventDefault(); rotateCCW(); }
+            else if (e.code === 'Space') { e.preventDefault(); hardDrop(); }
+        };
+        window.addEventListener('keydown', onKeyDown);
+        return () => window.removeEventListener('keydown', onKeyDown);
+    }, [moveLeft, moveRight, rotateCW, rotateCCW, hardDrop]);
+
     return (
         <Wrapper>
             <LogoTitle>Game</LogoTitle>
             <GameCard>
                 <Subtitle>ready to play</Subtitle>
                 <Row>
-                    <TetrisGrid rows={20} cols={10} cellSize={cellSize} showGrid={true} />
+                    <TetrisGrid
+                        rows={20}
+                        cols={10}
+                        cellSize={cellSize}
+                        showGrid={true}
+                        matrix={matrix}
+                        activePiece={currentPiece}
+                        activePos={position}
+                        animateMs={animateMs}
+                        clearingRows={clearingRows}
+                        clearAnimMs={clearAnimMs}
+                    />
                     {/* Placeholder for next/score panel */}
                     <SidePanel>
                         <PanelTitle>Next</PanelTitle>
-                        <NextBox />
+                        <NextBox>
+                            <NextPiecePreview piece={nextPieces?.[0]} cellSize={Math.max(12, Math.floor(cellSize * 0.6))} />
+                        </NextBox>
                         <PanelTitle style={{ marginTop: '0.5rem' }}>Score</PanelTitle>
-                        <ScoreBox>0</ScoreBox>
+                        <ScoreBox>{score}</ScoreBox>
                     </SidePanel>
                 </Row>
             </GameCard>

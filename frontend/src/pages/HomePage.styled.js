@@ -158,9 +158,9 @@ export const HintText = styled.div`
 
 // Wider card variant for game layout
 export const GameCard = styled(Card)`
-    width: min(96vw, 1200px);
+    width: min(94vw, 1000px);
 
     @media (min-width: 1400px) {
-        width: 1300px;
+        width: 1100px;
     }
 `;
