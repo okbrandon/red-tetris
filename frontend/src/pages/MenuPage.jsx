@@ -1,11 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import { Wrapper, LogoTitle, Card, Subtitle, StartButton } from './HomePage.styled';
+import BackButton from '../components/BackButton';
 
 const MenuPage = () => {
     const navigate = useNavigate();
 
     return (
         <Wrapper>
+            <BackButton />
             <LogoTitle>Menu</LogoTitle>
             <Card>
                 <Subtitle>Choose how you want to play</Subtitle>

@@ -1,6 +1,7 @@
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Wrapper, Card, Subtitle, StartButton, LogoTitle } from './HomePage.styled';
+import BackButton from '../components/BackButton';
 import { PlayerList, Player } from './LobbyPage.styled';
 
 const LobbyPage = () => {
@@ -16,6 +17,7 @@ const LobbyPage = () => {
 
     return (
         <Wrapper>
+            <BackButton />
 
             <LogoTitle>Lobby</LogoTitle>
 

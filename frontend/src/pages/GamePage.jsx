@@ -4,6 +4,7 @@ import { Wrapper, Subtitle, LogoTitle, GameCard } from './HomePage.styled';
 import { Row, SidePanel, PanelTitle, NextBox, ScoreBox } from './GamePage.styled';
 import { useMockTetris } from '../hooks/useMockTetris'; // to remove after backend integration
 import NextPiecePreview from '../components/NextPiecePreview';
+import BackButton from '../components/BackButton';
 
 const GamePage = () => {
     const computeCellSize = () => {
@@ -43,6 +44,7 @@ const GamePage = () => {
 
     return (
         <Wrapper>
+            <BackButton />
             <LogoTitle>Game</LogoTitle>
             <GameCard>
                 <Subtitle>ready to play</Subtitle>
