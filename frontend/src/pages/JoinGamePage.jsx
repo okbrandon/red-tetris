@@ -1,17 +1,27 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { Wrapper, Card, Subtitle, StartButton, LogoTitle, Input } from './HomePage.styled';
 import BackButton from '../components/BackButton';
 import { JoinForm, JoinHint } from './JoinGamePage.styled';
+import { setLobbySettings, resetLobby } from '../features/lobby/lobbySlice';
 
 const JoinGamePage = () => {
-    const [roomCode, setRoomCode] = useState('');
+    const dispatch = useDispatch();
+    const lobbySettings = useSelector((state) => state.lobby);
+    const [roomCode, setRoomCode] = useState(() => lobbySettings.roomCode || '');
     const navigate = useNavigate();
 
     const handleJoin = () => {
         if (!roomCode.trim()) return;
         // TODO: replace with real join flow once backend is ready
-        navigate('/lobby', { state: { roomCode: roomCode.trim() } });
+        const trimmed = roomCode.trim();
+        dispatch(resetLobby());
+        dispatch(setLobbySettings({
+            host: false,
+            roomCode: trimmed,
+        }));
+        navigate('/lobby');
     };
 
     return (

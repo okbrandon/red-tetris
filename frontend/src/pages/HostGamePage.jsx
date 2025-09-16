@@ -1,13 +1,17 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { Wrapper, Card, Subtitle, StartButton, LogoTitle, Input } from './HomePage.styled';
 import BackButton from '../components/BackButton';
 import { SettingsPanel, SettingsHeading, SettingRow, SettingLabel, NumberInput, ToggleLabel, Checkbox, SettingsHint } from './HostGamePage.styled';
+import { setLobbySettings } from '../features/lobby/lobbySlice';
 
 const HostGamePage = () => {
-    const [roomName, setRoomName] = useState('');
-    const [maxPlayers, setMaxPlayers] = useState('4');
-    const [isPrivate, setIsPrivate] = useState(false);
+    const dispatch = useDispatch();
+    const lobbySettings = useSelector((state) => state.lobby);
+    const [roomName, setRoomName] = useState(() => lobbySettings.roomName || '');
+    const [maxPlayers, setMaxPlayers] = useState(() => String(lobbySettings.maxPlayers || 4));
+    const [isPrivate, setIsPrivate] = useState(() => Boolean(lobbySettings.isPrivate));
     const navigate = useNavigate();
 
     const handleHost = () => {
@@ -15,14 +19,15 @@ const HostGamePage = () => {
         const parsedPlayers = Number.parseInt(maxPlayers, 10);
         const players = Number.isNaN(parsedPlayers) ? 4 : Math.max(2, Math.min(10, parsedPlayers));
         setMaxPlayers(String(players));
-        const roomSettings = {
-            roomName: trimmed || undefined,
+        dispatch(setLobbySettings({
+            roomName: trimmed,
             host: true,
             maxPlayers: players,
             isPrivate,
-        };
+            roomCode: '',
+        }));
         // TODO: replace with real hosting flow once backend is ready
-        navigate('/lobby', { state: roomSettings });
+        navigate('/lobby');
     };
 
     return (
