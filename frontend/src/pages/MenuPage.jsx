@@ -15,10 +15,10 @@ const MenuPage = () => {
                     <StartButton onClick={() => navigate('/game')} aria-label="Play solo">
                         Play
                     </StartButton>
-                    <StartButton onClick={() => navigate('/lobby')} aria-label="Join an existing room">
+                    <StartButton onClick={() => navigate('/join')} aria-label="Join an existing room">
                         Join Game
                     </StartButton>
-                    <StartButton onClick={() => navigate('/lobby')} aria-label="Host a new room">
+                    <StartButton onClick={() => navigate('/host')} aria-label="Host a new room">
                         Host Game
                     </StartButton>
                 </div>
