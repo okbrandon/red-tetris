@@ -4,6 +4,8 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import userReducer from './features/user/userSlice';
 import gameReducer from './features/game/gameSlice';
+import lobbyReducer from './features/lobby/lobbySlice';
+import notificationReducer from './features/notification/notificationSlice';
 
 export function renderWithProviders(
     ui,
@@ -12,7 +14,12 @@ export function renderWithProviders(
     const testStore =
         store ||
         configureStore({
-            reducer: { user: userReducer, game: gameReducer },
+            reducer: {
+                user: userReducer,
+                game: gameReducer,
+                lobby: lobbyReducer,
+                notification: notificationReducer,
+            },
             preloadedState,
         });
 

@@ -6,11 +6,13 @@ import GamePage from './pages/GamePage';
 import JoinGamePage from './pages/JoinGamePage';
 import HostGamePage from './pages/HostGamePage';
 import AnimatedBackground from './components/AnimatedBackground';
+import Notification from './components/Notification';
 
 function App() {
     return (
         <Router>
             <AnimatedBackground />
+            <Notification />
             <Routes>
                 <Route path='/' element={ <HomePage /> } />
                 <Route path='/menu' element={ <MenuPage /> } />

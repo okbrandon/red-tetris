@@ -1,12 +1,14 @@
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Wrapper, Card, Subtitle, StartButton, LogoTitle } from './HomePage.styled';
 import BackButton from '../components/BackButton';
 import { PlayerList, Player } from './LobbyPage.styled';
+import { showNotification } from '../features/notification/notificationSlice';
 
 const LobbyPage = () => {
     const username = useSelector((state) => state.user.username);
     const lobby = useSelector((state) => state.lobby);
+    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     // Mocked players list — replace with real-time data later
@@ -22,6 +24,7 @@ const LobbyPage = () => {
     const privacyLabel = lobby.isPrivate ? 'Private' : 'Public';
 
     const handleStartGame = () => {
+        dispatch(showNotification({ type: 'success', message: 'Starting game…' }));
         navigate('/game');
     };
 
