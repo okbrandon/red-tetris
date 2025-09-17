@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { hideNotification } from '../features/notification/notificationSlice';
@@ -8,6 +8,8 @@ const accentByType = {
     error: '#f87171',
     info: '#60a5fa',
 };
+
+const ANIMATION_MS = 280;
 
 const NotificationShell = styled.div`
     position: fixed;
@@ -27,6 +29,12 @@ const NotificationShell = styled.div`
     max-width: min(90vw, 360px);
     border-left: 4px solid ${({ $variant }) => accentByType[$variant] || accentByType.info};
     color: #f5f5ff;
+    transform: translateX(${({ $open }) => ($open ? '0' : '120%')});
+    opacity: ${({ $open }) => ($open ? 1 : 0)};
+    transition:
+        transform ${ANIMATION_MS}ms cubic-bezier(0.24, 0.82, 0.25, 1),
+        opacity ${ANIMATION_MS}ms ease;
+    will-change: transform, opacity;
 `;
 
 const Label = styled.span`
@@ -70,6 +78,8 @@ const DismissButton = styled.button`
 const Notification = () => {
     const dispatch = useDispatch();
     const { isVisible, message, type, duration, id } = useSelector((state) => state.notification);
+    const [shouldRender, setShouldRender] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
         if (!isVisible) return undefined;
@@ -79,7 +89,21 @@ const Notification = () => {
         return () => clearTimeout(timeout);
     }, [dispatch, duration, id, isVisible]);
 
-    if (!isVisible) {
+    useEffect(() => {
+        if (isVisible) {
+            setShouldRender(true);
+            const raf = requestAnimationFrame(() => setIsOpen(true));
+            return () => cancelAnimationFrame(raf);
+        }
+
+        if (!shouldRender) return undefined;
+
+        setIsOpen(false);
+        const timeout = setTimeout(() => setShouldRender(false), ANIMATION_MS);
+        return () => clearTimeout(timeout);
+    }, [isVisible, shouldRender]);
+
+    if (!shouldRender) {
         return null;
     }
 
@@ -87,7 +111,7 @@ const Notification = () => {
     const role = variant === 'error' ? 'alert' : 'status';
 
     return (
-        <NotificationShell role={role} aria-live='assertive' $variant={variant}>
+        <NotificationShell role={role} aria-live='assertive' $variant={variant} $open={isOpen}>
             <Content>
                 <Label $variant={variant}>{variant}</Label>
                 <Message>{message}</Message>
