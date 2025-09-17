@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { setUsername } from '../features/user/userSlice';
+import { showNotification } from '../features/notification/notificationSlice';
 import { Wrapper, StartButton, Input, LogoTitle, Card, Subtitle, FormRow, HintText } from './HomePage.styled';
 
 const HomePage = () => {
@@ -10,11 +11,14 @@ const HomePage = () => {
     const dispatch = useDispatch();
 
     const handleStart = () => {
-        if (name.trim()) {
-            dispatch(setUsername(name));
+        const trimmed = name.trim();
+
+        if (trimmed) {
+            dispatch(setUsername(trimmed));
+            dispatch(showNotification({ type: 'success', message: `Welcome ${trimmed}!` }));
             navigate('/menu');
         } else {
-            alert('Please enter a name');
+            dispatch(showNotification({ type: 'error', message: 'Please enter a name to continue.' }));
         }
     };
 

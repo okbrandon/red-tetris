@@ -5,6 +5,7 @@ import { Wrapper, Card, Subtitle, StartButton, LogoTitle, Input } from './HomePa
 import BackButton from '../components/BackButton';
 import { JoinForm, JoinHint } from './JoinGamePage.styled';
 import { setLobbySettings, resetLobby } from '../features/lobby/lobbySlice';
+import { showNotification } from '../features/notification/notificationSlice';
 
 const JoinGamePage = () => {
     const dispatch = useDispatch();
@@ -13,14 +14,18 @@ const JoinGamePage = () => {
     const navigate = useNavigate();
 
     const handleJoin = () => {
-        if (!roomCode.trim()) return;
-        // TODO: replace with real join flow once backend is ready
         const trimmed = roomCode.trim();
+        if (!trimmed) {
+            dispatch(showNotification({ type: 'error', message: 'Enter a room code to join a lobby.' }));
+            return;
+        }
+        // TODO: replace with real join flow once backend is ready
         dispatch(resetLobby());
         dispatch(setLobbySettings({
             host: false,
             roomCode: trimmed,
         }));
+        dispatch(showNotification({ type: 'success', message: `Joining lobby ${trimmed}…` }));
         navigate('/lobby');
     };
 
