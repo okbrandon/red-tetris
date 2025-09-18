@@ -4,6 +4,7 @@ import { Wrapper, Card, Subtitle, StartButton, LogoTitle } from './HomePage.styl
 import BackButton from '../components/BackButton';
 import { PlayerList, Player } from './LobbyPage.styled';
 import { showNotification } from '../features/notification/notificationSlice';
+import { setGameMode } from '../features/game/gameSlice';
 
 const LobbyPage = () => {
     const username = useSelector((state) => state.user.username);
@@ -24,6 +25,7 @@ const LobbyPage = () => {
     const privacyLabel = lobby.isPrivate ? 'Private' : 'Public';
 
     const handleStartGame = () => {
+        dispatch(setGameMode('multiplayer'));
         dispatch(showNotification({ type: 'success', message: 'Starting game…' }));
         navigate('/game');
     };

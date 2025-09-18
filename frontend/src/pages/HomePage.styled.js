@@ -11,7 +11,8 @@ export const Wrapper = styled.div`
     align-items: center;
     position: relative;
     z-index: 1; /* sit above fixed background */
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
 `;
 
 const glow = keyframes`
@@ -158,10 +159,10 @@ export const HintText = styled.div`
 
 // Wider card variant for game layout
 export const GameCard = styled(Card)`
-    width: min(94vw, 1000px);
+    width: min(96vw, 1180px);
 
     @media (min-width: 1400px) {
-        width: 1100px;
+        width: 1280px;
     }
 `;
 
