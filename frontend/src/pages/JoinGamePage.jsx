@@ -6,6 +6,7 @@ import BackButton from '../components/BackButton';
 import { JoinForm, JoinHint } from './JoinGamePage.styled';
 import { setLobbySettings, resetLobby } from '../features/lobby/lobbySlice';
 import { showNotification } from '../features/notification/notificationSlice';
+import { setGameMode } from '../features/game/gameSlice';
 
 const JoinGamePage = () => {
     const dispatch = useDispatch();
@@ -25,6 +26,7 @@ const JoinGamePage = () => {
             host: false,
             roomCode: trimmed,
         }));
+        dispatch(setGameMode('multiplayer'));
         dispatch(showNotification({ type: 'success', message: `Joining lobby ${trimmed}…` }));
         navigate('/lobby');
     };

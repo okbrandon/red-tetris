@@ -6,6 +6,7 @@ import BackButton from '../components/BackButton';
 import { SettingsPanel, SettingsHeading, SettingRow, SettingLabel, NumberInput, ToggleLabel, Checkbox, SettingsHint } from './HostGamePage.styled';
 import { setLobbySettings } from '../features/lobby/lobbySlice';
 import { showNotification } from '../features/notification/notificationSlice';
+import { setGameMode } from '../features/game/gameSlice';
 
 const HostGamePage = () => {
     const dispatch = useDispatch();
@@ -27,6 +28,7 @@ const HostGamePage = () => {
             isPrivate,
             roomCode: '',
         }));
+        dispatch(setGameMode('multiplayer'));
         dispatch(showNotification({ type: 'success', message: 'Lobby created! Share the code once it is ready.' }));
         // TODO: replace with real hosting flow once backend is ready
         navigate('/lobby');
