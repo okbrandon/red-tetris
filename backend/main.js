@@ -25,7 +25,20 @@ const httpServer = createServer((req, res) => {
  * Socket.IO server instance.
  * @type {Server}
  */
-const io = new Server(httpServer, {});
+const allowedOrigins = (process.env.SOCKET_ALLOWED_ORIGINS || '').split(',')
+	.map((origin) => origin.trim())
+	.filter(Boolean);
+
+const io = new Server(httpServer, {
+	cors: {
+		origin: allowedOrigins.length ? allowedOrigins : [
+			'http://localhost:5173',
+			'https://localhost:5173',
+		],
+		methods: ['GET', 'POST'],
+		credentials: true,
+	},
+});
 
 /**
  * Active game rooms stored by ID.
