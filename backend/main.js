@@ -181,12 +181,13 @@ io.on("connection", (socket) => {
 			try {
 				const room = createRoom(roomName);
 
-				room.playerJoin(client);
 				room.assignOwner(client);
+				room.playerJoin(client);
 
 				socket.join(roomName);
 				socket.emit(outgoingEvents.ROOM_CREATED, JSON.stringify({
-					roomName: roomName
+					roomName: roomName,
+					maxPlayers: room.maxPlayers
 				}));
 				room.broadcastRoom();
 			} catch (error) {
