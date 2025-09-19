@@ -62,14 +62,15 @@ const deleteRoom = (room) => {
 /**
  * Creates a new game room.
  * @param {string} id - Room ID.
+ * @param {boolean} soloJourney - Whether the game is in solo journey mode.
  * @returns {Game} - The created Game instance.
  * @throws {Error} - If the room already exists.
  */
-const createRoom = (id) => {
+const createRoom = (id, soloJourney) => {
 	if (rooms.has(id))
 		throw new Error('Game already exists');
 
-	const room = new Game(id, null);
+	const room = new Game(id, null, soloJourney);
 
 	rooms.set(id, room);
 	return room;
@@ -161,6 +162,7 @@ io.on("connection", (socket) => {
 	// Handle room joining
 	socket.on(incomingEvents.ROOM_JOIN, (data) => {
 		const roomName = data.roomName;
+		const soloJourney = data.soloJourney || false;
 
 		if (!roomName) {
 			socket.emit(outgoingEvents.ERROR, JSON.stringify({
@@ -179,7 +181,7 @@ io.on("connection", (socket) => {
 
 		if (!room) {
 			try {
-				const room = createRoom(roomName);
+				const room = createRoom(roomName, soloJourney);
 
 				room.assignOwner(client);
 				room.playerJoin(client);
@@ -187,6 +189,7 @@ io.on("connection", (socket) => {
 				socket.join(roomName);
 				socket.emit(outgoingEvents.ROOM_CREATED, JSON.stringify({
 					roomName: roomName,
+					soloJourney: soloJourney,
 					maxPlayers: room.maxPlayers
 				}));
 				room.broadcastRoom();

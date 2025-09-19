@@ -21,7 +21,7 @@ const CLIENT_UPDATE = 'client-update';
  *
  * @example
  * // Client-side example of emitting the ROOM_JOIN event
- * socket.emit('room-join', { roomName: 'amazingTestRoom' });
+ * socket.emit('room-join', { roomName: 'amazingTestRoom', soloJourney: true }); // soloJourney is optional
  */
 const ROOM_JOIN = 'room-join';
 
