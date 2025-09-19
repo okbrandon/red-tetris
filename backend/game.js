@@ -34,6 +34,8 @@ class Game {
 		this.soloJourney = false;
 		/** @type {NodeJS.Timeout|null} */
 		this.updateInterval = null;
+		/** @type {number} */
+		this.maxPlayers = gameSettings.MAX_PLAYERS_PER_ROOM;
 	}
 
 	/**
@@ -58,6 +60,8 @@ class Game {
 			throw new Error('Client already in a room');
 		if (this.status !== gameStatus.WAITING)
 			throw new Error('Game has already started');
+		if (this.clients.size >= this.maxPlayers)
+			throw new Error('Room is full');
 
 		client.room = this;
 		this.clients.add(client);
