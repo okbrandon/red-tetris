@@ -22,13 +22,10 @@ const MenuPage = () => {
                         }}
                         aria-label="Play solo"
                     >
-                        Play
+                        Solo Journey
                     </StartButton>
-                    <StartButton onClick={() => navigate('/join')} aria-label="Join an existing room">
-                        Join Game
-                    </StartButton>
-                    <StartButton onClick={() => navigate('/host')} aria-label="Host a new room">
-                        Host Game
+                    <StartButton onClick={() => navigate('/join')} aria-label="Join an existing room or create one">
+                        Multiplayer Journey
                     </StartButton>
                 </div>
             </Card>

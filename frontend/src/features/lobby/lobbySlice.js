@@ -3,9 +3,8 @@ import { createSlice } from '@reduxjs/toolkit';
 const createInitialState = () => ({
     host: false,
     roomName: '',
-    roomCode: '',
     maxPlayers: 4,
-    isPrivate: false,
+    serverSnapshot: null,
 });
 
 const lobbySlice = createSlice({
@@ -13,7 +12,7 @@ const lobbySlice = createSlice({
     initialState: createInitialState(),
     reducers: {
         setLobbySettings: (state, action) => {
-            const { host, roomName, roomCode, maxPlayers, isPrivate } = action.payload;
+            const { host, roomName } = action.payload;
 
             if (host !== undefined) {
                 state.host = Boolean(host);
@@ -22,22 +21,13 @@ const lobbySlice = createSlice({
             if (roomName !== undefined) {
                 state.roomName = roomName ?? '';
             }
-
-            if (roomCode !== undefined) {
-                state.roomCode = roomCode ?? '';
-            }
-
-            if (typeof maxPlayers === 'number' && Number.isFinite(maxPlayers)) {
-                state.maxPlayers = maxPlayers;
-            }
-
-            if (isPrivate !== undefined) {
-                state.isPrivate = Boolean(isPrivate);
-            }
+        },
+        setServerSnapshot: (state, action) => {
+            state.serverSnapshot = action.payload ?? null;
         },
         resetLobby: () => createInitialState(),
     },
 });
 
-export const { setLobbySettings, resetLobby } = lobbySlice.actions;
+export const { setLobbySettings, setServerSnapshot, resetLobby } = lobbySlice.actions;
 export default lobbySlice.reducer;

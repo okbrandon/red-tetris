@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import TetrisGrid from './TetrisGrid';
 import { Subtitle } from '../pages/HomePage.styled';
+import { useSelector } from 'react-redux';
 
 const ArenaContainer = styled.div`
     width: min(96vw, 1040px);
@@ -352,7 +353,7 @@ const computePrimaryCellSize = () => {
     return Math.max(20, Math.min(raw, 42));
 };
 
-const MultiplayerArena = ({ players }) => {
+const MultiplayerArena = () => {
     const [cellSize, setCellSize] = useState(computePrimaryCellSize);
 
     useEffect(() => {
@@ -361,10 +362,15 @@ const MultiplayerArena = ({ players }) => {
         return () => window.removeEventListener('resize', onResize);
     }, []);
 
+    const players = useSelector((state) => state.game.multiplayer?.players?.length ? state.game.multiplayer.players : []);
     const playerList = Array.isArray(players) && players.length ? players : [];
     const you = playerList.find((p) => p.isSelf) || playerList[0];
     const opponents = playerList.filter((p) => p !== you);
     const opponentCellSize = useMemo(() => Math.max(10, Math.floor(cellSize * 0.4)), [cellSize]);
+
+    useEffect(() => {
+        console.log('MultiplayerArena players:', players);
+    }, [players]);
 
     return (
         <ArenaContainer>
