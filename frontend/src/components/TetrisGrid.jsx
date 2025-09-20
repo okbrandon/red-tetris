@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import styled, { css, keyframes } from 'styled-components';
+import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
 const BASE_COLOR_PALETTE = Object.freeze({
@@ -94,59 +94,33 @@ const createEmptyCell = (palette) => ({
 });
 
 const normalizeCell = (value, palette) => {
-    if (value === undefined || value === null) {
+    if (!value || typeof value !== 'object') {
         return createEmptyCell(palette);
     }
 
-    if (typeof value === 'number') {
-        if (value <= 0) return createEmptyCell(palette);
-        const color = resolveColor(palette, value, value);
-        return {
-            filled: true,
-            ghost: false,
-            indestructible: false,
-            color,
-            shadowColor: setAlpha(color, 0.45),
-        };
-    }
+    const filled = Boolean(value.filled);
+    const ghost = Boolean(value.ghost);
+    const indestructible = Boolean(value.indestructible);
+    const rawColor = value.color ?? (filled ? 'default' : 'empty');
+    const baseColor = resolveColor(palette, rawColor, rawColor);
+    const color = ghost
+        ? palette.ghost
+        : indestructible
+            ? resolveColor(palette, rawColor ?? 'indestructible', 'indestructible')
+            : baseColor;
+    const shadowColor = value.shadowColor
+        ? resolveColor(palette, value.shadowColor, color)
+        : ghost
+            ? setAlpha(color, 0.25)
+            : setAlpha(color, filled ? 0.45 : 0.12);
 
-    if (typeof value === 'string') {
-        const color = resolveColor(palette, value, value);
-        const isGhost = value.toLowerCase() === 'ghost';
-        return {
-            filled: !isGhost && color !== palette.empty && color !== palette.transparent,
-            ghost: isGhost,
-            indestructible: false,
-            color: isGhost ? palette.ghost : color,
-            shadowColor: setAlpha(color, 0.4),
-        };
-    }
-
-    if (typeof value === 'object') {
-        const ghost = Boolean(value.ghost);
-        const indestructible = Boolean(value.indestructible);
-        const baseColor = resolveColor(
-            palette,
-            ghost ? value.ghostColor ?? 'ghost' : value.color,
-            ghost ? 'ghost' : value.type ?? value.shape ?? value.id
-        );
-        const color = ghost ? palette.ghost : (indestructible && baseColor === palette.empty
-            ? resolveColor(palette, 'indestructible', 'indestructible')
-            : baseColor);
-        const filled = ghost
-            ? false
-            : value.filled ?? (color !== palette.empty && color !== palette.transparent);
-
-        return {
-            filled,
-            ghost,
-            indestructible,
-            color,
-            shadowColor: setAlpha(color, ghost ? 0.25 : 0.45),
-        };
-    }
-
-    return createEmptyCell(palette);
+    return {
+        filled: ghost ? false : filled,
+        ghost,
+        indestructible,
+        color,
+        shadowColor,
+    };
 };
 
 const normalizeGrid = (grid, rows, cols, palette) => {
@@ -162,40 +136,29 @@ const normalizeGrid = (grid, rows, cols, palette) => {
     return normalized;
 };
 
-const normalizeActivePiece = (piece, overridePosition, palette) => {
+const normalizeActivePiece = (piece, palette) => {
     if (!piece) return null;
+    if (!Array.isArray(piece.shape)) return null;
 
-    if (Array.isArray(piece.blocks)) {
-        const color = resolveColor(palette, piece.color ?? piece.id, piece.id);
-        return {
-            blocks: piece.blocks,
-            position: overridePosition ?? piece.position ?? { x: 0, y: 0 },
-            color,
-            shadowColor: setAlpha(color, 0.45),
-        };
-    }
-
-    if (piece.shape && Array.isArray(piece.shape)) {
-        const shape = piece.shape;
-        const blocks = [];
-        for (let y = 0; y < shape.length; y += 1) {
-            for (let x = 0; x < shape[y].length; x += 1) {
-                if (shape[y][x]) {
-                    blocks.push([x, y]);
-                }
+    const blocks = [];
+    for (let y = 0; y < piece.shape.length; y += 1) {
+        for (let x = 0; x < piece.shape[y].length; x += 1) {
+            if (piece.shape[y][x]) {
+                blocks.push([x, y]);
             }
         }
-        const color = resolveColor(palette, piece.color, piece.type ?? piece.id);
-        const basePosition = piece.position ?? { x: 0, y: 0 };
-        return {
-            blocks,
-            position: overridePosition ?? basePosition,
-            color,
-            shadowColor: setAlpha(color, 0.45),
-        };
     }
 
-    return null;
+    if (blocks.length === 0) return null;
+
+    const color = resolveColor(palette, piece.color, piece.type ?? piece.id);
+
+    return {
+        blocks,
+        position: piece.position ?? { x: 0, y: 0 },
+        color,
+        shadowColor: setAlpha(color, 0.45),
+    };
 };
 
 const Board = styled.div`
@@ -208,12 +171,6 @@ const Board = styled.div`
     border-radius: 12px;
     overflow: hidden;
     position: relative;
-`;
-
-const pop = keyframes`
-  0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.12); }
-  100% { transform: scale(0.6); opacity: 0; }
 `;
 
 const Cell = styled.div`
@@ -243,11 +200,6 @@ const Cell = styled.div`
     opacity: ${({ $ghost }) => ($ghost ? 0.9 : 1)};
     transition: background 180ms ease, box-shadow 180ms ease, border-radius 180ms ease, opacity 180ms ease;
 
-    ${({ $pop, $clearMs }) =>
-        $pop && css`
-            animation: ${pop} ${$clearMs}ms ease forwards;
-        `}
-
     &::after {
         content: '';
         position: absolute;
@@ -270,7 +222,7 @@ const Overlay = styled.div`
 const OverlayInner = styled.div`
     position: absolute;
     will-change: transform;
-    ${({ $duration }) => css`transition: transform ${$duration}ms cubic-bezier(.2,.7,.2,1);`}
+    transition: transform 180ms cubic-bezier(.2,.7,.2,1);
 `;
 
 const Block = styled.div`
@@ -286,62 +238,40 @@ const TetrisGrid = ({
     rows = 20,
     cols = 10,
     cellSize = 24,
-    matrix,
     grid,
     showGrid = true,
     colors = BASE_COLOR_PALETTE,
-    activePiece,
     currentPiece,
-    activePos,
-    animateMs = 180,
-    clearingRows,
-    clearAnimMs = 220,
 }) => {
     const palette = useMemo(() => ({ ...BASE_COLOR_PALETTE, ...colors }), [colors]);
-    const sourceGrid = grid ?? matrix;
-
-    const resolvedRows = useMemo(() => {
-        if (Array.isArray(sourceGrid) && sourceGrid.length) return sourceGrid.length;
-        return rows;
-    }, [sourceGrid, rows]);
-
-    const resolvedCols = useMemo(() => {
-        if (Array.isArray(sourceGrid) && sourceGrid.length) {
-            const firstRow = sourceGrid.find((row) => Array.isArray(row));
-            if (firstRow && firstRow.length) return firstRow.length;
-        }
-        return cols;
-    }, [sourceGrid, cols]);
+    const sourceGrid = useMemo(() => (Array.isArray(grid) ? grid : []), [grid]);
 
     const normalizedGrid = useMemo(
-        () => normalizeGrid(sourceGrid, resolvedRows, resolvedCols, palette),
-        [sourceGrid, resolvedRows, resolvedCols, palette]
+        () => normalizeGrid(sourceGrid, rows, cols, palette),
+        [sourceGrid, rows, cols, palette]
     );
 
-    const clearingSet = useMemo(() => new Set(clearingRows || []), [clearingRows]);
-
-    const normalizedActivePiece = useMemo(
-        () => normalizeActivePiece(currentPiece ?? activePiece, activePos, palette),
-        [currentPiece, activePiece, activePos, palette]
+    const normalizedCurrentPiece = useMemo(
+        () => normalizeActivePiece(currentPiece, palette),
+        [currentPiece, palette]
     );
 
-    const overlay = normalizedActivePiece && normalizedActivePiece.blocks.length > 0 ? (
+    const overlay = normalizedCurrentPiece && normalizedCurrentPiece.blocks.length > 0 ? (
         <Overlay aria-hidden>
             <OverlayInner
-                $duration={animateMs}
                 style={{
-                    transform: `translate(${normalizedActivePiece.position.x * cellSize}px, ${normalizedActivePiece.position.y * cellSize}px)`,
+                    transform: `translate(${normalizedCurrentPiece.position.x * cellSize}px, ${normalizedCurrentPiece.position.y * cellSize}px)`,
                 }}
             >
-                {normalizedActivePiece.blocks.map(([bx, by], index) => (
+                {normalizedCurrentPiece.blocks.map(([bx, by], index) => (
                     <Block
                         key={index}
                         $size={cellSize}
                         style={{
                             left: bx * cellSize,
                             top: by * cellSize,
-                            '--block-color': normalizedActivePiece.color,
-                            '--block-shadow': normalizedActivePiece.shadowColor,
+                            '--block-color': normalizedCurrentPiece.color,
+                            '--block-shadow': normalizedCurrentPiece.shadowColor,
                         }}
                     />
                 ))}
@@ -352,11 +282,11 @@ const TetrisGrid = ({
     return (
         <Board
             role="grid"
-            aria-rowcount={resolvedRows}
-            aria-colcount={resolvedCols}
+            aria-rowcount={rows}
+            aria-colcount={cols}
             style={{
-                gridTemplateColumns: `repeat(${resolvedCols}, ${cellSize}px)`,
-                gridTemplateRows: `repeat(${resolvedRows}, ${cellSize}px)`,
+                gridTemplateColumns: `repeat(${cols}, ${cellSize}px)`,
+                gridTemplateRows: `repeat(${rows}, ${cellSize}px)`,
             }}
         >
             {normalizedGrid.map((row, y) =>
@@ -367,12 +297,11 @@ const TetrisGrid = ({
                         data-testid="cell"
                         data-filled={cell.filled ? 'true' : 'false'}
                         data-ghost={cell.ghost ? 'true' : 'false'}
+                        data-indestructible={cell.indestructible ? 'true' : 'false'}
                         $size={cellSize}
                         $filled={cell.filled}
                         $ghost={cell.ghost}
                         $showGrid={showGrid}
-                        $pop={cell.filled && clearingSet.has(y)}
-                        $clearMs={clearAnimMs}
                         style={{
                             '--cell-color': cell.color,
                             '--cell-shadow': cell.shadowColor,
@@ -385,45 +314,20 @@ const TetrisGrid = ({
     );
 };
 
-const cellValueProp = PropTypes.oneOfType([
-    PropTypes.number,
-    PropTypes.string,
-    PropTypes.shape({
-        filled: PropTypes.bool,
-        color: PropTypes.string,
-        ghost: PropTypes.bool,
-        indestructible: PropTypes.bool,
-    }),
-]);
-
-const pieceShapeProp = PropTypes.shape({
-    shape: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)),
-    color: PropTypes.string,
-    position: PropTypes.shape({ x: PropTypes.number, y: PropTypes.number }),
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-});
-
-const blocksPieceProp = PropTypes.shape({
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    blocks: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)),
-    color: PropTypes.string,
-    position: PropTypes.shape({ x: PropTypes.number, y: PropTypes.number }),
-});
-
 TetrisGrid.propTypes = {
     rows: PropTypes.number,
     cols: PropTypes.number,
     cellSize: PropTypes.number,
-    matrix: PropTypes.arrayOf(PropTypes.arrayOf(cellValueProp)),
-    grid: PropTypes.arrayOf(PropTypes.arrayOf(cellValueProp)),
+    grid: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.object)),
     showGrid: PropTypes.bool,
     colors: PropTypes.object,
-    activePiece: PropTypes.oneOfType([pieceShapeProp, blocksPieceProp]),
-    currentPiece: PropTypes.oneOfType([pieceShapeProp, blocksPieceProp]),
-    activePos: PropTypes.shape({ x: PropTypes.number, y: PropTypes.number }),
-    animateMs: PropTypes.number,
-    clearingRows: PropTypes.arrayOf(PropTypes.number),
-    clearAnimMs: PropTypes.number,
+    currentPiece: PropTypes.shape({
+        shape: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)),
+        color: PropTypes.string,
+        position: PropTypes.shape({ x: PropTypes.number, y: PropTypes.number }),
+        type: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+        id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    }),
 };
 
 export default TetrisGrid;

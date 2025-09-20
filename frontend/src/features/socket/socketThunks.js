@@ -9,7 +9,7 @@ import {
 } from './socketSlice.js';
 import { showNotification } from '../notification/notificationSlice.js';
 import { setServerIdentity } from '../user/userSlice.js';
-import { setGameState, setRoomName, setGameStop, resetGameState, setLobbySettings } from '../game/gameSlice.js';
+import { setGameState, setRoomName, setGameStatus, resetGameState, setLobbySettings } from '../game/gameSlice.js';
 
 let listenersBound = false;
 
@@ -99,7 +99,7 @@ export const initializeSocket = () => (dispatch) => {
 
     addListener(SERVER_EVENTS.GAME_STARTED, (payload) => { // done
         dispatch(socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.GAME_STARTED, payload }));
-        dispatch(setGameStop({ room: { status: 'started' } }));
+        dispatch(setGameStatus({ room: { status: 'in-game' } }));
     });
 
     addListener(SERVER_EVENTS.GAME_STATE, (payload) => { // done
@@ -109,7 +109,7 @@ export const initializeSocket = () => (dispatch) => {
 
     addListener(SERVER_EVENTS.GAME_OVER, (payload) => { // done
         dispatch(socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.GAME_OVER, payload }));
-        dispatch(setGameStop(payload));
+        dispatch(setGameStatus({ room: { status: 'game-over' } }));
     });
 
     return () => {

@@ -1,12 +1,31 @@
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Wrapper, LogoTitle, Card, Subtitle, StartButton } from './HomePage.styled';
 import BackButton from '../components/BackButton';
-import { setGameMode } from '../features/game/gameSlice';
+import { resetGameState, setGameMode } from '../features/game/gameSlice';
+import { requestRoomJoin, requestStartGame } from '../features/socket/socketThunks';
+import { showNotification } from '../features/notification/notificationSlice';
+import { useEffect } from 'react';
 
 const MenuPage = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const gameStatus = useSelector((state) => state.game.gameStatus);
+    const gameName = useSelector((state) => state.game.roomName);
+
+    const handleSoloJourney = () => {
+        dispatch(requestRoomJoin({ roomName: 'testt' }));
+        dispatch(resetGameState());
+        dispatch(setGameMode('solo'));
+        dispatch(showNotification({ type: 'info', message: 'Starting solo journey...'}));
+    }
+
+    useEffect(() => {
+        if (gameName && gameName === 'testt')
+            dispatch(requestStartGame());
+        if (gameStatus && gameStatus === 'in-game')
+            navigate('/game');
+    }, [gameStatus, gameName]);
 
     return (
         <Wrapper>
@@ -16,10 +35,7 @@ const MenuPage = () => {
                 <Subtitle>Choose how you want to play</Subtitle>
                 <div style={{ display: 'grid', gap: '0.75rem', gridTemplateColumns: '1fr', width: 'min(380px, 80vw)', margin: '0 auto' }}>
                     <StartButton
-                        onClick={() => {
-                            dispatch(setGameMode('solo'));
-                            navigate('/game');
-                        }}
+                        onClick={handleSoloJourney}
                         aria-label="Play solo"
                     >
                         Solo Journey

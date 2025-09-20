@@ -4,42 +4,40 @@ import { Wrapper, Card, Subtitle, StartButton, LogoTitle } from './HomePage.styl
 import BackButton from '../components/BackButton';
 import { PlayerList, Player } from './LobbyPage.styled';
 import { showNotification } from '../features/notification/notificationSlice';
-import { setGameMode } from '../features/game/gameSlice';
-import { requestStartGame, requestRoomLeave } from '../features/socket/socketThunks';
+import { requestRoomLeave, requestStartGame } from '../features/socket/socketThunks';
+import { useEffect } from 'react';
 
 const LobbyPage = () => {
     const username = useSelector((state) => state.user.username);
-    const lobby = useSelector((state) => state.game);
+    const game = useSelector((state) => state.game);
+    const gameStatus = useSelector((state) => state.game.gameStatus);
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const multiplayer = lobby.multiplayer;
+    const multiplayer = game.multiplayer;
     const players = multiplayer?.players?.length
         ? multiplayer.players.map((player) => player.username || player.id)
         : [username || 'You'];
-    const you = lobby?.you?.username || username || 'You';
-    const ownerId = lobby?.owner?.id;
-    const isOwner = lobby?.you?.id && lobby.you.id === ownerId;
+    const you = game?.you?.username || username || 'You';
+    const ownerId = game?.owner?.id;
+    const isOwner = game?.you?.id && game.you.id === ownerId;
 
-    const lobbyLabel = lobby?.roomName
-        ? `Lobby name: ${lobby.roomName}`
+    const lobbyLabel = game?.roomName
+        ? `Lobby name: ${game.roomName}`
         : isOwner
-            ? `Hosting ${lobby.roomName ? `"${lobby.roomName}"` : 'a new lobby'}`
-            : lobby.roomName
-                ? `Joining lobby ${lobby.roomName}`
+            ? `Hosting ${game.roomName ? `"${game.roomName}"` : 'a new lobby'}`
+            : game.roomName
+                ? `Joining lobby ${game.roomName}`
                 : 'Lobby ready to connect';
 
-    const maxSlots = lobby.maxPlayers || 4;
+    const maxSlots = game.maxPlayers || 4;
 
     const handleStartGame = () => {
         if (!isOwner) {
             dispatch(showNotification({ type: 'error', message: 'Only the lobby owner can start the game.' }));
             return;
         }
-        dispatch(setGameMode('multiplayer'));
         dispatch(requestStartGame());
-        dispatch(showNotification({ type: 'success', message: 'Starting game…' }));
-        navigate('/game');
     };
 
     const handleLeaveLobby = () => {
@@ -47,6 +45,15 @@ const LobbyPage = () => {
         dispatch(showNotification({ type: 'info', message: 'Leaving lobby…' }));
         navigate('/menu');
     };
+
+    useEffect(() => {
+        if (gameStatus && gameStatus === 'in-game')
+            navigate('/game');
+    }, [gameStatus]);
+
+    useEffect(() => {
+        console.log('Game state on LobbyPage:', game);
+    }, [game]);
 
     return (
         <Wrapper>

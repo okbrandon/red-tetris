@@ -1,21 +1,44 @@
 import styled from 'styled-components';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { LogoTitle } from './HomePage.styled';
 import BackButton from '../components/BackButton';
 import SoloGameView from '../components/SoloGameView';
-import MultiplayerArena from '../components/MultiplayerArena';
 import { PageWrapper } from './GamePage.styled';
+import MultiplayerArena from '../components/MultiplayerArena';
+import { requestRoomLeave } from '../features/socket/socketThunks';
+import { useNavigate } from 'react-router-dom';
+import { showNotification } from '../features/notification/notificationSlice';
+import { useEffect } from 'react';
 
 const GamePage = () => {
-    const mode = useSelector((state) => state.game.mode);
-    const multiplayer = useSelector((state) => state.game.multiplayer);
+    const { mode } = useSelector((state) => state.game);
+    const gameStatus = useSelector((state) => state.game.gameStatus);
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+
+    const isMultiplayer = mode === 'multiplayer';
+
+    const handleLeaveGame = () => {
+        dispatch(requestRoomLeave());
+        dispatch(showNotification({ type: 'info', message: 'Leaving game…' }));
+        navigate('/menu');
+    }
+
+    useEffect(() => {
+        console.log('Game status on GamePage:', gameStatus);
+        if (gameStatus && gameStatus === 'game-over') {
+            dispatch(showNotification({ type: 'info', message: 'The game has ended. Returning to menu.' }));
+            dispatch(requestRoomLeave());
+            navigate('/menu');
+        }
+    }, [gameStatus]);
 
     return (
         <PageWrapper>
-            <BackButton />
-            <GameLogoTitle>{mode === 'multiplayer' ? 'Multiplayer' : 'Game'}</GameLogoTitle>
-            {mode === 'multiplayer' && !multiplayer.gameOver
-                ? <MultiplayerArena players={players} />
+            <BackButton onClick={handleLeaveGame} />
+            <GameLogoTitle>{isMultiplayer ? 'Multiplayer' : 'Game'}</GameLogoTitle>
+            {isMultiplayer
+                ? <MultiplayerArena />
                 : <SoloGameView />}
         </PageWrapper>
     );

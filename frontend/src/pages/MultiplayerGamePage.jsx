@@ -4,14 +4,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Wrapper, Card, Subtitle, StartButton, LogoTitle, Input } from './HomePage.styled';
 import BackButton from '../components/BackButton';
 import { JoinForm, JoinHint } from './MultiplayerGamePage.styled';
-import { setLobbySettings, resetLobby } from '../features/lobby/lobbySlice';
+import { resetGameState } from '../features/game/gameSlice';
 import { showNotification } from '../features/notification/notificationSlice';
 import { setGameMode } from '../features/game/gameSlice';
 import { requestRoomJoin } from '../features/socket/socketThunks';
 
 const MultiplayerGamePage = () => {
     const dispatch = useDispatch();
-    const lobbySettings = useSelector((state) => state.lobby);
+    const lobbySettings = useSelector((state) => state.game);
     const [roomName, setRoomName] = useState(() => lobbySettings.roomName || '');
     const navigate = useNavigate();
 
@@ -23,11 +23,7 @@ const MultiplayerGamePage = () => {
         }
 
         dispatch(requestRoomJoin({ roomName: trimmed })); // TODO: should not join the room if there are already 4 players
-        dispatch(resetLobby());
-        dispatch(setLobbySettings({
-            host: false, // TODO: to change
-            roomName: trimmed,
-        }));
+        dispatch(resetGameState());
         dispatch(setGameMode('multiplayer'));
         dispatch(showNotification({ type: 'success', message: `Joining lobby ${trimmed}…` }));
         navigate('/lobby');

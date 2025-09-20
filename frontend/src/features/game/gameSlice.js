@@ -2,8 +2,6 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const createInitialMultiplayerState = () => ({
     players: [],
-    host: false,
-    gameStop: false,
     maxPlayers: 4,
 });
 
@@ -11,12 +9,12 @@ const createInitialState = () => ({
     mode: 'solo',
     owner: null,
     isOwner: false,
+    gameStatus: 'waiting',
     score: 0,
     roomName: '',
     you: null,
-    grid: [],
+    grid: [[]],
     currentPiece: null,
-    nextPiece: null,
     multiplayer: createInitialMultiplayerState(),
 });
 
@@ -33,31 +31,30 @@ export const gameSlice = createSlice({
             }
         },
         setGameState: (state, action) => {
-            const data = action.payload ?? {};
-            state.room = data.room || null;
-            state.you = data.you || null;
-            state.grid = Array.isArray(data.grid) ? data.grid : [];
-            state.currentPiece = data.currentPiece || null;
-            state.nextPiece = data.nextPiece || null;
+            const { room, you, grid, currentPiece, nextPiece, clients, score } = action.payload ?? {};
+
+            if (room) {
+                state.mode = room.soloJourney ? 'solo' : 'multiplayer';
+                state.roomName = room.id || state.roomName || '';
+                state.owner = room.owner || state.owner;
+            }
+            state.you = you || null;
+            state.grid = grid || [[]];
+            state.currentPiece = currentPiece || null;
+
+            if (typeof score === 'number') {
+                state.score = score;
+            }
+
             state.multiplayer = {
                 ...state.multiplayer,
-                clients: state.multiplayer.players.map((p) => {
-                    for (const c of data.clients || []) {
-                        if (c.id === p.id) {
-                            return {
-                                ...p,
-                                hasLost: Boolean(c.hasLost),
-                                specter: Array.isArray(c.specter) ? c.specter : [],
-                            }
-                        }
-                    }
-                })
+                players: clients,
             };
         },
-        setGameStop: (state, action) => { // game_started / game_over
+        setGameStatus: (state, action) => { // game_started / game_over
             const message = action.payload.room?.status || '';
 
-            state.multiplayer.gameOver = message === 'finished';
+            state.gameStatus = message;
         },
         setLobbySettings: (state, action) => { // room_broadcast
             const { room, owner, you, clients } = action.payload;
@@ -76,5 +73,5 @@ export const gameSlice = createSlice({
     },
 });
 
-export const { setGameMode, setGameState, setLobbySettings, resetGameState, setRoomName, setGameStop } = gameSlice.actions;
+export const { setGameMode, setGameState, setLobbySettings, resetGameState, setRoomName, setGameStatus } = gameSlice.actions;
 export default gameSlice.reducer;
