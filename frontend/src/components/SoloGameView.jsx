@@ -4,6 +4,8 @@ import styled from 'styled-components';
 import TetrisGrid from './TetrisGrid';
 import { Subtitle } from '../pages/HomePage.styled';
 import NextPiecePreview from './NextPiecePreview';
+import { requestPieceMove } from '../features/socket/socketThunks.js';
+import { extractMoveDirection, shouldIgnoreForGameControls } from '../utils/keyboard.js';
 
 const computeCellSize = (rows = 20, cols = 10) => {
     if (typeof window === 'undefined') return 32;
@@ -52,6 +54,26 @@ const SoloGameView = () => {
         }
         return () => {};
     }, [rows, cols]);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return () => {};
+
+        const handleKeyDown = (event) => {
+            if (!event || shouldIgnoreForGameControls(event.target)) return;
+
+            const direction = extractMoveDirection(event);
+            if (!direction) return;
+
+            event.preventDefault();
+            requestPieceMove({ direction });
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []);
 
     const primaryPreviewSize = useMemo(() => Math.max(16, Math.floor(cellSize * 0.6)), [cellSize]);
     const queuePreviewSize = useMemo(() => Math.max(14, Math.floor(cellSize * 0.48)), [cellSize]);

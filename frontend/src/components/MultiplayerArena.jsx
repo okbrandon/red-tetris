@@ -4,6 +4,8 @@ import styled from 'styled-components';
 import TetrisGrid from './TetrisGrid';
 import { Subtitle } from '../pages/HomePage.styled';
 import { useSelector } from 'react-redux';
+import { requestPieceMove } from '../features/socket/socketThunks.js';
+import { extractMoveDirection, shouldIgnoreForGameControls } from '../utils/keyboard.js';
 
 const ArenaContainer = styled.div`
     width: min(96vw, 1040px);
@@ -253,7 +255,6 @@ const MULTIPLAYER_COLORS = {
 
 const DEFAULT_ROWS = 20;
 const DEFAULT_COLS = 10;
-
 const deriveDimensions = (board) => {
     if (Array.isArray(board) && board.length > 0 && Array.isArray(board[0])) {
         return { rows: board.length, cols: board[0].length };
@@ -380,6 +381,28 @@ const MultiplayerArena = () => {
         : [];
 
     const opponentCellSize = useMemo(() => Math.max(10, Math.floor(cellSize * 0.4)), [cellSize]);
+
+    useEffect(() => {
+        if (!player || typeof window === 'undefined') return () => {};
+
+        const handleKeyDown = (event) => {
+            if (!event) return;
+
+            if (shouldIgnoreForGameControls(event.target)) return;
+
+            const direction = extractMoveDirection(event);
+            if (!direction) return;
+
+            event.preventDefault();
+            requestPieceMove({ direction });
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [player]);
 
     return (
         <ArenaContainer>
