@@ -9,6 +9,7 @@ import { requestRoomLeave } from '../features/socket/socketThunks';
 import { useNavigate } from 'react-router-dom';
 import { showNotification } from '../features/notification/notificationSlice';
 import { useEffect } from 'react';
+import { setGameStatus } from '../features/game/gameSlice';
 
 const GamePage = () => {
     const { mode } = useSelector((state) => state.game);
@@ -19,9 +20,8 @@ const GamePage = () => {
     const isMultiplayer = mode === 'multiplayer';
 
     const handleLeaveGame = () => {
-        dispatch(requestRoomLeave());
+        dispatch(setGameStatus({ room: { status: 'game-over' } }));
         dispatch(showNotification({ type: 'info', message: 'Leaving game…' }));
-        navigate('/menu');
     }
 
     useEffect(() => {
