@@ -12,8 +12,9 @@ class Game {
 	/**
 	 * @param {string} id - Unique ID for the game room.
 	 * @param {Object} [owner=null] - Initial owner of the game room.
+	 * @param {boolean} [soloJourney=false] - Whether the game is in solo journey mode.
 	 */
-	constructor(id, owner = null) {
+	constructor(id, owner = null, soloJourney = false) {
 		/** @type {string} */
 		this.id = id;
 		/** @type {Object|null} */
@@ -31,9 +32,11 @@ class Game {
 		/** @type {Tetromino} */
 		this.tetromino = new Tetromino();
 		/** @type {boolean} */
-		this.soloJourney = false;
+		this.soloJourney = soloJourney;
 		/** @type {NodeJS.Timeout|null} */
 		this.updateInterval = null;
+		/** @type {number} */
+		this.maxPlayers = soloJourney ? 1 : gameSettings.MAX_PLAYERS_PER_ROOM;
 	}
 
 	/**
@@ -58,6 +61,10 @@ class Game {
 			throw new Error('Client already in a room');
 		if (this.status !== gameStatus.WAITING)
 			throw new Error('Game has already started');
+		if (this.soloJourney && client !== this.owner)
+			throw new Error('Solo journey mode: only the owner can join');
+		if (this.clients.size >= this.maxPlayers)
+			throw new Error('Room is full');
 
 		client.room = this;
 		this.clients.add(client);

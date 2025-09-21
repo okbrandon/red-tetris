@@ -25,7 +25,20 @@ const httpServer = createServer((req, res) => {
  * Socket.IO server instance.
  * @type {Server}
  */
-const io = new Server(httpServer, {});
+const allowedOrigins = (process.env.SOCKET_ALLOWED_ORIGINS || '').split(',')
+	.map((origin) => origin.trim())
+	.filter(Boolean);
+
+const io = new Server(httpServer, {
+	cors: {
+		origin: allowedOrigins.length ? allowedOrigins : [
+			'http://localhost:5173',
+			'https://localhost:5173',
+		],
+		methods: ['GET', 'POST'],
+		credentials: true,
+	},
+});
 
 /**
  * Active game rooms stored by ID.
@@ -49,14 +62,15 @@ const deleteRoom = (room) => {
 /**
  * Creates a new game room.
  * @param {string} id - Room ID.
+ * @param {boolean} soloJourney - Whether the game is in solo journey mode.
  * @returns {Game} - The created Game instance.
  * @throws {Error} - If the room already exists.
  */
-const createRoom = (id) => {
+const createRoom = (id, soloJourney) => {
 	if (rooms.has(id))
 		throw new Error('Game already exists');
 
-	const room = new Game(id, null);
+	const room = new Game(id, null, soloJourney);
 
 	rooms.set(id, room);
 	return room;
@@ -148,6 +162,7 @@ io.on("connection", (socket) => {
 	// Handle room joining
 	socket.on(incomingEvents.ROOM_JOIN, (data) => {
 		const roomName = data.roomName;
+		const soloJourney = data.soloJourney || false;
 
 		if (!roomName) {
 			socket.emit(outgoingEvents.ERROR, JSON.stringify({
@@ -166,14 +181,16 @@ io.on("connection", (socket) => {
 
 		if (!room) {
 			try {
-				const room = createRoom(roomName);
+				const room = createRoom(roomName, soloJourney);
 
-				room.playerJoin(client);
 				room.assignOwner(client);
+				room.playerJoin(client);
 
 				socket.join(roomName);
 				socket.emit(outgoingEvents.ROOM_CREATED, JSON.stringify({
-					roomName: roomName
+					roomName: roomName,
+					soloJourney: soloJourney,
+					maxPlayers: room.maxPlayers
 				}));
 				room.broadcastRoom();
 			} catch (error) {
