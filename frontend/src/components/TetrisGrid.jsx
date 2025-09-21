@@ -1,29 +1,7 @@
 import { useMemo } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-
-const BASE_COLOR_PALETTE = Object.freeze({
-    default: 'rgba(162,89,255,0.86)',
-    empty: 'rgba(20,20,25,0.35)',
-    ghost: 'rgba(208,204,255,0.18)',
-    transparent: 'rgba(0,0,0,0)',
-    indestructible: 'rgba(110,110,140,1)',
-    1: 'rgba(0,229,255,1)', // I
-    2: 'rgba(255,149,0,1)', // L
-    3: 'rgba(0,122,255,1)', // J
-    4: 'rgba(255,59,48,1)', // Z
-    5: 'rgba(255,214,10,1)', // O
-    6: 'rgba(191,90,242,1)', // T
-    7: 'rgba(52,199,89,1)', // S
-    cyan: 'rgba(0,229,255,1)',
-    orange: 'rgba(255,149,0,1)',
-    blue: 'rgba(0,122,255,1)',
-    purple: 'rgba(191,90,242,1)',
-    yellow: 'rgba(255,214,10,1)',
-    green: 'rgba(52,199,89,1)',
-    red: 'rgba(255,59,48,1)',
-    gray: 'rgba(154,154,189,0.85)',
-});
+import { BASE_TETRIS_COLORS, extractPieceBlocks } from '../utils/tetris.js';
 
 const setAlpha = (color, alpha) => {
     if (!color) return `rgba(0,0,0,${alpha})`;
@@ -60,57 +38,17 @@ const setAlpha = (color, alpha) => {
     return color;
 };
 
-const resolveColor = (palette, value, fallback) => {
-    const candidates = [value, fallback];
-
-    for (const candidate of candidates) {
-        if (candidate === undefined || candidate === null) continue;
-
-        if (palette[candidate] !== undefined) return palette[candidate];
-
-        if (typeof candidate === 'string') {
-            const key = candidate.toLowerCase();
-            if (palette[key] !== undefined) return palette[key];
-            if (key === 'transparent') return palette.transparent;
-            if (key === 'ghost') return palette.ghost;
-            if (/^#|^rgb/.test(candidate)) return candidate;
-        }
-
-        if (typeof candidate === 'number') {
-            if (palette[String(candidate)] !== undefined) return palette[String(candidate)];
-            if (palette[candidate] !== undefined) return palette[candidate];
-        }
-    }
-
-    return palette.default;
-};
-
-const createEmptyCell = (palette) => ({
-    filled: false,
-    ghost: false,
-    indestructible: false,
-    color: palette.empty,
-    shadowColor: setAlpha(palette.default, 0.12),
-});
-
 const normalizeCell = (value, palette) => {
-    if (!value || typeof value !== 'object') {
-        return createEmptyCell(palette);
-    }
-
     const filled = Boolean(value.filled);
     const ghost = Boolean(value.ghost);
     const indestructible = Boolean(value.indestructible);
-    const rawColor = value.color ?? (filled ? 'default' : 'empty');
-    const baseColor = resolveColor(palette, rawColor, rawColor);
+    const baseColor = palette[value.color];
     const color = ghost
         ? palette.ghost
         : indestructible
-            ? resolveColor(palette, rawColor ?? 'indestructible', 'indestructible')
+            ? palette.indestructible
             : baseColor;
-    const shadowColor = value.shadowColor
-        ? resolveColor(palette, value.shadowColor, color)
-        : ghost
+    const shadowColor = ghost
             ? setAlpha(color, 0.25)
             : setAlpha(color, filled ? 0.45 : 0.12);
 
@@ -140,18 +78,11 @@ const normalizeActivePiece = (piece, palette) => {
     if (!piece) return null;
     if (!Array.isArray(piece.shape)) return null;
 
-    const blocks = [];
-    for (let y = 0; y < piece.shape.length; y += 1) {
-        for (let x = 0; x < piece.shape[y].length; x += 1) {
-            if (piece.shape[y][x]) {
-                blocks.push([x, y]);
-            }
-        }
-    }
+    const blocks = extractPieceBlocks(piece, { preferShape: true });
 
     if (blocks.length === 0) return null;
 
-    const color = resolveColor(palette, piece.color, piece.type ?? piece.id);
+    const color = palette[piece.color];
 
     return {
         blocks,
@@ -240,10 +171,9 @@ const TetrisGrid = ({
     cellSize = 24,
     grid,
     showGrid = true,
-    colors = BASE_COLOR_PALETTE,
     currentPiece,
 }) => {
-    const palette = useMemo(() => ({ ...BASE_COLOR_PALETTE, ...colors }), [colors]);
+    const palette = useMemo(() => ({ ...BASE_TETRIS_COLORS }), []);
     const sourceGrid = useMemo(() => (Array.isArray(grid) ? grid : []), [grid]);
 
     const normalizedGrid = useMemo(

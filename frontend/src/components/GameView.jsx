@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import TetrisGrid from './TetrisGrid.jsx';
@@ -6,6 +6,8 @@ import { Subtitle } from '../pages/HomePage.styled.js';
 import NextPiecePreview from './NextPiecePreview.jsx';
 import { requestPieceMove } from '../features/socket/socketThunks.js';
 import { extractMoveDirection, shouldIgnoreForGameControls } from '../utils/keyboard.js';
+import useResponsiveValue from '../hooks/useResponsiveValue.js';
+import { deriveBoardDimensions } from '../utils/tetris.js';
 
 const computeCellSize = (rows = 20, cols = 10) => {
     if (typeof window === 'undefined') return 32;
@@ -21,39 +23,16 @@ const computeCellSize = (rows = 20, cols = 10) => {
     return Math.max(22, Math.min(raw, 44));
 };
 
-const normalizePiece = (piece) => {
-    if (!piece || typeof piece !== 'object' || !Array.isArray(piece.shape)) return null;
-    return {
-        ...piece,
-        position: piece.position ?? { x: 0, y: 0 },
-    };
-};
-
 const GameView = () => {
     const { grid, currentPiece, nextPieces, score } = useSelector((state) => state.game);
 
     const board = useMemo(() => (Array.isArray(grid) ? grid : []), [grid]);
-    const rows = board.length || 20;
-    const cols = board[0]?.length || 10;
-    const normalizedPiece = useMemo(() => normalizePiece(currentPiece), [currentPiece]);
+    const { rows, cols } = useMemo(() => deriveBoardDimensions(board), [board]);
     const queue = useMemo(() => (
         Array.isArray(nextPieces) && nextPieces.length ? nextPieces : []
     ), [nextPieces]);
 
-    const [cellSize, setCellSize] = useState(() => computeCellSize(rows, cols));
-
-    useEffect(() => {
-        setCellSize(computeCellSize(rows, cols));
-    }, [rows, cols]);
-
-    useEffect(() => {
-        const onResize = () => setCellSize(computeCellSize(rows, cols));
-        if (typeof window !== 'undefined') {
-            window.addEventListener('resize', onResize);
-            return () => window.removeEventListener('resize', onResize);
-        }
-        return () => {};
-    }, [rows, cols]);
+    const cellSize = useResponsiveValue(useCallback(() => computeCellSize(rows, cols), [rows, cols]));
 
     useEffect(() => {
         if (typeof window === 'undefined') return () => {};
@@ -88,7 +67,7 @@ const GameView = () => {
                         cellSize={cellSize}
                         showGrid
                         grid={board}
-                        currentPiece={normalizedPiece}
+                        currentPiece={currentPiece}
                     />
                 </BoardFrame>
             </BoardArea>

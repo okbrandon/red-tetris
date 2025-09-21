@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
+import { BASE_TETRIS_COLORS, extractPieceBlocks } from '../utils/tetris.js';
 
 const Board = styled.div`
     display: grid;
@@ -21,39 +22,13 @@ const Cell = styled.div`
     box-shadow: ${({ $filled, $color }) => ($filled ? `0 0 8px ${$color.replace('1)', '0.35)')}` : 'none')};
 `;
 
-const defaultColors = {
-    1: 'rgba(0,229,255,1)',    // I - cyan
-    2: 'rgba(255,149,0,1)',    // L - orange
-    3: 'rgba(0,122,255,1)',    // J - blue
-    4: 'rgba(255,59,48,1)',    // Z - red
-    5: 'rgba(255,214,10,1)',   // O - yellow
-    6: 'rgba(191,90,242,1)',   // T - purple
-    7: 'rgba(52,199,89,1)',    // S - green
-};
-
-const extractBlocks = (piece) => {
-    if (!piece) return [];
-    if (Array.isArray(piece.blocks)) return piece.blocks;
-    if (!Array.isArray(piece.shape)) return [];
-
-    const blocks = [];
-    for (let y = 0; y < piece.shape.length; y += 1) {
-        for (let x = 0; x < piece.shape[y].length; x += 1) {
-            if (piece.shape[y][x]) {
-                blocks.push([x, y]);
-            }
-        }
-    }
-    return blocks;
-};
-
 const buildPreviewMatrix = (piece) => {
     const rows = 4;
     const cols = 4;
     const matrix = Array.from({ length: rows }, () => Array(cols).fill(0));
     if (!piece) return matrix;
 
-    const blocks = extractBlocks(piece);
+    const blocks = extractPieceBlocks(piece);
     if (blocks.length === 0) return matrix;
 
     let minX = Infinity;
@@ -85,12 +60,10 @@ const buildPreviewMatrix = (piece) => {
     return matrix;
 };
 
-const NextPiecePreview = ({ piece, cellSize = 18, colors = defaultColors }) => {
+const NextPiecePreview = ({ piece, cellSize = 18 }) => {
+    const colors = BASE_TETRIS_COLORS;
     const data = buildPreviewMatrix(piece);
-    const baseColorKey = piece?.color ?? piece?.id ?? 1;
-    const paletteColor = typeof baseColorKey === 'string'
-        ? baseColorKey
-        : colors[baseColorKey] ?? colors[1];
+    const paletteColor = colors[piece.color] ?? colors[1];
     return (
         <Board style={{ gridTemplateColumns: `repeat(4, ${cellSize}px)`, gridTemplateRows: `repeat(4, ${cellSize}px)` }}>
             {data.map((r, y) =>

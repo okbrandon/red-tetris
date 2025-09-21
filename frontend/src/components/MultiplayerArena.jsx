@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import TetrisGrid from './TetrisGrid';
 import { useSelector } from 'react-redux';
 import GameView from './GameView.jsx';
+import useResponsiveValue from '../hooks/useResponsiveValue.js';
+import { deriveBoardDimension } from '../utils/tetris.js';
 
 const ArenaContainer = styled.div`
     width: 80%;
@@ -150,29 +152,9 @@ const MainColumn = styled.section`
     max-height: 100%;
 `;
 
-const MULTIPLAYER_COLORS = {
-    1: 'rgba(0,229,255,1)',
-    2: 'rgba(255,149,0,1)',
-    3: 'rgba(0,122,255,1)',
-    4: 'rgba(255,59,48,1)',
-    5: 'rgba(255,214,10,1)',
-    6: 'rgba(191,90,242,1)',
-    7: 'rgba(52,199,89,1)',
-    8: 'rgba(120,120,150,1)',
-};
-
-const DEFAULT_ROWS = 20;
-const DEFAULT_COLS = 10;
-const deriveDimensions = (board) => {
-    if (Array.isArray(board) && board.length > 0 && Array.isArray(board[0])) {
-        return { rows: board.length, cols: board[0].length };
-    }
-    return { rows: DEFAULT_ROWS, cols: DEFAULT_COLS };
-};
-
 const OpponentBoard = ({ opponent, index, cellSize }) => {
     const board = opponent?.specter ?? [];
-    const { rows, cols } = deriveDimensions(board);
+    const { rows, cols } = deriveBoardDimensions(board);
     const name = opponent?.username ?? `Opponent ${index + 1}`;
 
     return (
@@ -187,7 +169,6 @@ const OpponentBoard = ({ opponent, index, cellSize }) => {
                     cellSize={cellSize}
                     showGrid={false}
                     grid={board}
-                    colors={MULTIPLAYER_COLORS}
                 />
             </MiniBoard>
         </OpponentCard>
@@ -223,13 +204,7 @@ const computePrimaryCellSize = () => {
 };
 
 const MultiplayerArena = () => {
-    const [cellSize, setCellSize] = useState(computePrimaryCellSize);
-
-    useEffect(() => {
-        const onResize = () => setCellSize(computePrimaryCellSize());
-        window.addEventListener('resize', onResize);
-        return () => window.removeEventListener('resize', onResize);
-    }, []);
+    const cellSize = useResponsiveValue(useCallback(computePrimaryCellSize, []));
 
     const { you, multiplayer } = useSelector((state) => state.game);
 
