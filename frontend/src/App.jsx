@@ -3,8 +3,7 @@ import HomePage from './pages/HomePage';
 import MenuPage from './pages/MenuPage';
 import LobbyPage from './pages/LobbyPage';
 import GamePage from './pages/GamePage';
-import JoinGamePage from './pages/JoinGamePage';
-import HostGamePage from './pages/HostGamePage';
+import MultiplayerGamePage from './pages/MultiplayerGamePage';
 import AnimatedBackground from './components/AnimatedBackground';
 import Notification from './components/Notification';
 
@@ -16,8 +15,7 @@ function App() {
             <Routes>
                 <Route path='/' element={ <HomePage /> } />
                 <Route path='/menu' element={ <MenuPage /> } />
-                <Route path='/join' element={ <JoinGamePage /> } />
-                <Route path='/host' element={ <HostGamePage /> } />
+                <Route path='/join' element={ <MultiplayerGamePage /> } />
                 <Route path='/lobby' element={ <LobbyPage /> } />
                 <Route path='/game' element={ <GamePage /> } />
             </Routes>
