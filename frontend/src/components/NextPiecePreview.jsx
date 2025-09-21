@@ -48,27 +48,40 @@ const extractBlocks = (piece) => {
 };
 
 const buildPreviewMatrix = (piece) => {
-    const rows = 4, cols = 4;
+    const rows = 4;
+    const cols = 4;
     const matrix = Array.from({ length: rows }, () => Array(cols).fill(0));
     if (!piece) return matrix;
 
     const blocks = extractBlocks(piece);
     if (blocks.length === 0) return matrix;
 
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
     for (const [x, y] of blocks) {
-        if (x < minX) minX = x; if (y < minY) minY = y;
-        if (x > maxX) maxX = x; if (y > maxY) maxY = y;
+        if (x < minX) minX = x;
+        if (y < minY) minY = y;
+        if (x > maxX) maxX = x;
+        if (y > maxY) maxY = y;
     }
+
     const width = maxX - minX + 1;
+    const height = maxY - minY + 1;
+
     const offsetX = Math.floor((cols - width) / 2) - minX;
-    const offsetY = -minY;
+    const offsetY = Math.floor((rows - height) / 2) - minY;
 
     for (const [bx, by] of blocks) {
         const x = bx + offsetX;
         const y = by + offsetY;
-        if (x >= 0 && x < cols && y >= 0 && y < rows) matrix[y][x] = 1;
+        if (x >= 0 && x < cols && y >= 0 && y < rows) {
+            matrix[y][x] = 1;
+        }
     }
+
     return matrix;
 };
 
