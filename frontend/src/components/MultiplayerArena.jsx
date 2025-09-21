@@ -2,14 +2,12 @@ import { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import TetrisGrid from './TetrisGrid';
-import { Subtitle } from '../pages/HomePage.styled';
 import { useSelector } from 'react-redux';
-import { requestPieceMove } from '../features/socket/socketThunks.js';
-import { extractMoveDirection, shouldIgnoreForGameControls } from '../utils/keyboard.js';
+import GameView from './GameView.jsx';
 
 const ArenaContainer = styled.div`
-    width: min(96vw, 1040px);
-    height: min(84vh, 720px);
+    width: 80%;
+    height: 100%;
     flex: 1;
     display: flex;
     justify-content: center;
@@ -152,96 +150,6 @@ const MainColumn = styled.section`
     max-height: 100%;
 `;
 
-const PlayerPanel = styled.div`
-    width: fit-content;
-    max-width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.4rem;
-`;
-
-const PlayerBoardHolder = styled.div`
-    width: fit-content;
-    max-width: 100%;
-    display: flex;
-    justify-content: center;
-`;
-
-const PlayerBoardArea = styled.div`
-    display: flex;
-    gap: clamp(0.8rem, 2vw, 1.4rem);
-    justify-content: center;
-    align-items: stretch;
-    flex-wrap: wrap;
-    width: 100%;
-    max-width: clamp(320px, 90vw, 640px);
-`;
-
-const PlayerName = styled.h2`
-    margin: 0;
-    font-size: clamp(1.15rem, 2vw, 1.6rem);
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: ${({ $highlight }) => ($highlight ? '#f9f1ff' : 'rgba(234, 226, 255, 0.9)')};
-`;
-
-const EmptyPanel = styled.div`
-    width: fit-content;
-    max-width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-    align-items: center;
-    padding: clamp(0.9rem, 2vw, 1.2rem);
-    border-radius: 12px;
-    border: 1px dashed rgba(142, 107, 225, 0.32);
-    background: rgba(23, 21, 36, 0.42);
-    text-align: center;
-`;
-
-const StatsTray = styled.div`
-    display: grid;
-    gap: 0.55rem;
-    align-content: center;
-    justify-items: stretch;
-    min-width: clamp(150px, 28vw, 200px);
-    flex: 0 0 auto;
-
-    @media (max-width: 620px) {
-        flex: 1 1 100%;
-        width: clamp(220px, 84vw, 420px);
-        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-    }
-`;
-
-const StatPill = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.2rem;
-    padding: 0.5rem 0.85rem;
-    border-radius: 18px;
-    border: 1px solid rgba(162, 130, 235, 0.32);
-    background: rgba(42, 36, 66, 0.76);
-    box-shadow: inset 0 1px 0 rgba(217, 206, 255, 0.18);
-`;
-
-const StatValue = styled.span`
-    font-size: 0.94rem;
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: #f6f1ff;
-`;
-
-const StatLabel = styled.span`
-    font-size: 0.56rem;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: rgba(207, 198, 236, 0.68);
-`;
-
 const MULTIPLAYER_COLORS = {
     1: 'rgba(0,229,255,1)',
     2: 'rgba(255,149,0,1)',
@@ -299,52 +207,6 @@ OpponentBoard.propTypes = {
     cellSize: PropTypes.number.isRequired,
 };
 
-const PlayerField = ({ player, board, piece, cellSize }) => {
-    const { rows, cols } = deriveDimensions(board);
-    const stats = player?.stats ?? {};
-    const name = player?.username ?? player?.name ?? 'You';
-
-    return (
-        <PlayerPanel>
-            <PlayerName $highlight>{name}</PlayerName>
-            <PlayerBoardArea>
-                <PlayerBoardHolder>
-                    <TetrisGrid
-                        rows={rows}
-                        cols={cols}
-                        cellSize={cellSize}
-                        showGrid
-                        grid={board}
-                        currentPiece={piece}
-                        colors={MULTIPLAYER_COLORS}
-                    />
-                </PlayerBoardHolder>
-                <StatsTray>
-                    <StatPill>
-                        <StatValue>{stats.linesCleared ?? 0}</StatValue>
-                        <StatLabel>Lines Cleared</StatLabel>
-                    </StatPill>
-                    <StatPill>
-                        <StatValue>{stats.penaltiesSent ?? 0}</StatValue>
-                        <StatLabel>Penalties Sent</StatLabel>
-                    </StatPill>
-                    <StatPill>
-                        <StatValue>{stats.penaltiesReceived ?? 0}</StatValue>
-                        <StatLabel>Penalties Received</StatLabel>
-                    </StatPill>
-                </StatsTray>
-            </PlayerBoardArea>
-        </PlayerPanel>
-    );
-};
-
-PlayerField.propTypes = {
-    player: OpponentBoard.propTypes.opponent,
-    board: PropTypes.array,
-    piece: PropTypes.object,
-    cellSize: PropTypes.number.isRequired,
-};
-
 const computePrimaryCellSize = () => {
     if (typeof window === 'undefined') return 32;
     const w = window.innerWidth;
@@ -369,10 +231,8 @@ const MultiplayerArena = () => {
         return () => window.removeEventListener('resize', onResize);
     }, []);
 
-    const { grid, currentPiece, you, multiplayer } = useSelector((state) => state.game);
+    const { you, multiplayer } = useSelector((state) => state.game);
 
-    const board = Array.isArray(grid) ? grid : [];
-    const piece = currentPiece ?? null;
     const player = you ?? null;
 
     const yourId = player?.id;
@@ -381,28 +241,6 @@ const MultiplayerArena = () => {
         : [];
 
     const opponentCellSize = useMemo(() => Math.max(10, Math.floor(cellSize * 0.4)), [cellSize]);
-
-    useEffect(() => {
-        if (!player || typeof window === 'undefined') return () => {};
-
-        const handleKeyDown = (event) => {
-            if (!event) return;
-
-            if (shouldIgnoreForGameControls(event.target)) return;
-
-            const direction = extractMoveDirection(event);
-            if (!direction) return;
-
-            event.preventDefault();
-            requestPieceMove({ direction });
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-
-        return () => {
-            window.removeEventListener('keydown', handleKeyDown);
-        };
-    }, [player]);
 
     return (
         <ArenaContainer>
@@ -426,19 +264,7 @@ const MultiplayerArena = () => {
                 </OpponentColumn>
 
                 <MainColumn>
-                    {player ? (
-                        <PlayerField
-                            player={player}
-                            board={board}
-                            piece={piece}
-                            cellSize={cellSize}
-                        />
-                    ) : (
-                        <EmptyPanel>
-                            <PlayerName>No Active Board</PlayerName>
-                            <Subtitle>Join a match to start stacking.</Subtitle>
-                        </EmptyPanel>
-                    )}
+                    <GameView/>
                 </MainColumn>
             </ArenaLayout>
         </ArenaContainer>

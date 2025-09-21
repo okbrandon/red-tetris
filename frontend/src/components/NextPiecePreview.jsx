@@ -101,6 +101,7 @@ const NextPiecePreview = ({ piece, cellSize = 18, colors = defaultColors }) => {
         </Board>
     );
 };
+
 NextPiecePreview.propTypes = {
     piece: PropTypes.shape({
         id: PropTypes.number,

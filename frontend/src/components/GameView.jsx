@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import TetrisGrid from './TetrisGrid';
-import { Subtitle } from '../pages/HomePage.styled';
-import NextPiecePreview from './NextPiecePreview';
+import TetrisGrid from './TetrisGrid.jsx';
+import { Subtitle } from '../pages/HomePage.styled.js';
+import NextPiecePreview from './NextPiecePreview.jsx';
 import { requestPieceMove } from '../features/socket/socketThunks.js';
 import { extractMoveDirection, shouldIgnoreForGameControls } from '../utils/keyboard.js';
 
@@ -29,7 +29,7 @@ const normalizePiece = (piece) => {
     };
 };
 
-const SoloGameView = () => {
+const GameView = () => {
     const { grid, currentPiece, nextPieces, score } = useSelector((state) => state.game);
 
     const board = useMemo(() => (Array.isArray(grid) ? grid : []), [grid]);
@@ -79,69 +79,56 @@ const SoloGameView = () => {
     const queuePreviewSize = useMemo(() => Math.max(14, Math.floor(cellSize * 0.48)), [cellSize]);
 
     return (
-        <SoloArena>
-            <SoloLayout>
-                <BoardArea>
-                    <BoardFrame>
-                        <TetrisGrid
-                            rows={rows}
-                            cols={cols}
-                            cellSize={cellSize}
-                            showGrid
-                            grid={board}
-                            currentPiece={normalizedPiece}
-                        />
-                    </BoardFrame>
-                </BoardArea>
-                <PanelArea>
-                    <PanelHeading>
-                        <Subtitle as='h2' style={{ margin: 0 }}>Solo Journey</Subtitle>
-                        <PanelCaption>Stay sharp, stack the neon skyline.</PanelCaption>
-                    </PanelHeading>
+        <Layout>
+            <BoardArea>
+                <BoardFrame>
+                    <TetrisGrid
+                        rows={rows}
+                        cols={cols}
+                        cellSize={cellSize}
+                        showGrid
+                        grid={board}
+                        currentPiece={normalizedPiece}
+                    />
+                </BoardFrame>
+            </BoardArea>
+            <PanelArea>
+                <PanelHeading>
+                    <Subtitle as='h2' style={{ margin: 0 }}>Solo Journey</Subtitle>
+                    <PanelCaption>Stay sharp, stack the neon skyline.</PanelCaption>
+                </PanelHeading>
 
-                    <InfoCard aria-label='Score overview'>
-                        <InfoLabel>Score</InfoLabel>
-                        <ScoreValue>{score ?? 0}</ScoreValue>
-                    </InfoCard>
+                <InfoCard aria-label='Score overview'>
+                    <InfoLabel>Score</InfoLabel>
+                    <ScoreValue>{score ?? 0}</ScoreValue>
+                </InfoCard>
 
-                    <InfoCard aria-label='Upcoming pieces'>
-                        <InfoLabel>Next Pieces</InfoLabel>
-                        {queue.length ? (
-                            <VerticalPreview>
-                                {queue.slice(0, 3).map((piece, index) => (
-                                    <PreviewSlot key={piece?.id ?? piece?.name ?? `next-${index}`}>
-                                        <NextPiecePreview
-                                            piece={piece}
-                                            cellSize={index === 0 ? primaryPreviewSize : queuePreviewSize}
-                                        />
-                                    </PreviewSlot>
-                                ))}
-                            </VerticalPreview>
-                        ) : (
-                            <EmptyQueue>No preview available</EmptyQueue>
-                        )}
-                    </InfoCard>
-                </PanelArea>
-            </SoloLayout>
-        </SoloArena>
+                <InfoCard aria-label='Upcoming pieces'>
+                    <InfoLabel>Next Pieces</InfoLabel>
+                    {queue.length ? (
+                        <VerticalPreview>
+                            {queue.slice(0, 3).map((piece, index) => (
+                                <PreviewSlot key={piece?.id ?? piece?.name ?? `next-${index}`}>
+                                    <NextPiecePreview
+                                        piece={piece}
+                                        cellSize={index === 0 ? primaryPreviewSize : queuePreviewSize}
+                                    />
+                                </PreviewSlot>
+                            ))}
+                        </VerticalPreview>
+                    ) : (
+                        <EmptyQueue>No preview available</EmptyQueue>
+                    )}
+                </InfoCard>
+            </PanelArea>
+        </Layout>
     );
 };
 
-export default SoloGameView;
+export default GameView;
 
-const SoloArena = styled.div`
-    width: min(96vw, 1040px);
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto;
-    padding: clamp(0.8rem, 3vw, 1.6rem);
-    box-sizing: border-box;
-`;
-
-const SoloLayout = styled.div`
-    width: 100%;
+const Layout = styled.div`
+    width: fit-content;
     height: 100%;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -153,7 +140,7 @@ const SoloLayout = styled.div`
     border: 1px solid rgba(142, 107, 225, 0.26);
     background: linear-gradient(160deg, rgba(26, 22, 45, 0.88), rgba(13, 11, 24, 0.96));
     box-shadow: 0 24px 46px rgba(8, 5, 18, 0.52);
-    padding: clamp(1.1rem, 3vw, 2rem);
+    padding: clamp(1.1rem, 3vw, 2rem) 100px;
     box-sizing: border-box;
 
     @media (min-width: 920px) {
