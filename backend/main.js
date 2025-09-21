@@ -198,6 +198,7 @@ io.on("connection", (socket) => {
 					message: error.message
 				}));
 			}
+			console.log(rooms);
 			return;
 		}
 
@@ -329,6 +330,7 @@ io.on("connection", (socket) => {
 		}
 
 		console.log("A user disconnected");
+		console.log(rooms);
 	});
 });
 
