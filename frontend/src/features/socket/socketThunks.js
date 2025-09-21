@@ -98,7 +98,6 @@ export const initializeSocket = () => {
 
     addListener(SERVER_EVENTS.ROOM_LEFT, (payload) => { // done
         dispatch(socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.ROOM_LEFT, payload }));
-        dispatch(resetGameState());
     });
 
     addListener(SERVER_EVENTS.GAME_STARTED, (payload) => { // done

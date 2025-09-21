@@ -6,6 +6,7 @@ import { PlayerList, Player } from './LobbyPage.styled';
 import { showNotification } from '../features/notification/notificationSlice';
 import { requestRoomLeave, requestStartGame } from '../features/socket/socketThunks.js';
 import { useEffect } from 'react';
+import { resetGameState } from '../features/game/gameSlice.js';
 
 const LobbyPage = () => {
     const username = useSelector((state) => state.user.username);
@@ -42,6 +43,7 @@ const LobbyPage = () => {
 
     const handleLeaveLobby = () => {
         requestRoomLeave();
+        dispatch(resetGameState());
         dispatch(showNotification({ type: 'info', message: 'Leaving lobby…' }));
         navigate('/menu');
     };

@@ -1,31 +1,45 @@
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { useEffect, useRef } from 'react';
 import { Wrapper, LogoTitle, Card, Subtitle, StartButton } from './HomePage.styled';
 import BackButton from '../components/BackButton';
-import { resetGameState, setGameMode } from '../features/game/gameSlice';
-import { requestRoomJoin, requestStartGame } from '../features/socket/socketThunks.js';
+import { SOLO_ROOM_NAME, startSoloGame } from '../features/game/gameSlice.js';
 import { showNotification } from '../features/notification/notificationSlice';
-import { useEffect } from 'react';
+import { requestRoomJoin, requestStartGame } from '../features/socket/socketThunks.js';
 
 const MenuPage = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const gameStatus = useSelector((state) => state.game.gameStatus);
-    const gameName = useSelector((state) => state.game.roomName);
+    const { mode, gameStatus, roomName } = useSelector((state) => state.game);
+    const soloStartRequested = useRef(false);
 
     const handleSoloJourney = () => {
-        requestRoomJoin({ roomName: 'testt' });
-        dispatch(resetGameState());
-        dispatch(setGameMode('solo'));
+        dispatch(startSoloGame());
+        soloStartRequested.current = false;
+        requestRoomJoin({ roomName: SOLO_ROOM_NAME });
         dispatch(showNotification({ type: 'info', message: 'Starting solo journey...'}));
     }
 
     useEffect(() => {
-        if (gameName && gameName === 'testt')
+        if (!soloStartRequested.current
+            && mode === 'solo'
+            && roomName === SOLO_ROOM_NAME
+            && gameStatus === 'waiting') {
+            soloStartRequested.current = true;
             requestStartGame();
+        }
+    }, [gameStatus, mode, roomName]);
+
+    useEffect(() => {
+        if (mode !== 'solo' || roomName !== SOLO_ROOM_NAME) {
+            soloStartRequested.current = false;
+        }
+    }, [mode, roomName]);
+
+    useEffect(() => {
         if (gameStatus && gameStatus === 'in-game')
             navigate('/game');
-    }, [gameStatus, gameName, navigate]);
+    }, [gameStatus, navigate]);
 
     return (
         <Wrapper>

@@ -1,5 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+export const SOLO_ROOM_NAME = 'solo-local';
+
 const createInitialMultiplayerState = () => ({
     players: [],
     maxPlayers: 4,
@@ -70,8 +72,14 @@ export const gameSlice = createSlice({
             state.roomName = action.payload.roomName ?? '';
         },
         resetGameState: () => createInitialState(), // room_left
+        startSoloGame: () => ({
+            ...createInitialState(),
+            mode: 'solo',
+            roomName: '',
+            gameStatus: 'waiting',
+        }),
     },
 });
 
-export const { setGameMode, setGameState, setLobbySettings, resetGameState, setRoomName, setGameStatus } = gameSlice.actions;
+export const { setGameMode, setGameState, setLobbySettings, resetGameState, setRoomName, setGameStatus, startSoloGame } = gameSlice.actions;
 export default gameSlice.reducer;
