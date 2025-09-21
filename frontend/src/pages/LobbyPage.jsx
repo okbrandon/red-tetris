@@ -4,7 +4,7 @@ import { Wrapper, Card, Subtitle, StartButton, LogoTitle } from './HomePage.styl
 import BackButton from '../components/BackButton';
 import { PlayerList, Player } from './LobbyPage.styled';
 import { showNotification } from '../features/notification/notificationSlice';
-import { requestRoomLeave, requestStartGame } from '../features/socket/socketThunks';
+import { requestRoomLeave, requestStartGame } from '../features/socket/socketThunks.js';
 import { useEffect } from 'react';
 
 const LobbyPage = () => {
@@ -37,11 +37,11 @@ const LobbyPage = () => {
             dispatch(showNotification({ type: 'error', message: 'Only the lobby owner can start the game.' }));
             return;
         }
-        dispatch(requestStartGame());
+        requestStartGame();
     };
 
     const handleLeaveLobby = () => {
-        dispatch(requestRoomLeave());
+        requestRoomLeave();
         dispatch(showNotification({ type: 'info', message: 'Leaving lobby…' }));
         navigate('/menu');
     };
@@ -49,7 +49,7 @@ const LobbyPage = () => {
     useEffect(() => {
         if (gameStatus && gameStatus === 'in-game')
             navigate('/game');
-    }, [gameStatus]);
+    }, [gameStatus, navigate]);
 
     useEffect(() => {
         console.log('Game state on LobbyPage:', game);

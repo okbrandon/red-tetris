@@ -7,7 +7,7 @@ import { JoinForm, JoinHint } from './MultiplayerGamePage.styled';
 import { resetGameState } from '../features/game/gameSlice';
 import { showNotification } from '../features/notification/notificationSlice';
 import { setGameMode } from '../features/game/gameSlice';
-import { requestRoomJoin } from '../features/socket/socketThunks';
+import { requestRoomJoin } from '../features/socket/socketThunks.js';
 
 const MultiplayerGamePage = () => {
     const dispatch = useDispatch();
@@ -22,7 +22,7 @@ const MultiplayerGamePage = () => {
             return;
         }
 
-        dispatch(requestRoomJoin({ roomName: trimmed })); // TODO: should not join the room if there are already 4 players
+        requestRoomJoin({ roomName: trimmed }); // TODO: should not join the room if there are already 4 players
         dispatch(resetGameState());
         dispatch(setGameMode('multiplayer'));
         dispatch(showNotification({ type: 'success', message: `Joining lobby ${trimmed}…` }));

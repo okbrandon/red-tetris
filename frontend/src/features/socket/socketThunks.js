@@ -10,8 +10,12 @@ import {
 import { showNotification } from '../notification/notificationSlice.js';
 import { setServerIdentity } from '../user/userSlice.js';
 import { setGameState, setRoomName, setGameStatus, resetGameState, setLobbySettings } from '../game/gameSlice.js';
+import { store } from '../../store.js';
 
 let listenersBound = false;
+
+const dispatch = (action) => store.dispatch(action);
+const getState = () => store.getState();
 
 const parseServerPayload = (payload) => {
     if (payload == null) return null;
@@ -25,7 +29,7 @@ const parseServerPayload = (payload) => {
     return payload;
 };
 
-export const initializeSocket = () => (dispatch) => {
+export const initializeSocket = () => {
     const socket = socketClient.connect();
 
     if (listenersBound) {
@@ -120,7 +124,7 @@ export const initializeSocket = () => (dispatch) => {
     };
 };
 
-export const ensureSocketConnection = () => (dispatch, getState) => {
+export const ensureSocketConnection = () => {
     const { status } = getState().socket;
 
     if (status === 'connected') {
@@ -131,41 +135,41 @@ export const ensureSocketConnection = () => (dispatch, getState) => {
     }
 
     if (status !== 'connecting') {
-        dispatch(initializeSocket());
+        initializeSocket();
     }
 };
 
-const emitWithTracking = (dispatch, type, payload) => {
+const emitWithTracking = (type, payload) => {
     dispatch(socketEventReceived({ direction: 'outgoing', type, payload }));
     socketClient.emit(type, payload);
 };
 
-export const sendClientUpdate = (payload) => (dispatch) => {
-    dispatch(ensureSocketConnection());
-    emitWithTracking(dispatch, CLIENT_EVENTS.CLIENT_UPDATE, payload);
+export const sendClientUpdate = (payload) => {
+    ensureSocketConnection();
+    emitWithTracking(CLIENT_EVENTS.CLIENT_UPDATE, payload);
 };
 
-export const requestRoomJoin = (payload) => (dispatch) => {
-    dispatch(ensureSocketConnection());
-    emitWithTracking(dispatch, CLIENT_EVENTS.ROOM_JOIN, payload);
+export const requestRoomJoin = (payload) => {
+    ensureSocketConnection();
+    emitWithTracking(CLIENT_EVENTS.ROOM_JOIN, payload);
 };
 
-export const requestRoomLeave = () => (dispatch) => {
-    dispatch(ensureSocketConnection());
-    emitWithTracking(dispatch, CLIENT_EVENTS.ROOM_LEAVE);
+export const requestRoomLeave = () => {
+    ensureSocketConnection();
+    emitWithTracking(CLIENT_EVENTS.ROOM_LEAVE);
 };
 
-export const requestStartGame = () => (dispatch) => {
-    dispatch(ensureSocketConnection());
-    emitWithTracking(dispatch, CLIENT_EVENTS.START_GAME);
+export const requestStartGame = () => {
+    ensureSocketConnection();
+    emitWithTracking(CLIENT_EVENTS.START_GAME);
 };
 
-export const requestRestartGame = () => (dispatch) => {
-    dispatch(ensureSocketConnection());
-    emitWithTracking(dispatch, CLIENT_EVENTS.RESTART_GAME);
+export const requestRestartGame = () => {
+    ensureSocketConnection();
+    emitWithTracking(CLIENT_EVENTS.RESTART_GAME);
 };
 
-export const requestPieceMove = (payload) => (dispatch) => {
-    dispatch(ensureSocketConnection());
-    emitWithTracking(dispatch, CLIENT_EVENTS.MOVE_PIECE, payload);
+export const requestPieceMove = (payload) => {
+    ensureSocketConnection();
+    emitWithTracking(CLIENT_EVENTS.MOVE_PIECE, payload);
 };

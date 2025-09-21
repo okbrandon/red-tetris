@@ -5,7 +5,7 @@ import BackButton from '../components/BackButton';
 import SoloGameView from '../components/SoloGameView';
 import { PageWrapper } from './GamePage.styled';
 import MultiplayerArena from '../components/MultiplayerArena';
-import { requestRoomLeave } from '../features/socket/socketThunks';
+import { requestRoomLeave } from '../features/socket/socketThunks.js';
 import { useNavigate } from 'react-router-dom';
 import { showNotification } from '../features/notification/notificationSlice';
 import { useEffect } from 'react';
@@ -28,10 +28,10 @@ const GamePage = () => {
         console.log('Game status on GamePage:', gameStatus);
         if (gameStatus && gameStatus === 'game-over') {
             dispatch(showNotification({ type: 'info', message: 'The game has ended. Returning to menu.' }));
-            dispatch(requestRoomLeave());
+            requestRoomLeave();
             navigate('/menu');
         }
-    }, [gameStatus]);
+    }, [dispatch, gameStatus, navigate]);
 
     return (
         <PageWrapper>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { updateUsername } from '../features/user/userThunks';
+import { updateUsername } from '../features/user/userThunks.js';
 import { showNotification } from '../features/notification/notificationSlice';
 import { Wrapper, StartButton, Input, LogoTitle, Card, Subtitle, FormRow, HintText } from './HomePage.styled';
 
@@ -14,7 +14,7 @@ const HomePage = () => {
         const trimmed = name.trim();
 
         if (trimmed) {
-            dispatch(updateUsername(trimmed));
+            updateUsername(trimmed);
             dispatch(showNotification({ type: 'success', message: `Welcome ${trimmed}!` }));
             navigate('/menu');
         } else {

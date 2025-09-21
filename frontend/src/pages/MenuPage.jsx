@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Wrapper, LogoTitle, Card, Subtitle, StartButton } from './HomePage.styled';
 import BackButton from '../components/BackButton';
 import { resetGameState, setGameMode } from '../features/game/gameSlice';
-import { requestRoomJoin, requestStartGame } from '../features/socket/socketThunks';
+import { requestRoomJoin, requestStartGame } from '../features/socket/socketThunks.js';
 import { showNotification } from '../features/notification/notificationSlice';
 import { useEffect } from 'react';
 
@@ -14,7 +14,7 @@ const MenuPage = () => {
     const gameName = useSelector((state) => state.game.roomName);
 
     const handleSoloJourney = () => {
-        dispatch(requestRoomJoin({ roomName: 'testt' }));
+        requestRoomJoin({ roomName: 'testt' });
         dispatch(resetGameState());
         dispatch(setGameMode('solo'));
         dispatch(showNotification({ type: 'info', message: 'Starting solo journey...'}));
@@ -22,10 +22,10 @@ const MenuPage = () => {
 
     useEffect(() => {
         if (gameName && gameName === 'testt')
-            dispatch(requestStartGame());
+            requestStartGame();
         if (gameStatus && gameStatus === 'in-game')
             navigate('/game');
-    }, [gameStatus, gameName]);
+    }, [gameStatus, gameName, navigate]);
 
     return (
         <Wrapper>
