@@ -1,25 +1,30 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+export const SOLO_ROOM_NAME = 'solo-local';
+
 const createInitialMultiplayerState = () => ({
-    roomCode: '',
-    sharedPieceQueue: [],
     players: [],
-    garbageLog: [],
+    maxPlayers: 4,
 });
 
-const initialState = {
+const createInitialState = () => ({
     mode: 'solo',
+    owner: null,
+    isOwner: false,
+    gameStatus: 'waiting',
     score: 0,
+    roomName: '',
+    you: null,
+    grid: [[]],
+    nextPieces: [],
+    currentPiece: null,
     multiplayer: createInitialMultiplayerState(),
-};
+});
 
 export const gameSlice = createSlice({
     name: 'game',
-    initialState,
+    initialState: createInitialState(),
     reducers: {
-        incrementScore: (state) => {
-            state.score += 10;
-        },
         setGameMode: (state, action) => {
             const mode = action.payload === 'multiplayer' ? 'multiplayer' : 'solo';
             state.mode = mode;
@@ -28,16 +33,55 @@ export const gameSlice = createSlice({
                 state.score = 0;
             }
         },
-        setMultiplayerSnapshot: (state, action) => {
-            state.multiplayer = { ...createInitialMultiplayerState(), ...action.payload };
+        setGameState: (state, action) => {
+            const { room, you, grid, currentPiece, nextPieces, clients, score } = action.payload ?? {};
+
+            if (room) {
+                state.mode = room.soloJourney ? 'solo' : 'multiplayer';
+                state.roomName = room.id || state.roomName || '';
+                state.owner = room.owner || state.owner;
+            }
+            state.you = you || null;
+            state.currentPiece = currentPiece || null;
+            state.grid = grid || [[]];
+            state.nextPieces = Array.isArray(nextPieces) ? nextPieces : [];
+
+            if (typeof score === 'number') {
+                state.score = score;
+            }
+
+            state.multiplayer = {
+                ...state.multiplayer,
+                players: clients,
+            };
         },
-        resetGameState: () => ({
+        setGameStatus: (state, action) => { // game_started / game_over
+            const message = action.payload.room?.status || '';
+
+            state.gameStatus = message;
+        },
+        setLobbySettings: (state, action) => { // room_broadcast
+            const { room, owner, you, clients } = action.payload;
+            state.roomName = room || null;
+            state.owner = owner || null;
+            state.you = you || null;
+            state.isOwner = you && owner && you.id === owner.id;
+            if (Array.isArray(clients) && clients.length > 0) {
+                state.multiplayer.players = clients;
+            }
+        },
+        setRoomName: (state, action) => { // room_created / room_joined
+            state.roomName = action.payload.roomName ?? '';
+        },
+        resetGameState: () => createInitialState(), // room_left
+        startSoloGame: () => ({
+            ...createInitialState(),
             mode: 'solo',
-            score: 0,
-            multiplayer: createInitialMultiplayerState(),
+            roomName: '',
+            gameStatus: 'waiting',
         }),
     },
 });
 
-export const { incrementScore, setGameMode, setMultiplayerSnapshot, resetGameState } = gameSlice.actions;
+export const { setGameMode, setGameState, setLobbySettings, resetGameState, setRoomName, setGameStatus, startSoloGame } = gameSlice.actions;
 export default gameSlice.reducer;

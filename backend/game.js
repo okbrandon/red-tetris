@@ -66,6 +66,7 @@ class Game {
 		if (this.clients.size >= this.maxPlayers)
 			throw new Error('Room is full');
 
+		client.reset();
 		client.room = this;
 		this.clients.add(client);
 	}
@@ -82,6 +83,7 @@ class Game {
 		if (client.updateInterval)
 			clearInterval(client.updateInterval);
 
+		client.reset();
 		client.room = null;
 		this.clients.delete(client);
 

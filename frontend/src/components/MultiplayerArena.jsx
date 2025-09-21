@@ -3,6 +3,9 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import TetrisGrid from './TetrisGrid';
 import { Subtitle } from '../pages/HomePage.styled';
+import { useSelector } from 'react-redux';
+import { requestPieceMove } from '../features/socket/socketThunks.js';
+import { extractMoveDirection, shouldIgnoreForGameControls } from '../utils/keyboard.js';
 
 const ArenaContainer = styled.div`
     width: min(96vw, 1040px);
@@ -250,90 +253,95 @@ const MULTIPLAYER_COLORS = {
     8: 'rgba(120,120,150,1)',
 };
 
-const playerShape = PropTypes.shape({
-    id: PropTypes.string,
-    name: PropTypes.string,
-    isSelf: PropTypes.bool,
-    status: PropTypes.string,
-    board: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)),
-    activePiece: PropTypes.object,
-    activePos: PropTypes.shape({ x: PropTypes.number, y: PropTypes.number }),
-    animateMs: PropTypes.number,
-    clearingRows: PropTypes.arrayOf(PropTypes.number),
-    clearAnimMs: PropTypes.number,
-    stats: PropTypes.shape({
-        linesCleared: PropTypes.number,
-        penaltiesSent: PropTypes.number,
-        penaltiesReceived: PropTypes.number,
-    }),
-});
+const DEFAULT_ROWS = 20;
+const DEFAULT_COLS = 10;
+const deriveDimensions = (board) => {
+    if (Array.isArray(board) && board.length > 0 && Array.isArray(board[0])) {
+        return { rows: board.length, cols: board[0].length };
+    }
+    return { rows: DEFAULT_ROWS, cols: DEFAULT_COLS };
+};
 
-const OpponentBoard = ({ opponent, cellSize }) => (
-    <OpponentCard>
-        <OpponentHeader>
-            <OpponentName>{opponent.name}</OpponentName>
-        </OpponentHeader>
-        <MiniBoard>
-            <TetrisGrid
-                rows={20}
-                cols={10}
-                cellSize={cellSize}
-                showGrid={false}
-                matrix={opponent.board}
-                activePiece={opponent.activePiece}
-                activePos={opponent.activePos}
-                animateMs={opponent.animateMs ?? 140}
-                clearingRows={opponent.clearingRows}
-                clearAnimMs={opponent.clearAnimMs ?? 220}
-                colors={MULTIPLAYER_COLORS}
-            />
-        </MiniBoard>
-    </OpponentCard>
-);
+const OpponentBoard = ({ opponent, index, cellSize }) => {
+    const board = opponent?.specter ?? [];
+    const { rows, cols } = deriveDimensions(board);
+    const name = opponent?.username ?? `Opponent ${index + 1}`;
+
+    return (
+        <OpponentCard>
+            <OpponentHeader>
+                <OpponentName>{name}</OpponentName>
+            </OpponentHeader>
+            <MiniBoard>
+                <TetrisGrid
+                    rows={rows}
+                    cols={cols}
+                    cellSize={cellSize}
+                    showGrid={false}
+                    grid={board}
+                    colors={MULTIPLAYER_COLORS}
+                />
+            </MiniBoard>
+        </OpponentCard>
+    );
+};
 
 OpponentBoard.propTypes = {
-    opponent: playerShape.isRequired,
+    opponent: PropTypes.shape({
+        id: PropTypes.string,
+        username: PropTypes.string,
+        name: PropTypes.string,
+        specter: PropTypes.array,
+        board: PropTypes.array,
+        stats: PropTypes.object,
+    }).isRequired,
+    index: PropTypes.number.isRequired,
     cellSize: PropTypes.number.isRequired,
 };
 
-const PlayerField = ({ player, cellSize }) => (
-    <PlayerPanel>
-        <PlayerBoardArea>
-            <PlayerBoardHolder>
-                <TetrisGrid
-                    rows={20}
-                    cols={10}
-                    cellSize={cellSize}
-                    showGrid
-                    matrix={player.board}
-                    activePiece={player.activePiece}
-                    activePos={player.activePos}
-                    animateMs={player.animateMs ?? 140}
-                    clearingRows={player.clearingRows}
-                    clearAnimMs={player.clearAnimMs ?? 220}
-                    colors={MULTIPLAYER_COLORS}
-                />
-            </PlayerBoardHolder>
-            <StatsTray>
-                <StatPill>
-                    <StatValue>{player.stats?.linesCleared ?? 0}</StatValue>
-                    <StatLabel>Lines Cleared</StatLabel>
-                </StatPill>
-                <StatPill>
-                    <StatValue>{player.stats?.penaltiesSent ?? 0}</StatValue>
-                    <StatLabel>Penalties Sent</StatLabel>
-                </StatPill>
-                <StatPill>
-                    <StatValue>{player.stats?.penaltiesReceived ?? 0}</StatValue>
-                    <StatLabel>Penalties Received</StatLabel>
-                </StatPill>
-            </StatsTray>
-        </PlayerBoardArea>
-    </PlayerPanel>
-);
+const PlayerField = ({ player, board, piece, cellSize }) => {
+    const { rows, cols } = deriveDimensions(board);
+    const stats = player?.stats ?? {};
+    const name = player?.username ?? player?.name ?? 'You';
+
+    return (
+        <PlayerPanel>
+            <PlayerName $highlight>{name}</PlayerName>
+            <PlayerBoardArea>
+                <PlayerBoardHolder>
+                    <TetrisGrid
+                        rows={rows}
+                        cols={cols}
+                        cellSize={cellSize}
+                        showGrid
+                        grid={board}
+                        currentPiece={piece}
+                        colors={MULTIPLAYER_COLORS}
+                    />
+                </PlayerBoardHolder>
+                <StatsTray>
+                    <StatPill>
+                        <StatValue>{stats.linesCleared ?? 0}</StatValue>
+                        <StatLabel>Lines Cleared</StatLabel>
+                    </StatPill>
+                    <StatPill>
+                        <StatValue>{stats.penaltiesSent ?? 0}</StatValue>
+                        <StatLabel>Penalties Sent</StatLabel>
+                    </StatPill>
+                    <StatPill>
+                        <StatValue>{stats.penaltiesReceived ?? 0}</StatValue>
+                        <StatLabel>Penalties Received</StatLabel>
+                    </StatPill>
+                </StatsTray>
+            </PlayerBoardArea>
+        </PlayerPanel>
+    );
+};
 
 PlayerField.propTypes = {
-    player: playerShape.isRequired,
+    player: OpponentBoard.propTypes.opponent,
+    board: PropTypes.array,
+    piece: PropTypes.object,
     cellSize: PropTypes.number.isRequired,
 };
 
@@ -352,7 +360,7 @@ const computePrimaryCellSize = () => {
     return Math.max(20, Math.min(raw, 42));
 };
 
-const MultiplayerArena = ({ players }) => {
+const MultiplayerArena = () => {
     const [cellSize, setCellSize] = useState(computePrimaryCellSize);
 
     useEffect(() => {
@@ -361,10 +369,40 @@ const MultiplayerArena = ({ players }) => {
         return () => window.removeEventListener('resize', onResize);
     }, []);
 
-    const playerList = Array.isArray(players) && players.length ? players : [];
-    const you = playerList.find((p) => p.isSelf) || playerList[0];
-    const opponents = playerList.filter((p) => p !== you);
+    const { grid, currentPiece, you, multiplayer } = useSelector((state) => state.game);
+
+    const board = Array.isArray(grid) ? grid : [];
+    const piece = currentPiece ?? null;
+    const player = you ?? null;
+
+    const yourId = player?.id;
+    const opponents = Array.isArray(multiplayer?.players)
+        ? multiplayer.players.filter((opponent) => (yourId ? opponent?.id !== yourId : true))
+        : [];
+
     const opponentCellSize = useMemo(() => Math.max(10, Math.floor(cellSize * 0.4)), [cellSize]);
+
+    useEffect(() => {
+        if (!player || typeof window === 'undefined') return () => {};
+
+        const handleKeyDown = (event) => {
+            if (!event) return;
+
+            if (shouldIgnoreForGameControls(event.target)) return;
+
+            const direction = extractMoveDirection(event);
+            if (!direction) return;
+
+            event.preventDefault();
+            requestPieceMove({ direction });
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [player]);
 
     return (
         <ArenaContainer>
@@ -373,8 +411,13 @@ const MultiplayerArena = ({ players }) => {
                     <SectionLabel>{`Opponents${opponents.length ? ` (${opponents.length})` : ''}`}</SectionLabel>
                     {opponents.length ? (
                         <OpponentScroller aria-label='Opponent boards'>
-                            {opponents.map((opponent) => (
-                                <OpponentBoard key={opponent.id || opponent.name} opponent={opponent} cellSize={opponentCellSize} />
+                            {opponents.map((opponent, index) => (
+                                <OpponentBoard
+                                    key={opponent?.id || opponent?.username || opponent?.name || `opponent-${index}`}
+                                    opponent={opponent}
+                                    index={index}
+                                    cellSize={opponentCellSize}
+                                />
                             ))}
                         </OpponentScroller>
                     ) : (
@@ -383,8 +426,13 @@ const MultiplayerArena = ({ players }) => {
                 </OpponentColumn>
 
                 <MainColumn>
-                    {you ? (
-                        <PlayerField player={you} cellSize={cellSize} />
+                    {player ? (
+                        <PlayerField
+                            player={player}
+                            board={board}
+                            piece={piece}
+                            cellSize={cellSize}
+                        />
                     ) : (
                         <EmptyPanel>
                             <PlayerName>No Active Board</PlayerName>
@@ -395,10 +443,6 @@ const MultiplayerArena = ({ players }) => {
             </ArenaLayout>
         </ArenaContainer>
     );
-};
-
-MultiplayerArena.propTypes = {
-    players: PropTypes.arrayOf(playerShape),
 };
 
 export default MultiplayerArena;

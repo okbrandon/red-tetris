@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCallback, useMemo } from 'react';
 import { BackButtonContainer, BackButton as BackButtonButton } from '../pages/HomePage.styled';
 
-const BackButton = () => {
+const BackButton = ({ onClick }) => {
     const navigate = useNavigate();
 
     const canGoBack = useMemo(() => {
@@ -12,12 +12,17 @@ const BackButton = () => {
     }, []);
 
     const handleBack = useCallback(() => {
+        if (onClick) {
+            onClick();
+            return;
+        }
+
         if (canGoBack) {
             navigate(-1);
         } else {
             navigate('/');
         }
-    }, [canGoBack, navigate]);
+    }, [canGoBack, navigate, onClick]);
 
     return (
         <BackButtonContainer>
