@@ -1,4 +1,4 @@
-import { describe, beforeEach, test, expect, vi } from "vitest";
+import { jest } from '@jest/globals';
 import gameSettings from '../constants/game-settings.js';
 import gameStatus from '../constants/game-status.js';
 import Player from '../player.js';
@@ -10,8 +10,8 @@ describe('Player', () => {
 
 	beforeEach(() => {
 		mockConnection = {
-			send: vi.fn(),
-			emit: vi.fn()
+			send: jest.fn(),
+			emit: jest.fn()
 		};
 		player = new Player(mockConnection, 'player1', 'Alice');
 		player.room = {
@@ -22,7 +22,7 @@ describe('Player', () => {
 			rows: 2,
 			cols: 2,
 			clients: new Set([player]),
-			handlePenalties: vi.fn()
+			handlePenalties: jest.fn()
 		};
 	});
 
@@ -104,15 +104,15 @@ describe('Player', () => {
 			{ shape: [[1]], color: 'green', position: { x: 0, y: 0 } }
 		]);
 		const otherPlayer = Object.assign(new Player(mockConnection, 'player2', 'Bob'), {
-			getLandSpecter: vi.fn(() => [[{ filled: true }]])
+			getLandSpecter: jest.fn(() => [[{ filled: true }]])
 		});
 		player.room.clients = new Set([player, otherPlayer]);
-		player.getLandSpecter = vi.fn(() => [[{ filled: true }]]);
+		player.getLandSpecter = jest.fn(() => [[{ filled: true }]]);
 		player.currentPieceIndex = 0;
-		player.emit = vi.fn();
-		player.removePieceFromGrid = vi.fn((piece, grid) => grid);
-		player.mergePieceIntoGrid = vi.fn((piece, grid, ghost) => grid);
-		player.getGhostPiece = vi.fn(() => player.currentPiece);
+		player.emit = jest.fn();
+		player.removePieceFromGrid = jest.fn((piece, grid) => grid);
+		player.mergePieceIntoGrid = jest.fn((piece, grid, ghost) => grid);
+		player.getGhostPiece = jest.fn(() => player.currentPiece);
 		player.sendGrid();
 		expect(player.emit).toHaveBeenCalledWith(
 			expect.anything(),
@@ -136,10 +136,10 @@ describe('Player', () => {
 		const piece = {
 			shape: [[1]],
 			position: { x: 0, y: 0 },
-			clone: vi.fn(function () { return { ...this, position: { ...this.position } }; })
+			clone: jest.fn(function () { return { ...this, position: { ...this.position } }; })
 		};
 		player.currentPiece = piece;
-		player.isValidMove = vi.fn((p, grid, pos) => pos.y < 2);
+		player.isValidMove = jest.fn((p, grid, pos) => pos.y < 2);
 		const ghost = player.getGhostPiece([[{ filled: false }]]);
 		expect(ghost.position.y).toBe(1);
 	});
@@ -158,7 +158,7 @@ describe('Player', () => {
 			[{ filled: true, indestructible: false }, { filled: false }]
 		];
 		player.currentPiece = { shape: [[1]], position: { x: 0, y: 0 } };
-		player.removePieceFromGrid = vi.fn((piece, grid) => grid);
+		player.removePieceFromGrid = jest.fn((piece, grid) => grid);
 		const result = player.getLandSpecter();
 		expect(result[0][0].color).toBe('gray');
 	});
@@ -199,6 +199,15 @@ describe('Player', () => {
 		expect(player.isValidMove(piece, grid, { x: 0, y: 0 })).toBe(true);
 	});
 
+	test('updatePieceOnGrid skips indestructible cells', () => {
+		const piece = { shape: [[1, 1]], position: { x: 0, y: 0 } };
+		const grid = [[{ indestructible: true }, { indestructible: false }]];
+		const updateCell = jest.fn();
+
+		player.updatePieceOnGrid(piece, grid, updateCell);
+		expect(updateCell).toHaveBeenCalledTimes(1);
+	});
+
 	test('updatePieceOnGrid updates correct cells and skips indestructible', () => {
 		const piece = { shape: [[1, 0], [1, 1]], position: { x: 0, y: 0 } };
 		player.room.rows = 2;
@@ -207,7 +216,7 @@ describe('Player', () => {
 			[{ indestructible: false }, { indestructible: true }],
 			[{ indestructible: false }, { indestructible: false }]
 		];
-		const updateCell = vi.fn();
+		const updateCell = jest.fn();
 		player.updatePieceOnGrid(piece, grid, updateCell);
 		expect(updateCell).toHaveBeenCalledTimes(3);
 	});
@@ -217,7 +226,7 @@ describe('Player', () => {
 		player.room.rows = 1;
 		player.room.cols = 1;
 		const grid = [[{}]];
-		const spy = vi.spyOn(player, 'updatePieceOnGrid');
+		const spy = jest.spyOn(player, 'updatePieceOnGrid');
 		player.mergePieceIntoGrid(piece, grid, true);
 		expect(spy).toHaveBeenCalledWith(piece, grid, expect.any(Function));
 	});
@@ -227,7 +236,7 @@ describe('Player', () => {
 		player.room.rows = 1;
 		player.room.cols = 1;
 		const grid = [[{}]];
-		const spy = vi.spyOn(player, 'updatePieceOnGrid');
+		const spy = jest.spyOn(player, 'updatePieceOnGrid');
 		player.removePieceFromGrid(piece, grid);
 		expect(spy).toHaveBeenCalledWith(piece, grid, expect.any(Function));
 	});
@@ -275,7 +284,7 @@ describe('Player', () => {
 			[{ filled: true, indestructible: false }, { filled: true, indestructible: false }],
 			[{ filled: false, indestructible: false }, { filled: false, indestructible: false }]
 		];
-		player.room.handlePenalties = vi.fn();
+		player.room.handlePenalties = jest.fn();
 		player.clearFullLines();
 		expect(player.grid.length).toBe(2);
 		expect(player.room.handlePenalties).not.toHaveBeenCalled();
@@ -288,7 +297,7 @@ describe('Player', () => {
 			[{ filled: true, indestructible: false }, { filled: true, indestructible: false }],
 			[{ filled: true, indestructible: false }, { filled: true, indestructible: false }]
 		];
-		player.room.handlePenalties = vi.fn();
+		player.room.handlePenalties = jest.fn();
 		player.clearFullLines();
 		expect(player.grid.length).toBe(2);
 	});
@@ -300,7 +309,7 @@ describe('Player', () => {
 			[{ filled: true, indestructible: false }, { filled: true, indestructible: false }],
 			[{ filled: true, indestructible: false }, { filled: true, indestructible: false }]
 		];
-		player.room.handlePenalties = vi.fn();
+		player.room.handlePenalties = jest.fn();
 		player.clearFullLines();
 		expect(player.room.handlePenalties).toHaveBeenCalled();
 	});
@@ -312,24 +321,24 @@ describe('Player', () => {
 	});
 
 	test('handlePieceLanding calls sendGameOver if nextPiece invalid', () => {
-		const nextPiece = { position: { x: 0, y: 0 }, getLeadingEmptyRows: vi.fn(() => 0) };
+		const nextPiece = { position: { x: 0, y: 0 }, getLeadingEmptyRows: jest.fn(() => 0) };
 		player.currentPiece = { dummy: true };
-		player.nextPiece = vi.fn(() => nextPiece);
-		player.isValidMove = vi.fn(() => false);
-		player.sendGameOver = vi.fn();
-		player.clearFullLines = vi.fn();
+		player.nextPiece = jest.fn(() => nextPiece);
+		player.isValidMove = jest.fn(() => false);
+		player.sendGameOver = jest.fn();
+		player.clearFullLines = jest.fn();
 		player.handlePieceLanding();
 		expect(player.sendGameOver).toHaveBeenCalled();
 	});
 
 	test('handlePieceLanding updates currentPiece and grid', () => {
-		const nextPiece = { position: { x: 0, y: 0 }, getLeadingEmptyRows: vi.fn(() => 0) };
+		const nextPiece = { position: { x: 0, y: 0 }, getLeadingEmptyRows: jest.fn(() => 0) };
 		player.currentPiece = { dummy: true };
-		player.nextPiece = vi.fn(() => nextPiece);
-		player.isValidMove = vi.fn(() => true);
-		player.clearFullLines = vi.fn();
-		player.mergePieceIntoGrid = vi.fn(() => []);
-		player.sendGrid = vi.fn();
+		player.nextPiece = jest.fn(() => nextPiece);
+		player.isValidMove = jest.fn(() => true);
+		player.clearFullLines = jest.fn();
+		player.mergePieceIntoGrid = jest.fn(() => []);
+		player.sendGrid = jest.fn();
 		player.handlePieceLanding();
 		expect(player.currentPiece).toBe(nextPiece);
 		expect(player.mergePieceIntoGrid).toHaveBeenCalled();
@@ -346,17 +355,17 @@ describe('Player', () => {
 		const piece = {
 			position: { x: 0, y: 0 },
 			shape: [[1]],
-			rotate: vi.fn(() => [[1]])
+			rotate: jest.fn(() => [[1]])
 		};
 		player.currentPiece = piece;
 		player.grid = [[{ filled: false }]];
 		player.room.rows = 1;
 		player.room.cols = 1;
-		player.removePieceFromGrid = vi.fn(() => [[{ filled: false }]]);
-		player.mergePieceIntoGrid = vi.fn(() => [[{ filled: false }]]);
-		player.isValidMove = vi.fn(() => false);
-		player.sendGrid = vi.fn();
-		player.handlePieceLanding = vi.fn();
+		player.removePieceFromGrid = jest.fn(() => [[{ filled: false }]]);
+		player.mergePieceIntoGrid = jest.fn(() => [[{ filled: false }]]);
+		player.isValidMove = jest.fn(() => false);
+		player.sendGrid = jest.fn();
+		player.handlePieceLanding = jest.fn();
 
 		player.movePiece('invalid');
 		expect(player.currentPiece.position).toEqual({ x: 0, y: 0 });
@@ -368,17 +377,17 @@ describe('Player', () => {
 		const piece = {
 			position: { x: 0, y: 0 },
 			shape: [[1]],
-			rotate: vi.fn(() => [[1]])
+			rotate: jest.fn(() => [[1]])
 		};
 		player.currentPiece = piece;
 		player.grid = [[{ filled: false }], [{ filled: false }]];
 		player.room.rows = 2;
 		player.room.cols = 1;
-		player.removePieceFromGrid = vi.fn(() => [[{ filled: false }], [{ filled: false }]]);
-		player.mergePieceIntoGrid = vi.fn(() => [[{ filled: false }], [{ filled: false }]]);
-		player.isValidMove = vi.fn(() => true);
-		player.sendGrid = vi.fn();
-		player.handlePieceLanding = vi.fn();
+		player.removePieceFromGrid = jest.fn(() => [[{ filled: false }], [{ filled: false }]]);
+		player.mergePieceIntoGrid = jest.fn(() => [[{ filled: false }], [{ filled: false }]]);
+		player.isValidMove = jest.fn(() => true);
+		player.sendGrid = jest.fn();
+		player.handlePieceLanding = jest.fn();
 
 		player.movePiece('down');
 		expect(player.currentPiece.position.y).toBe(1);
@@ -389,17 +398,17 @@ describe('Player', () => {
 		const piece = {
 			position: { x: 1, y: 0 },
 			shape: [[1]],
-			rotate: vi.fn(() => [[1]])
+			rotate: jest.fn(() => [[1]])
 		};
 		player.currentPiece = piece;
 		player.grid = [[{ filled: false }, { filled: false }]];
 		player.room.rows = 1;
 		player.room.cols = 2;
-		player.removePieceFromGrid = vi.fn(() => [[{ filled: false }, { filled: false }]]);
-		player.mergePieceIntoGrid = vi.fn(() => [[{ filled: false }, { filled: false }]]);
-		player.isValidMove = vi.fn(() => true);
-		player.sendGrid = vi.fn();
-		player.handlePieceLanding = vi.fn();
+		player.removePieceFromGrid = jest.fn(() => [[{ filled: false }, { filled: false }]]);
+		player.mergePieceIntoGrid = jest.fn(() => [[{ filled: false }, { filled: false }]]);
+		player.isValidMove = jest.fn(() => true);
+		player.sendGrid = jest.fn();
+		player.handlePieceLanding = jest.fn();
 
 		player.movePiece('left');
 		expect(player.currentPiece.position.x).toBe(0);
@@ -410,17 +419,17 @@ describe('Player', () => {
 		const piece = {
 			position: { x: 0, y: 0 },
 			shape: [[1]],
-			rotate: vi.fn(() => [[1]])
+			rotate: jest.fn(() => [[1]])
 		};
 		player.currentPiece = piece;
 		player.grid = [[{ filled: false }, { filled: false }]];
 		player.room.rows = 1;
 		player.room.cols = 2;
-		player.removePieceFromGrid = vi.fn(() => [[{ filled: false }, { filled: false }]]);
-		player.mergePieceIntoGrid = vi.fn(() => [[{ filled: false }, { filled: false }]]);
-		player.isValidMove = vi.fn(() => true);
-		player.sendGrid = vi.fn();
-		player.handlePieceLanding = vi.fn();
+		player.removePieceFromGrid = jest.fn(() => [[{ filled: false }, { filled: false }]]);
+		player.mergePieceIntoGrid = jest.fn(() => [[{ filled: false }, { filled: false }]]);
+		player.isValidMove = jest.fn(() => true);
+		player.sendGrid = jest.fn();
+		player.handlePieceLanding = jest.fn();
 
 		player.movePiece('right');
 		expect(player.currentPiece.position.x).toBe(1);
@@ -431,17 +440,17 @@ describe('Player', () => {
 		const piece = {
 			position: { x: 0, y: 0 },
 			shape: [[1, 0], [0, 1]],
-			rotate: vi.fn(() => [[0, 1], [1, 0]])
+			rotate: jest.fn(() => [[0, 1], [1, 0]])
 		};
 		player.currentPiece = piece;
 		player.grid = [[{ filled: false }, { filled: false }], [{ filled: false }, { filled: false }]];
 		player.room.rows = 2;
 		player.room.cols = 2;
-		player.removePieceFromGrid = vi.fn(() => [[{ filled: false }, { filled: false }], [{ filled: false }, { filled: false }]]);
-		player.mergePieceIntoGrid = vi.fn(() => [[{ filled: false }, { filled: false }], [{ filled: false }, { filled: false }]]);
-		player.isValidMove = vi.fn(() => true);
-		player.sendGrid = vi.fn();
-		player.handlePieceLanding = vi.fn();
+		player.removePieceFromGrid = jest.fn(() => [[{ filled: false }, { filled: false }], [{ filled: false }, { filled: false }]]);
+		player.mergePieceIntoGrid = jest.fn(() => [[{ filled: false }, { filled: false }], [{ filled: false }, { filled: false }]]);
+		player.isValidMove = jest.fn(() => true);
+		player.sendGrid = jest.fn();
+		player.handlePieceLanding = jest.fn();
 
 		player.movePiece('up');
 		expect(player.currentPiece.shape).toEqual([[0, 1], [1, 0]]);
@@ -452,17 +461,17 @@ describe('Player', () => {
 		const piece = {
 			position: { x: 0, y: 0 },
 			shape: [[1]],
-			rotate: vi.fn(() => [[1]])
+			rotate: jest.fn(() => [[1]])
 		};
 		player.currentPiece = piece;
 		player.grid = [[{ filled: false }], [{ filled: false }]];
 		player.room.rows = 2;
 		player.room.cols = 1;
-		player.removePieceFromGrid = vi.fn(() => [[{ filled: false }], [{ filled: false }]]);
-		player.mergePieceIntoGrid = vi.fn(() => [[{ filled: false }], [{ filled: false }]]);
-		player.isValidMove = vi.fn((p, g, pos) => pos.y < 2);
-		player.sendGrid = vi.fn();
-		player.handlePieceLanding = vi.fn();
+		player.removePieceFromGrid = jest.fn(() => [[{ filled: false }], [{ filled: false }]]);
+		player.mergePieceIntoGrid = jest.fn(() => [[{ filled: false }], [{ filled: false }]]);
+		player.isValidMove = jest.fn((p, g, pos) => pos.y < 2);
+		player.sendGrid = jest.fn();
+		player.handlePieceLanding = jest.fn();
 
 		player.movePiece('space');
 		expect(player.currentPiece.position.y).toBe(1);
@@ -473,24 +482,24 @@ describe('Player', () => {
 		const piece = {
 			position: { x: 0, y: 0 },
 			shape: [[1]],
-			rotate: vi.fn(() => [[1]])
+			rotate: jest.fn(() => [[1]])
 		};
 		player.currentPiece = piece;
 		player.grid = [[{ filled: false }]];
 		player.room.rows = 1;
 		player.room.cols = 1;
-		player.removePieceFromGrid = vi.fn(() => [[{ filled: false }]]);
-		player.mergePieceIntoGrid = vi.fn(() => [[{ filled: false }]]);
-		player.isValidMove = vi.fn(() => false);
-		player.sendGrid = vi.fn();
-		player.handlePieceLanding = vi.fn();
+		player.removePieceFromGrid = jest.fn(() => [[{ filled: false }]]);
+		player.mergePieceIntoGrid = jest.fn(() => [[{ filled: false }]]);
+		player.isValidMove = jest.fn(() => false);
+		player.sendGrid = jest.fn();
+		player.handlePieceLanding = jest.fn();
 		player.movePiece('down');
 		expect(player.handlePieceLanding).toHaveBeenCalled();
 	});
 
 	test('tickInterval returns if no room', () => {
 		player.room = null;
-		const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+		const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
 		player.tickInterval();
 		expect(logSpy).toHaveBeenCalledWith('No room to start interval');
 		logSpy.mockRestore();
@@ -506,7 +515,7 @@ describe('Player', () => {
 	test('tickInterval calls movePiece', () => {
 		player.room = { dummy: true };
 		player.hasLost = false;
-		player.movePiece = vi.fn();
+		player.movePiece = jest.fn();
 		player.tickInterval();
 		expect(player.movePiece).toHaveBeenCalled();
 	});
