@@ -2,10 +2,10 @@
  * @fileoverview Game class for managing game state and player interactions.
  */
 
-const Tetromino = require('./tetromino.js')
-const outgoingEvents = require('./constants/outgoing-events.js')
-const gameStatus = require('./constants/game-status.js')
-const gameSettings = require('./constants/game-settings.js')
+import Tetromino from './tetromino.js';
+import gameSettings from './constants/game-settings.js';
+import gameStatus from './constants/game-status.js';
+import outgoingEvents from './constants/outgoing-events.js';
 
 class Game {
 
@@ -306,4 +306,4 @@ class Game {
 
 }
 
-module.exports = Game;
+export default Game;
