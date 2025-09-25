@@ -67,6 +67,17 @@ describe('Player', () => {
 		expect(player.nextPiece()).toBeNull();
 	});
 
+	test('nextPiece returns next piece and increments index', () => {
+		const piece1 = { shape: [[1]], color: 'red', position: { x: 0, y: 0 } };
+		const piece2 = { shape: [[1]], color: 'blue', position: { x: 0, y: 0 } };
+
+		player.pieces.add(piece1);
+		player.pieces.add(piece2);
+
+		expect(player.nextPiece()).toBe(piece1);
+		expect(player.nextPiece()).toBe(piece2);
+	});
+
 	test('reset clears player state', () => {
 		player.pieces.add({ dummy: true });
 		player.currentPiece = { dummy: true };
@@ -331,7 +342,7 @@ describe('Player', () => {
 		// nothing to assert, just coverage
 	});
 
-	test('movePiece handles down direction', () => {
+	test('movePiece does nothing if invalid move', () => {
 		const piece = {
 			position: { x: 0, y: 0 },
 			shape: [[1]],
@@ -343,13 +354,120 @@ describe('Player', () => {
 		player.room.cols = 1;
 		player.removePieceFromGrid = vi.fn(() => [[{ filled: false }]]);
 		player.mergePieceIntoGrid = vi.fn(() => [[{ filled: false }]]);
+		player.isValidMove = vi.fn(() => false);
+		player.sendGrid = vi.fn();
+		player.handlePieceLanding = vi.fn();
+
+		player.movePiece('invalid');
+		expect(player.currentPiece.position).toEqual({ x: 0, y: 0 });
+		expect(player.sendGrid).not.toHaveBeenCalled();
+		expect(player.handlePieceLanding).not.toHaveBeenCalled();
+	})
+
+	test('movePiece handles down direction', () => {
+		const piece = {
+			position: { x: 0, y: 0 },
+			shape: [[1]],
+			rotate: vi.fn(() => [[1]])
+		};
+		player.currentPiece = piece;
+		player.grid = [[{ filled: false }], [{ filled: false }]];
+		player.room.rows = 2;
+		player.room.cols = 1;
+		player.removePieceFromGrid = vi.fn(() => [[{ filled: false }], [{ filled: false }]]);
+		player.mergePieceIntoGrid = vi.fn(() => [[{ filled: false }], [{ filled: false }]]);
 		player.isValidMove = vi.fn(() => true);
 		player.sendGrid = vi.fn();
 		player.handlePieceLanding = vi.fn();
 
 		player.movePiece('down');
+		expect(player.currentPiece.position.y).toBe(1);
 		expect(player.sendGrid).toHaveBeenCalled();
 	});
+
+	test('movePiece handles left direction', () => {
+		const piece = {
+			position: { x: 1, y: 0 },
+			shape: [[1]],
+			rotate: vi.fn(() => [[1]])
+		};
+		player.currentPiece = piece;
+		player.grid = [[{ filled: false }, { filled: false }]];
+		player.room.rows = 1;
+		player.room.cols = 2;
+		player.removePieceFromGrid = vi.fn(() => [[{ filled: false }, { filled: false }]]);
+		player.mergePieceIntoGrid = vi.fn(() => [[{ filled: false }, { filled: false }]]);
+		player.isValidMove = vi.fn(() => true);
+		player.sendGrid = vi.fn();
+		player.handlePieceLanding = vi.fn();
+
+		player.movePiece('left');
+		expect(player.currentPiece.position.x).toBe(0);
+		expect(player.sendGrid).toHaveBeenCalled();
+	});
+
+	test('movePiece handles right direction', () => {
+		const piece = {
+			position: { x: 0, y: 0 },
+			shape: [[1]],
+			rotate: vi.fn(() => [[1]])
+		};
+		player.currentPiece = piece;
+		player.grid = [[{ filled: false }, { filled: false }]];
+		player.room.rows = 1;
+		player.room.cols = 2;
+		player.removePieceFromGrid = vi.fn(() => [[{ filled: false }, { filled: false }]]);
+		player.mergePieceIntoGrid = vi.fn(() => [[{ filled: false }, { filled: false }]]);
+		player.isValidMove = vi.fn(() => true);
+		player.sendGrid = vi.fn();
+		player.handlePieceLanding = vi.fn();
+
+		player.movePiece('right');
+		expect(player.currentPiece.position.x).toBe(1);
+		expect(player.sendGrid).toHaveBeenCalled();
+	});
+
+	test('movePiece handles rotation piece', () => {
+		const piece = {
+			position: { x: 0, y: 0 },
+			shape: [[1, 0], [0, 1]],
+			rotate: vi.fn(() => [[0, 1], [1, 0]])
+		};
+		player.currentPiece = piece;
+		player.grid = [[{ filled: false }, { filled: false }], [{ filled: false }, { filled: false }]];
+		player.room.rows = 2;
+		player.room.cols = 2;
+		player.removePieceFromGrid = vi.fn(() => [[{ filled: false }, { filled: false }], [{ filled: false }, { filled: false }]]);
+		player.mergePieceIntoGrid = vi.fn(() => [[{ filled: false }, { filled: false }], [{ filled: false }, { filled: false }]]);
+		player.isValidMove = vi.fn(() => true);
+		player.sendGrid = vi.fn();
+		player.handlePieceLanding = vi.fn();
+
+		player.movePiece('up');
+		expect(player.currentPiece.shape).toEqual([[0, 1], [1, 0]]);
+		expect(player.sendGrid).toHaveBeenCalled();
+	})
+
+	test('movePiece handles hard drop', () => {
+		const piece = {
+			position: { x: 0, y: 0 },
+			shape: [[1]],
+			rotate: vi.fn(() => [[1]])
+		};
+		player.currentPiece = piece;
+		player.grid = [[{ filled: false }], [{ filled: false }]];
+		player.room.rows = 2;
+		player.room.cols = 1;
+		player.removePieceFromGrid = vi.fn(() => [[{ filled: false }], [{ filled: false }]]);
+		player.mergePieceIntoGrid = vi.fn(() => [[{ filled: false }], [{ filled: false }]]);
+		player.isValidMove = vi.fn((p, g, pos) => pos.y < 2);
+		player.sendGrid = vi.fn();
+		player.handlePieceLanding = vi.fn();
+
+		player.movePiece('space');
+		expect(player.currentPiece.position.y).toBe(1);
+		expect(player.sendGrid).toHaveBeenCalled();
+	})
 
 	test('movePiece handles blocked move and triggers landing', () => {
 		const piece = {
