@@ -150,7 +150,7 @@ const GAME_STATE = 'game-state';
  */
 const GAME_OVER = 'game-over';
 
-export {
+export default {
 	ERROR,
 	CLIENT_UPDATED,
 	ROOM_CREATED,

@@ -4,8 +4,8 @@
  * and game over conditions.
  */
 
-const { DEFAULT_EMPTY_GRID } = require('./constants/game-settings.js');
-const outgoingEvents = require('./constants/outgoing-events.js');
+import gameSettings from './constants/game-settings.js';
+import outgoingEvents from './constants/outgoing-events.js';
 
 class Player {
 
@@ -151,7 +151,7 @@ class Player {
 	 */
 	getLandSpecter() {
 		if (!this.grid || !this.currentPiece)
-			return DEFAULT_EMPTY_GRID;
+			return gameSettings.DEFAULT_EMPTY_GRID;
 
 		const gridWithoutCurrent = this.removePieceFromGrid(this.currentPiece, structuredClone(this.grid));
 
@@ -175,7 +175,7 @@ class Player {
 	 * Initializes a new empty grid for the player.
 	 */
 	generateEmptyGrid() {
-		this.grid = structuredClone(DEFAULT_EMPTY_GRID);
+		this.grid = structuredClone(gameSettings.DEFAULT_EMPTY_GRID);
 	}
 
 	/**
@@ -470,4 +470,4 @@ class Player {
 
 }
 
-module.exports = Player;
+export default Player;

@@ -86,4 +86,4 @@ class Piece {
 
 }
 
-module.exports = Piece;
+export default Piece;
