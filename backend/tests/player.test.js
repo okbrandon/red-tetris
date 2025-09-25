@@ -1,6 +1,6 @@
 import { describe, beforeEach, test, expect, vi } from "vitest";
-import { DEFAULT_EMPTY_GRID } from '../constants/game-settings.js';
-import { WAITING } from '../constants/game-status.js';
+import gameSettings from '../constants/game-settings.js';
+import gameStatus from '../constants/game-status.js';
 import Player from '../player.js';
 
 describe('Player', () => {
@@ -17,7 +17,7 @@ describe('Player', () => {
 		player.room = {
 			id: 'room1',
 			owner: { id: 'owner1', username: 'Owner' },
-			status: WAITING,
+			status: gameStatus.WAITING,
 			soloJourney: false,
 			rows: 2,
 			cols: 2,
@@ -45,7 +45,7 @@ describe('Player', () => {
 
 	test('generateEmptyGrid sets grid to DEFAULT_EMPTY_GRID', () => {
 		player.generateEmptyGrid();
-		expect(player.grid).toEqual(DEFAULT_EMPTY_GRID);
+		expect(player.grid).toEqual(gameSettings.DEFAULT_EMPTY_GRID);
 	});
 
 	test('sendGameOver sets hasLost and emits GAME_OVER', () => {
@@ -147,10 +147,10 @@ describe('Player', () => {
 	test('getLandSpecter returns DEFAULT_EMPTY_GRID if grid or currentPiece missing', () => {
 		player.grid = null;
 		player.currentPiece = {};
-		expect(player.getLandSpecter()).toStrictEqual(DEFAULT_EMPTY_GRID);
+		expect(player.getLandSpecter()).toStrictEqual(gameSettings.DEFAULT_EMPTY_GRID);
 		player.grid = [[{ filled: false }]];
 		player.currentPiece = null;
-		expect(player.getLandSpecter()).toStrictEqual(DEFAULT_EMPTY_GRID);
+		expect(player.getLandSpecter()).toStrictEqual(gameSettings.DEFAULT_EMPTY_GRID);
 	});
 
 	test('getLandSpecter returns gray grid for filled cells', () => {
