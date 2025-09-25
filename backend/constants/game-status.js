@@ -18,7 +18,7 @@ const FINISHED = 'finished';
  */
 const ABORTED = 'aborted';
 
-export {
+export default {
 	WAITING,
 	IN_GAME,
 	FINISHED,

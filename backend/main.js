@@ -3,13 +3,13 @@
  * Sets up the HTTP server, Socket.IO, game logic, and player interactions.
  */
 
-const { createServer } = require("http")
-const { Server } = require("socket.io")
-const Player = require("./player");
-const Game = require("./game");
-const incomingEvents = require("./constants/incoming-events.js");
-const outgoingEvents = require("./constants/outgoing-events.js");
-const gameStatus = require("./constants/game-status.js");
+import { createServer } from "http";
+import { Server } from "socket.io";
+import Player from "./player.js";
+import Game from "./game.js";
+import incomingEvents from "./constants/incoming-events.js";
+import outgoingEvents from "./constants/outgoing-events.js";
+import gameStatus from "./constants/game-status.js";
 
 const PORT = process.env.PORT || 3000;
 

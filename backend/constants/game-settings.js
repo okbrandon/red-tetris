@@ -33,7 +33,7 @@ const DEFAULT_EMPTY_GRID = Array.from({ length: FRAME_ROWS }, () => Array(FRAME_
  */
 const MAX_PLAYERS_PER_ROOM = 4;
 
-export {
+export default {
 	FRAME_COLS,
 	FRAME_ROWS,
 	DEFAULT_PIECE_COUNT,

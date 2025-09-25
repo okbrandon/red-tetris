@@ -81,7 +81,7 @@ const RESTART_GAME = 'restart-game';
  */
 const MOVE_PIECE = 'move-piece';
 
-export {
+export default {
 	CLIENT_UPDATE,
 	ROOM_JOIN,
 	ROOM_LEAVE,

@@ -3,8 +3,8 @@
  * This module handles the creation and management of Tetris pieces.
  */
 
-const Piece = require('./piece.js');
-const gameSettings = require('./constants/game-settings.js');
+import Piece from './piece.js';
+import gameSettings from './constants/game-settings.js';
 
 /**
  * Initializes the Tetromino manager with predefined templates and an empty piece set.
@@ -138,4 +138,4 @@ class Tetromino {
 
 }
 
-module.exports = Tetromino;
+export default Tetromino;
