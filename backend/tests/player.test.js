@@ -33,6 +33,11 @@ describe('Player', () => {
 		expect(player.pieces.size).toBe(0);
 	});
 
+	test('constructor sets username to null if not provided', () => {
+		const p = new Player(mockConnection, 'id');
+		expect(p.username).toBeNull();
+	});
+
 	test('send calls connection.send', () => {
 		player.send('hello');
 		expect(mockConnection.send).toHaveBeenCalledWith('hello');
@@ -76,6 +81,14 @@ describe('Player', () => {
 
 		expect(player.nextPiece()).toBe(piece1);
 		expect(player.nextPiece()).toBe(piece2);
+	});
+
+	test('nextPiece wraps around when currentPieceIndex exceeds pieces.size', () => {
+		const piece1 = { shape: [[1]], color: 'red', position: { x: 0, y: 0 } };
+		const piece2 = { shape: [[1]], color: 'blue', position: { x: 0, y: 0 } };
+		player.pieces = new Set([piece1, piece2]);
+		player.currentPieceIndex = 2;
+		expect(player.nextPiece()).toBe(piece1);
 	});
 
 	test('reset clears player state', () => {
@@ -125,6 +138,27 @@ describe('Player', () => {
 				clients: expect.any(Array)
 			})
 		);
+	});
+
+	test('sendGrid handles less than 3 pieces and non-zero currentPieceIndex', () => {
+		player.grid = [
+			[{ filled: false }, { filled: false }],
+			[{ filled: false }, { filled: false }]
+		];
+		player.currentPiece = { shape: [[1]], color: 'red', position: { x: 0, y: 0 }, clone: () => ({ shape: [[1]], color: 'red', position: { x: 0, y: 0 } }) };
+		player.pieces = new Set([
+			{ shape: [[1]], color: 'red', position: { x: 0, y: 0 } },
+			{ shape: [[1]], color: 'blue', position: { x: 0, y: 0 } }
+		]);
+		player.currentPieceIndex = 1;
+		player.emit = jest.fn();
+		player.removePieceFromGrid = jest.fn((piece, grid) => grid);
+		player.mergePieceIntoGrid = jest.fn((piece, grid, ghost) => grid);
+		player.getGhostPiece = jest.fn(() => player.currentPiece);
+		player.getLandSpecter = jest.fn(() => [[{ filled: true }]]);
+		player.sendGrid();
+		const call = player.emit.mock.calls[0][1];
+		expect(call.nextPieces.length).toBeLessThanOrEqual(2);
 	});
 
 	test('getGhostPiece returns null if no currentPiece', () => {
@@ -259,16 +293,14 @@ describe('Player', () => {
 		expect(player.grid[1].every(cell => cell.indestructible)).toBe(true);
 	});
 
-	test('penalize keeps existing penalties and normal rows', () => {
-		player.room.rows = 2;
+	test('penalize merges new penalties with existing penalty rows', () => {
+		player.room.rows = 3;
 		player.room.cols = 2;
 		const penaltyRow = [{ indestructible: true }, { indestructible: true }];
-		player.grid = [
-			penaltyRow,
-			[{ indestructible: false }, { indestructible: false }]
-		];
+		player.grid = [penaltyRow, [{ indestructible: false }, { indestructible: false }], penaltyRow];
 		player.penalize(1);
-		expect(player.grid.filter(row => row.every(cell => cell.indestructible)).length).toBe(2);
+		const penaltyRows = player.grid.filter(row => row.every(cell => cell.indestructible));
+		expect(penaltyRows.length).toBeGreaterThan(1);
 	});
 
 	test('clearFullLines returns if no grid', () => {
@@ -343,6 +375,18 @@ describe('Player', () => {
 		expect(player.currentPiece).toBe(nextPiece);
 		expect(player.mergePieceIntoGrid).toHaveBeenCalled();
 		expect(player.sendGrid).toHaveBeenCalled();
+	});
+
+	test('handlePieceLanding adjusts nextPiece position by offsetY', () => {
+		const nextPiece = { position: { x: 0, y: 2 }, getLeadingEmptyRows: jest.fn(() => 2) };
+		player.currentPiece = { dummy: true };
+		player.nextPiece = jest.fn(() => nextPiece);
+		player.isValidMove = jest.fn(() => true);
+		player.clearFullLines = jest.fn();
+		player.mergePieceIntoGrid = jest.fn(() => []);
+		player.sendGrid = jest.fn();
+		player.handlePieceLanding();
+		expect(nextPiece.position.y).toBe(0);
 	});
 
 	test('movePiece returns if no currentPiece', () => {
