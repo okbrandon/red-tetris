@@ -3,7 +3,7 @@ import gameSettings from '../constants/game-settings.js';
 import gameStatus from '../constants/game-status.js';
 import outgoingEvents from '../constants/outgoing-events.js';
 import Player from '../player.js';
-import { createMockPiece } from './_mockPiece.js';
+import { createMockPiece } from '../__mocks__/_mockPiece.js';
 
 describe('Player', () => {
 
