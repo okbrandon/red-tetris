@@ -10,17 +10,26 @@ describe('Game', () => {
 
 	let game;
 
+	/**
+	 * Sets up a new Game instance before each test.
+	 */
 	beforeEach(() => {
 		jest.useFakeTimers();
 		game = new Game('room1', { id: 'owner', username: 'Owner' });
 	});
 
+	/**
+	 * Cleans up after each test by stopping the game and restoring timers.
+	 */
 	afterEach(() => {
 		game.stop();
 		jest.clearAllMocks();
 		jest.useRealTimers();
 	});
 
+	/**
+	 * Confirms that the constructor initializes all properties correctly.
+	 */
 	test('constructor sets properties', () => {
 		expect(game.id).toBe('room1');
 		expect(game.owner).toEqual({ id: 'owner', username: 'Owner' });
@@ -35,6 +44,9 @@ describe('Game', () => {
 		expect(game.maxPlayers).toBe(gameSettings.MAX_PLAYERS_PER_ROOM);
 	});
 
+	/**
+	 * Confirms that assignOwner sets the owner if not already set.
+	 */
 	test('assignOwner sets owner if not set', () => {
 		const g = new Game('r');
 
@@ -44,10 +56,16 @@ describe('Game', () => {
 		expect(g.owner).toEqual({ id: 'x' });
 	});
 
+	/**
+	 * Confirms that assignOwner throws if owner is already set.
+	 */
 	test('assignOwner throws if already set', () => {
 		expect(() => game.assignOwner({ id: 'x' })).toThrow('Game already has an owner');
 	});
 
+	/**
+	 * Confirms that playerJoin adds a player and resets them.
+	 */
 	test('playerJoin adds player and resets', () => {
 		const player = createMockPlayer();
 
@@ -61,11 +79,18 @@ describe('Game', () => {
 		expect(game.clients.has(player)).toBe(true);
 	});
 
+	/**
+	 * Confirms that playerJoin throws if client is already in a room.
+	 */
 	test('playerJoin throws if already in room', () => {
 		const player = createMockPlayer({ room: {} });
+
 		expect(() => game.playerJoin(player)).toThrow('Client already in a room');
 	});
 
+	/**
+	 * Confirms that playerJoin throws if game has started.
+	 */
 	test('playerJoin throws if game started', () => {
 		const player = createMockPlayer();
 
@@ -74,6 +99,9 @@ describe('Game', () => {
 		expect(() => game.playerJoin(player)).toThrow('Game has already started');
 	});
 
+	/**
+	 * Confirms that playerJoin throws if soloJourney and not owner.
+	 */
 	test('playerJoin throws if soloJourney and not owner', () => {
 		const player = createMockPlayer();
 
@@ -83,6 +111,9 @@ describe('Game', () => {
 		expect(() => game.playerJoin(player)).toThrow('Solo journey mode: only the owner can join');
 	});
 
+	/**
+	 * Confirms that playerJoin throws if room is full.
+	 */
 	test('playerJoin throws if room is full', () => {
 		game.maxPlayers = 1;
 
@@ -94,6 +125,9 @@ describe('Game', () => {
 		expect(() => game.playerJoin(player2)).toThrow('Room is full');
 	});
 
+	/**
+	 * Confirms that playerLeave removes a player and resets them.
+	 */
 	test('playerLeave removes player and resets', () => {
 		const player = createMockPlayer({ id: 'owner' });
 
@@ -106,12 +140,18 @@ describe('Game', () => {
 		expect(game.clients.has(player)).toBe(false);
 	});
 
+	/**
+	 * Confirms that playerLeave throws if client is not in the room.
+	 */
 	test('playerLeave throws if not in room', () => {
 		const player = createMockPlayer({ room: null });
 
 		expect(() => game.playerLeave(player)).toThrow('Client not in a room');
 	});
 
+	/**
+	 * Confirms that playerLeave stops the game if shouldEndGame returns true.
+	 */
 	test('playerLeave stops game if shouldEndGame returns true', () => {
 		const player = createMockPlayer({ id: 'owner' });
 
@@ -127,6 +167,9 @@ describe('Game', () => {
 		expect(stopSpy).toHaveBeenCalled();
 	});
 
+	/**
+	 * Confirms that playerLeave transfers ownership if owner leaves.
+	 */
 	test('playerLeave transfers ownership if owner leaves', () => {
 		const player1 = createMockPlayer({ id: 'owner' });
 		const player2 = createMockPlayer({ id: 'p2' });
@@ -141,6 +184,9 @@ describe('Game', () => {
 		expect(game.owner).toBe(player2);
 	});
 
+	/**
+	 * Confirms that broadcastRoom emits to all clients.
+	 */
 	test('broadcastRoom emits ROOM_BROADCAST to all clients', () => {
 		const player1 = createMockPlayer({ id: 'p1' });
 		const player2 = createMockPlayer({ id: 'p2' });
@@ -154,12 +200,18 @@ describe('Game', () => {
 		expect(player2.emit).toHaveBeenCalledWith(outgoingEvents.ROOM_BROADCAST, expect.any(String));
 	});
 
+	/**
+	 * Confirms that shouldEndGame returns true if status is FINISHED.
+	 */
 	test('shouldEndGame returns true if status is FINISHED', () => {
 		game.status = gameStatus.FINISHED;
 
 		expect(game.shouldEndGame()).toBe(true);
 	});
 
+	/**
+	 * Confirms that shouldEndGame returns true if clients.length is 0.
+	 */
 	test('shouldEndGame returns true if clients.length is 0', () => {
 		game.status = gameStatus.PLAYING;
 		game.clients.clear();
@@ -167,6 +219,9 @@ describe('Game', () => {
 		expect(game.shouldEndGame()).toBe(true);
 	});
 
+	/**
+	 * Confirms that shouldEndGame returns true if soloJourney and client hasLost.
+	 */
 	test('shouldEndGame returns true if soloJourney and client hasLost', () => {
 		game.soloJourney = true;
 		game.status = gameStatus.PLAYING;
@@ -177,6 +232,9 @@ describe('Game', () => {
 		expect(game.shouldEndGame()).toBe(true);
 	});
 
+	/**
+	 * Confirms that shouldEndGame returns false if soloJourney and client has not lost.
+	 */
 	test('shouldEndGame returns true if all but one lost', () => {
 		const winner = createMockPlayer({ id: 'winner', hasLost: false });
 		const loser1 = createMockPlayer({ id: 'loser1', hasLost: true });
@@ -194,6 +252,9 @@ describe('Game', () => {
 		expect(loser2.sendGameOver).toHaveBeenCalledWith('You lose!');
 	});
 
+	/**
+	 * Confirms that shouldEndGame returns false if not finished.
+	 */
 	test('shouldEndGame returns false if not finished', () => {
 		const player1 = createMockPlayer({ hasLost: false });
 		const player2 = createMockPlayer({ hasLost: false });
@@ -205,6 +266,9 @@ describe('Game', () => {
 		expect(game.shouldEndGame()).toBe(false);
 	});
 
+	/**
+	 * Confirms that startInterval sets updateInterval and calls tickInterval.
+	 */
 	test('startInterval sets updateInterval and calls tickInterval', () => {
 		const player = createMockPlayer();
 
@@ -223,6 +287,9 @@ describe('Game', () => {
 		clearInterval(game.updateInterval);
 	});
 
+	/**
+	 * Confirms that startInterval does nothing if updateInterval is already set.
+	 */
 	test('startInterval does nothing if updateInterval is set', () => {
 		game.updateInterval = setInterval(() => {}, 1000);
 		game.startInterval();
@@ -231,6 +298,9 @@ describe('Game', () => {
 		clearInterval(game.updateInterval);
 	});
 
+	/**
+	 * Confirms that startInterval stops the game if shouldEndGame returns true.
+	 */
 	test('startInterval stops game if shouldEndGame returns true', () => {
 		const player = createMockPlayer();
 
@@ -249,12 +319,18 @@ describe('Game', () => {
 		clearInterval(game.updateInterval);
 	});
 
+	/**
+	 * Confirms that start throws if already started.
+	 */
 	test('start throws if already started', () => {
 		game.status = gameStatus.PLAYING;
 
 		expect(() => game.start()).toThrow('Game has already started');
 	});
 
+	/**
+	 * Confirms that start sets up game and calls client methods.
+	 */
 	test('start sets up game and calls client methods', () => {
 		const player = createMockPlayer();
 
@@ -275,12 +351,18 @@ describe('Game', () => {
 		expect(player.sendGrid).toHaveBeenCalled();
 	});
 
+	/**
+	 * Confirms that restart throws if not finished.
+	 */
 	test('restart throws if not finished', () => {
 		game.status = gameStatus.PLAYING;
 
 		expect(() => game.restart()).toThrow('Game is not finished');
 	});
 
+	/**
+	 * Confirms that restart resets clients and restarts game.
+	 */
 	test('restart resets clients and restarts game', () => {
 		const player = createMockPlayer();
 
@@ -296,6 +378,9 @@ describe('Game', () => {
 		expect(game.start).toHaveBeenCalled();
 	});
 
+	/**
+	 * Confirms that stop clears updateInterval and calls sendGameOver.
+	 */
 	test('stop clears updateInterval and calls sendGameOver', () => {
 		const player = createMockPlayer();
 
@@ -307,6 +392,9 @@ describe('Game', () => {
 		expect(player.sendGameOver).toHaveBeenCalled();
 	});
 
+	/**
+	 * Confirms that handlePieceMove throws if not playing.
+	 */
 	test('handlePieceMove throws if not playing', () => {
 		const player = createMockPlayer();
 
@@ -315,6 +403,9 @@ describe('Game', () => {
 		expect(() => game.handlePieceMove(player, 'left')).toThrow('Game is not in progress');
 	});
 
+	/**
+	 * Confirms that handlePieceMove throws if client has no currentPiece.
+	 */
 	test('handlePieceMove throws if no currentPiece', () => {
 		const player = createMockPlayer();
 
@@ -324,6 +415,9 @@ describe('Game', () => {
 		expect(() => game.handlePieceMove(player, 'left')).toThrow('Client has no current piece');
 	});
 
+	/**
+	 * Confirms that handlePieceMove calls movePiece.
+	 */
 	test('handlePieceMove calls movePiece', () => {
 		const player = createMockPlayer();
 
@@ -334,6 +428,9 @@ describe('Game', () => {
 		expect(player.movePiece).toHaveBeenCalledWith('left');
 	});
 
+	/**
+	 * Confirms that handlePenalties returns if soloJourney.
+	 */
 	test('handlePenalties returns if soloJourney', () => {
 		const player = createMockPlayer();
 
@@ -342,6 +439,9 @@ describe('Game', () => {
 		expect(game.handlePenalties(player, 2)).toBeUndefined();
 	});
 
+	/**
+	 * Confirms that handlePenalties throws if not playing.
+	 */
 	test('handlePenalties throws if not playing', () => {
 		const player = createMockPlayer();
 
@@ -351,6 +451,9 @@ describe('Game', () => {
 		expect(() => game.handlePenalties(player, 2)).toThrow('Game is not in progress');
 	});
 
+	/**
+	 * Confirms that handlePenalties throws if author not in clients.
+	 */
 	test('handlePenalties calls penalize and sendGrid on other clients', () => {
 		const author = createMockPlayer({ id: 'author' });
 		const other = createMockPlayer({ id: 'other' });
