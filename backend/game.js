@@ -80,9 +80,6 @@ class Game {
 		if (client.room !== this)
 			throw new Error('Client not in a room');
 
-		if (client.updateInterval)
-			clearInterval(client.updateInterval);
-
 		client.reset();
 		client.room = null;
 		this.clients.delete(client);
@@ -134,8 +131,9 @@ class Game {
 	 * @returns {boolean}
 	 */
 	shouldEndGame() {
+		if (this.status === gameStatus.WAITING) return false;
 		if (this.status === gameStatus.FINISHED) return true;
-		if (this.clients.length === 0) return true;
+		if (this.clients.size === 0) return true;
 
 		const clients = [...this.clients];
 
