@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals';
+import { expect, jest } from '@jest/globals';
 import gameSettings from '../constants/game-settings.js';
 import gameStatus from '../constants/game-status.js';
 import outgoingEvents from '../constants/outgoing-events.js';
@@ -41,6 +41,11 @@ describe('Player', () => {
 	 */
 	afterEach(() => {
 		mockConnection = null;
+
+		if (player && typeof player.isValidMove === 'function' && player.isValidMove._isMockFunction) {
+			player.isValidMove = Player.prototype.isValidMove;
+		}
+
 		player = null;
 	});
 
@@ -273,6 +278,18 @@ describe('Player', () => {
 		const grid = [[{ filled: false }]];
 
 		expect(player.isValidMove(piece, grid, { x: 0, y: 0 })).toBe(true);
+	});
+
+	/**
+	 * Confirms that isValidMove skips empty cells in shape.
+	 */
+	test('isValidMove skips empty cells in shape', () => {
+		const piece = createMockPiece({ shape: [[0, 1], [0, 0]], position: { x: 0, y: 0 } });
+		const grid = [
+			[{ filled: false }, { filled: true }],
+			[{ filled: false }, { filled: false }]
+		];
+		expect(player.isValidMove(piece, grid, { x: 0, y: 1 })).toBe(true);
 	});
 
 	/**

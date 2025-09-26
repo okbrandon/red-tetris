@@ -54,7 +54,7 @@ describe('Piece', () => {
 			[3, 4]
 		];
 		const piece = new Piece(shape, 'red');
-		const rotated = piece.rotate(true);
+		const rotated = piece.rotate();
 
 		expect(rotated).toEqual([
 			[3, 1],
