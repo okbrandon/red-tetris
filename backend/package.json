@@ -4,7 +4,7 @@
   "main": "main.js",
   "scripts": {
     "start": "node main.js",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --watchAll"
   },
   "keywords": [],
   "author": "",
