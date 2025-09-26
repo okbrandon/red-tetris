@@ -11,11 +11,14 @@ describe('Game', () => {
 	let game;
 
 	beforeEach(() => {
+		jest.useFakeTimers();
 		game = new Game('room1', { id: 'owner', username: 'Owner' });
 	});
 
 	afterEach(() => {
+		game.stop();
 		jest.clearAllMocks();
+		jest.useRealTimers();
 	});
 
 	test('constructor sets properties', () => {
