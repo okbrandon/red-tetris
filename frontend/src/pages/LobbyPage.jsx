@@ -6,6 +6,7 @@ import { PlayerList, Player } from './LobbyPage.styled';
 import { showNotification } from '../features/notification/notificationSlice';
 import { requestRoomLeave, requestStartGame } from '../features/socket/socketThunks.js';
 import { useEffect } from 'react';
+import { setGameStatus } from '../features/game/gameSlice.js';
 
 const LobbyPage = () => {
     const username = useSelector((state) => state.user.username);
@@ -37,7 +38,8 @@ const LobbyPage = () => {
             dispatch(showNotification({ type: 'error', message: 'Only the lobby owner can start the game.' }));
             return;
         }
-        requestStartGame();
+        // requestStartGame();
+        dispatch(setGameStatus({ room: { status: 'in-game' } })); // Temporary until backend is ready
     };
 
     const handleLeaveLobby = () => {

@@ -63,6 +63,7 @@ const normalizeCell = (value, palette) => {
 
 const normalizeGrid = (grid, rows, cols, palette) => {
     const normalized = [];
+    console.log('grid in normalizeGrid:', grid);
     for (let y = 0; y < rows; y += 1) {
         const row = [];
         for (let x = 0; x < cols; x += 1) {

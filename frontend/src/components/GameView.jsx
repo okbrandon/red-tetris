@@ -23,8 +23,8 @@ const computeCellSize = (rows = 20, cols = 10) => {
     return Math.max(22, Math.min(raw, 44));
 };
 
-const GameView = () => {
-    const { grid, currentPiece, nextPieces, score } = useSelector((state) => state.game);
+const GameView = ({ grid }) => {
+    const { currentPiece, nextPieces, score } = useSelector((state) => state.game);
 
     const board = useMemo(() => (Array.isArray(grid) ? grid : []), [grid]);
     const { rows, cols } = useMemo(() => deriveBoardDimensions(board), [board]);
