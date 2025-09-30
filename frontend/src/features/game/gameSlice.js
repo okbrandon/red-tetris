@@ -12,6 +12,7 @@ const createInitialState = () => ({
     owner: null,
     isOwner: false,
     gameStatus: 'waiting',
+    gameResult: null,
     score: 0,
     roomName: '',
     you: null,
@@ -56,9 +57,28 @@ export const gameSlice = createSlice({
             };
         },
         setGameStatus: (state, action) => { // game_started / game_over
-            const message = action.payload.room?.status || '';
+            const status = action.payload.room?.status || '';
 
-            state.gameStatus = message;
+            state.gameStatus = status;
+
+            if (status === 'game-over') {
+                const rawMessage = action.payload.message || '';
+                const normalized = rawMessage.toLowerCase();
+                let outcome = 'info';
+
+                if (normalized.includes('win')) {
+                    outcome = 'win';
+                } else if (normalized.includes('lose')) {
+                    outcome = 'lose';
+                }
+
+                state.gameResult = {
+                    message: rawMessage,
+                    outcome,
+                };
+            } else {
+                state.gameResult = null;
+            }
         },
         setLobbySettings: (state, action) => { // room_broadcast
             const { room, owner, you, clients } = action.payload;

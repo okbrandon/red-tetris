@@ -1,33 +1,49 @@
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import BackButton from '../components/BackButton';
 import GameView from '../components/GameView.jsx';
 import { PageWrapper, SoloArena, GameLogoTitle } from './GamePage.styled';
 import MultiplayerArena from '../components/MultiplayerArena';
 import { requestRoomLeave } from '../features/socket/socketThunks.js';
-import { useNavigate } from 'react-router-dom';
 import { showNotification } from '../features/notification/notificationSlice';
-import { useEffect } from 'react';
-import { setGameStatus } from '../features/game/gameSlice';
+import GameResultModal from '../components/GameResultModal.jsx';
 
 
 const GamePage = () => {
-    const { mode, gameStatus, grid } = useSelector((state) => state.game);
+    const { mode, gameStatus, grid, gameResult } = useSelector((state) => state.game);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const [isResultModalOpen, setResultModalOpen] = useState(false);
 
     const isMultiplayer = mode === 'multiplayer';
+    const resultOutcome = gameResult?.outcome ?? 'info';
+    const resultMessage = gameResult?.message ?? '';
 
     const handleLeaveGame = () => {
-        dispatch(setGameStatus({ room: { status: 'game-over' } }));
-    }
+        requestRoomLeave();
+        navigate('/menu');
+    };
 
     useEffect(() => {
-        if (gameStatus && gameStatus === 'game-over') {
-            dispatch(showNotification({ type: 'info', message: 'The game has ended. Returning to menu.' }));
-            requestRoomLeave();
-            navigate('/menu');
+        if (gameStatus !== 'game-over') {
+            return;
         }
-    }, [dispatch, gameStatus, navigate]);
+
+        setResultModalOpen(true);
+    }, [dispatch, gameStatus, isMultiplayer, navigate]);
+
+    useEffect(() => {
+        if (gameStatus !== 'game-over' && isResultModalOpen) {
+            setResultModalOpen(false);
+        }
+    }, [gameStatus, isResultModalOpen]);
+
+    const handleResultConfirm = () => {
+        setResultModalOpen(false);
+        requestRoomLeave();
+        navigate('/menu');
+    };
 
     return (
         <PageWrapper>
@@ -40,6 +56,11 @@ const GamePage = () => {
                         <GameView grid={grid} />
                     </SoloArena>
                 )}
+            <GameResultModal
+                isOpen={isResultModalOpen}
+                outcome={resultOutcome}
+                onConfirm={handleResultConfirm}
+            />
         </PageWrapper>
     );
 };

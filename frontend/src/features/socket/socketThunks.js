@@ -113,7 +113,8 @@ export const initializeSocket = () => {
 
     addListener(SERVER_EVENTS.GAME_OVER, (payload) => { // done
         dispatch(socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.GAME_OVER, payload }));
-        dispatch(setGameStatus({ room: { status: 'game-over' } }));
+        const message = typeof payload?.message === 'string' ? payload.message : 'Game Over';
+        dispatch(setGameStatus({ room: { status: 'game-over' }, message }));
     });
 
     return () => {
