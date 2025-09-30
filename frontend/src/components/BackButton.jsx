@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useCallback, useMemo } from 'react';
-import { BackButtonContainer, BackButton as BackButtonButton } from '../pages/HomePage.styled';
+import { BackButtonContainer, BackButton as BackButtonButton } from  './BackButton.styled.js';
 
 const BackButton = ({ onClick }) => {
     const navigate = useNavigate();
