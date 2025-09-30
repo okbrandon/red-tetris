@@ -6,7 +6,6 @@ import GameView from '../components/GameView.jsx';
 import { PageWrapper, SoloArena, GameLogoTitle } from './GamePage.styled';
 import MultiplayerArena from '../components/MultiplayerArena';
 import { requestRoomLeave } from '../features/socket/socketThunks.js';
-import { showNotification } from '../features/notification/notificationSlice';
 import GameResultModal from '../components/GameResultModal.jsx';
 
 
@@ -18,7 +17,6 @@ const GamePage = () => {
 
     const isMultiplayer = mode === 'multiplayer';
     const resultOutcome = gameResult?.outcome ?? 'info';
-    const resultMessage = gameResult?.message ?? '';
 
     const handleLeaveGame = () => {
         requestRoomLeave();

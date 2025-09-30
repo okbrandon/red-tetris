@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import TetrisGrid from './TetrisGrid.jsx';
 import { Subtitle } from '../pages/HomePage.styled.js';
@@ -39,11 +39,9 @@ const computeCellSize = (rows = 20, cols = 10) => {
 const GameView = ({ grid }) => {
     const { currentPiece, nextPieces, score } = useSelector((state) => state.game);
 
-    const board = useMemo(() => (Array.isArray(grid) ? grid : []), [grid]);
-    const { rows, cols } = useMemo(() => deriveBoardDimensions(board), [board]);
-    const queue = useMemo(() => (
-        Array.isArray(nextPieces) && nextPieces.length ? nextPieces : []
-    ), [nextPieces]);
+    const board = Array.isArray(grid) ? grid : [];
+    const { rows, cols } = deriveBoardDimensions(board);
+    const queue = Array.isArray(nextPieces) ? nextPieces : [];
 
     const cellSize = useResponsiveValue(useCallback(() => computeCellSize(rows, cols), [rows, cols]));
 
@@ -67,8 +65,8 @@ const GameView = ({ grid }) => {
         };
     }, []);
 
-    const primaryPreviewSize = useMemo(() => Math.max(16, Math.floor(cellSize * 0.6)), [cellSize]);
-    const queuePreviewSize = useMemo(() => Math.max(14, Math.floor(cellSize * 0.48)), [cellSize]);
+    const primaryPreviewSize = Math.max(16, Math.floor(cellSize * 0.6));
+    const queuePreviewSize = Math.max(14, Math.floor(cellSize * 0.48));
 
     return (
         <Layout>
