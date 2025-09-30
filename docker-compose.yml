@@ -11,6 +11,14 @@ services:
     ports:
       - "3000:3000"
 
+  # frontend:
+  #   build: ./frontend
+  #   container_name: red-tetris-frontend
+  #   restart: always
+  #   networks:
+  #     - public
+  #   ports:
+  #     - "8080:8080"
 
 networks:
   public:

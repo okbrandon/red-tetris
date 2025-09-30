@@ -2,8 +2,8 @@ FROM node:23-alpine3.20
 
 WORKDIR /app
 
-COPY package.json package.json
-COPY package-lock.json package-lock.json
+COPY package.json .
+COPY package-lock.json .
 
 RUN npm install
 
