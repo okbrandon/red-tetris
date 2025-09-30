@@ -1,29 +1,7 @@
 import { useMemo } from 'react';
-import styled from 'styled-components';
 import PropTypes from 'prop-types';
-
-const BASE_COLOR_PALETTE = Object.freeze({
-    default: 'rgba(162,89,255,0.86)',
-    empty: 'rgba(20,20,25,0.35)',
-    ghost: 'rgba(208,204,255,0.18)',
-    transparent: 'rgba(0,0,0,0)',
-    indestructible: 'rgba(110,110,140,1)',
-    1: 'rgba(0,229,255,1)', // I
-    2: 'rgba(255,149,0,1)', // L
-    3: 'rgba(0,122,255,1)', // J
-    4: 'rgba(255,59,48,1)', // Z
-    5: 'rgba(255,214,10,1)', // O
-    6: 'rgba(191,90,242,1)', // T
-    7: 'rgba(52,199,89,1)', // S
-    cyan: 'rgba(0,229,255,1)',
-    orange: 'rgba(255,149,0,1)',
-    blue: 'rgba(0,122,255,1)',
-    purple: 'rgba(191,90,242,1)',
-    yellow: 'rgba(255,214,10,1)',
-    green: 'rgba(52,199,89,1)',
-    red: 'rgba(255,59,48,1)',
-    gray: 'rgba(154,154,189,0.85)',
-});
+import { BASE_TETRIS_COLORS, extractPieceBlocks } from '../utils/tetris.js';
+import { Board, Cell, Overlay, OverlayInner, Block } from './TetrisGrid.styled.js';
 
 const setAlpha = (color, alpha) => {
     if (!color) return `rgba(0,0,0,${alpha})`;
@@ -60,57 +38,17 @@ const setAlpha = (color, alpha) => {
     return color;
 };
 
-const resolveColor = (palette, value, fallback) => {
-    const candidates = [value, fallback];
-
-    for (const candidate of candidates) {
-        if (candidate === undefined || candidate === null) continue;
-
-        if (palette[candidate] !== undefined) return palette[candidate];
-
-        if (typeof candidate === 'string') {
-            const key = candidate.toLowerCase();
-            if (palette[key] !== undefined) return palette[key];
-            if (key === 'transparent') return palette.transparent;
-            if (key === 'ghost') return palette.ghost;
-            if (/^#|^rgb/.test(candidate)) return candidate;
-        }
-
-        if (typeof candidate === 'number') {
-            if (palette[String(candidate)] !== undefined) return palette[String(candidate)];
-            if (palette[candidate] !== undefined) return palette[candidate];
-        }
-    }
-
-    return palette.default;
-};
-
-const createEmptyCell = (palette) => ({
-    filled: false,
-    ghost: false,
-    indestructible: false,
-    color: palette.empty,
-    shadowColor: setAlpha(palette.default, 0.12),
-});
-
 const normalizeCell = (value, palette) => {
-    if (!value || typeof value !== 'object') {
-        return createEmptyCell(palette);
-    }
-
     const filled = Boolean(value.filled);
     const ghost = Boolean(value.ghost);
     const indestructible = Boolean(value.indestructible);
-    const rawColor = value.color ?? (filled ? 'default' : 'empty');
-    const baseColor = resolveColor(palette, rawColor, rawColor);
+    const baseColor = palette[value.color];
     const color = ghost
         ? palette.ghost
         : indestructible
-            ? resolveColor(palette, rawColor ?? 'indestructible', 'indestructible')
+            ? palette.indestructible
             : baseColor;
-    const shadowColor = value.shadowColor
-        ? resolveColor(palette, value.shadowColor, color)
-        : ghost
+    const shadowColor = ghost
             ? setAlpha(color, 0.25)
             : setAlpha(color, filled ? 0.45 : 0.12);
 
@@ -140,18 +78,11 @@ const normalizeActivePiece = (piece, palette) => {
     if (!piece) return null;
     if (!Array.isArray(piece.shape)) return null;
 
-    const blocks = [];
-    for (let y = 0; y < piece.shape.length; y += 1) {
-        for (let x = 0; x < piece.shape[y].length; x += 1) {
-            if (piece.shape[y][x]) {
-                blocks.push([x, y]);
-            }
-        }
-    }
+    const blocks = extractPieceBlocks(piece, { preferShape: true });
 
     if (blocks.length === 0) return null;
 
-    const color = resolveColor(palette, piece.color, piece.type ?? piece.id);
+    const color = palette[piece.color];
 
     return {
         blocks,
@@ -161,89 +92,15 @@ const normalizeActivePiece = (piece, palette) => {
     };
 };
 
-const Board = styled.div`
-    display: grid;
-    place-content: center;
-    background: rgba(15, 15, 20, 0.45);
-    border: 1px solid rgba(255,255,255,0.08);
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04), 0 20px 60px rgba(0,0,0,0.45);
-    backdrop-filter: blur(10px) saturate(120%);
-    border-radius: 12px;
-    overflow: hidden;
-    position: relative;
-`;
-
-const Cell = styled.div`
-    width: ${({ $size }) => $size}px;
-    height: ${({ $size }) => $size}px;
-    box-sizing: border-box;
-    position: relative;
-    background: ${({ $filled, $ghost }) => {
-        if ($ghost) {
-            return 'linear-gradient(145deg, rgba(230,229,255,0.08) 0%, rgba(180,175,230,0.02) 100%)';
-        }
-        return $filled
-            ? 'linear-gradient(145deg, var(--cell-color, rgba(191,90,242,1)) 0%, rgba(255,255,255,0.9) 140%)'
-            : 'rgba(20,20,25,0.35)';
-    }};
-    border: ${({ $showGrid, $ghost }) => {
-        if ($ghost) return '1px dashed rgba(210,198,255,0.28)';
-        return $showGrid ? '1px solid rgba(199,168,255,0.08)' : '1px solid transparent';
-    }};
-    border-radius: ${({ $filled, $ghost }) => ($ghost ? 2 : $filled ? 3 : 0)}px;
-    box-shadow: ${({ $filled, $ghost }) => {
-        if ($ghost) return 'inset 0 0 0 1px rgba(210,198,255,0.22)';
-        return $filled
-            ? '0 0 12px var(--cell-shadow, rgba(0,0,0,0.45)), inset 0 0 1px rgba(255,255,255,0.25)'
-            : 'none';
-    }};
-    opacity: ${({ $ghost }) => ($ghost ? 0.9 : 1)};
-    transition: background 180ms ease, box-shadow 180ms ease, border-radius 180ms ease, opacity 180ms ease;
-
-    &::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        border-radius: inherit;
-        pointer-events: none;
-        background: ${({ $filled, $ghost }) =>
-            $filled && !$ghost
-                ? 'radial-gradient(120% 80% at 25% 20%, rgba(255,255,255,0.35), rgba(255,255,255,0) 55%)'
-                : 'none'};
-    }
-`;
-
-const Overlay = styled.div`
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-`;
-
-const OverlayInner = styled.div`
-    position: absolute;
-    will-change: transform;
-    transition: transform 180ms cubic-bezier(.2,.7,.2,1);
-`;
-
-const Block = styled.div`
-    position: absolute;
-    width: ${({ $size }) => $size}px;
-    height: ${({ $size }) => $size}px;
-    border-radius: 3px;
-    background: linear-gradient(145deg, var(--block-color, rgba(191,90,242,1)) 0%, rgba(255,255,255,0.9) 140%);
-    box-shadow: 0 0 12px var(--block-shadow, rgba(0,0,0,0.45)), inset 0 0 1px rgba(255,255,255,0.25);
-`;
-
 const TetrisGrid = ({
     rows = 20,
     cols = 10,
     cellSize = 24,
     grid,
     showGrid = true,
-    colors = BASE_COLOR_PALETTE,
     currentPiece,
 }) => {
-    const palette = useMemo(() => ({ ...BASE_COLOR_PALETTE, ...colors }), [colors]);
+    const palette = useMemo(() => ({ ...BASE_TETRIS_COLORS }), []);
     const sourceGrid = useMemo(() => (Array.isArray(grid) ? grid : []), [grid]);
 
     const normalizedGrid = useMemo(
@@ -260,7 +117,7 @@ const TetrisGrid = ({
         <Overlay aria-hidden>
             <OverlayInner
                 style={{
-                    transform: `translate(${normalizedCurrentPiece.position.x * cellSize}px, ${normalizedCurrentPiece.position.y * cellSize}px)`,
+                    transform: `translate3d(${normalizedCurrentPiece.position.x * cellSize}px, ${normalizedCurrentPiece.position.y * cellSize}px, 0)`,
                 }}
             >
                 {normalizedCurrentPiece.blocks.map(([bx, by], index) => (
