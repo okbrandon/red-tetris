@@ -63,7 +63,6 @@ const normalizeCell = (value, palette) => {
 
 const normalizeGrid = (grid, rows, cols, palette) => {
     const normalized = [];
-    console.log('grid in normalizeGrid:', grid);
     for (let y = 0; y < rows; y += 1) {
         const row = [];
         for (let x = 0; x < cols; x += 1) {
@@ -118,7 +117,7 @@ const TetrisGrid = ({
         <Overlay aria-hidden>
             <OverlayInner
                 style={{
-                    transform: `translate(${normalizedCurrentPiece.position.x * cellSize}px, ${normalizedCurrentPiece.position.y * cellSize}px)`,
+                    transform: `translate3d(${normalizedCurrentPiece.position.x * cellSize}px, ${normalizedCurrentPiece.position.y * cellSize}px, 0)`,
                 }}
             >
                 {normalizedCurrentPiece.blocks.map(([bx, by], index) => (

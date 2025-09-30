@@ -36,20 +36,6 @@ export const Cell = styled.div`
             ? '0 0 12px var(--cell-shadow, rgba(0,0,0,0.45)), inset 0 0 1px rgba(255,255,255,0.25)'
             : 'none';
     }};
-    opacity: ${({ $ghost }) => ($ghost ? 0.9 : 1)};
-    transition: background 180ms ease, box-shadow 180ms ease, border-radius 180ms ease, opacity 180ms ease;
-
-    &::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        border-radius: inherit;
-        pointer-events: none;
-        background: ${({ $filled, $ghost }) =>
-            $filled && !$ghost
-                ? 'radial-gradient(120% 80% at 25% 20%, rgba(255,255,255,0.35), rgba(255,255,255,0) 55%)'
-                : 'none'};
-    }
 `;
 
 export const Overlay = styled.div`
@@ -60,8 +46,6 @@ export const Overlay = styled.div`
 
 export const OverlayInner = styled.div`
     position: absolute;
-    will-change: transform;
-    transition: transform 180ms cubic-bezier(.2,.7,.2,1);
 `;
 
 export const Block = styled.div`
