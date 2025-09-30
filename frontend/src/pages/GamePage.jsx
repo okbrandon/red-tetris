@@ -1,9 +1,7 @@
-import styled from 'styled-components';
 import { useDispatch, useSelector } from 'react-redux';
-import { LogoTitle } from './HomePage.styled';
 import BackButton from '../components/BackButton';
 import GameView from '../components/GameView.jsx';
-import { PageWrapper } from './GamePage.styled';
+import { PageWrapper, SoloArena, GameLogoTitle } from './GamePage.styled';
 import MultiplayerArena from '../components/MultiplayerArena';
 import { requestRoomLeave } from '../features/socket/socketThunks.js';
 import { useNavigate } from 'react-router-dom';
@@ -45,21 +43,5 @@ const GamePage = () => {
         </PageWrapper>
     );
 };
-
-const SoloArena = styled.div`
-    width: min(96vw, 1040px);
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto;
-    padding: clamp(0.8rem, 3vw, 1.6rem);
-    box-sizing: border-box;
-`;
-
-const GameLogoTitle = styled(LogoTitle)`
-    font-size: clamp(2.1rem, 4vw, 2.8rem);
-    margin: 0;
-`;
 
 export default GamePage;
