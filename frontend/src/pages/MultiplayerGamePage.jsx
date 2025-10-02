@@ -18,7 +18,7 @@ const MultiplayerGamePage = () => {
     const handleJoin = () => {
         const trimmed = roomName.trim();
         if (!trimmed) {
-            dispatch(showNotification({ type: 'error', message: 'Enter a room code to join a lobby.' }));
+            dispatch(showNotification({ type: 'error', message: 'Enter a room name to join a lobby.' }));
             return;
         }
 
@@ -31,7 +31,7 @@ const MultiplayerGamePage = () => {
 
     return (
         <Wrapper>
-            <BackButton />
+            <BackButton onClick={() => navigate('/menu')} />
             <LogoTitle>Multiplayer</LogoTitle>
             <Card>
                 <Subtitle>Enter a room name</Subtitle>
