@@ -193,6 +193,47 @@ describe('Game', () => {
 	});
 
 	/**
+	 * Confirms that playerLeave does not trigger endGame if shouldEndGame is false and owner leaves.
+	 */
+	test('playerLeave does not trigger endGame if shouldEndGame is false and owner leaves', () => {
+		const player1 = createMockPlayer({ id: 'owner' });
+		const player2 = createMockPlayer({ id: 'p2' });
+
+		player1.room = game;
+		player2.room = game;
+		game.clients.add(player1);
+		game.clients.add(player2);
+		game.owner = player1;
+		game.status = gameStatus.IN_GAME;
+		jest.spyOn(game, 'shouldEndGame').mockReturnValue(false);
+
+		const stopSpy = jest.spyOn(game, 'stop').mockImplementation(() => {});
+
+		game.playerLeave(player1);
+
+		expect(game.owner).toBe(player2);
+		expect(stopSpy).not.toHaveBeenCalled();
+	});
+
+	/**
+	 * Confirms that playerLeave does not transfer ownership if a non-owner leaves.
+	 */
+	test('playerLeave does not transfer ownership if non-owner leaves', () => {
+		const player1 = createMockPlayer({ id: 'owner' });
+		const player2 = createMockPlayer({ id: 'p2' });
+
+		player1.room = game;
+		player2.room = game;
+		game.clients.add(player1);
+		game.clients.add(player2);
+		game.owner = player1;
+		game.playerLeave(player2);
+
+		expect(game.owner).toBe(player1);
+		expect(game.clients.has(player2)).toBe(false);
+	});
+
+	/**
 	 * Confirms that broadcastRoom emits to all clients.
 	 */
 	test('broadcastRoom emits ROOM_BROADCAST to all clients', () => {
@@ -282,15 +323,36 @@ describe('Game', () => {
 		expect(game.shouldEndGame()).toBe(false);
 	});
 
-	test('shouldEndGame returns true if soloJourney and only client hasLost', () => {
-		const player = createMockPlayer({ hasLost: true });
+	/**
+	 * Confirms that shouldEndGame returns false if soloJourney and only client !hasLost.
+	 */
+	test('shouldEndGame returns true if soloJourney and only client !hasLost', () => {
+		const player = createMockPlayer({ hasLost: false });
 
 		game.clients.add(player);
 		game.soloJourney = true;
 		game.status = gameStatus.IN_GAME;
 
 		expect(game.clients.size).toBe(1);
-		expect(game.shouldEndGame()).toBe(true);
+		expect(game.shouldEndGame()).toBe(false);
+	});
+
+	/**
+	 * Confirms that shouldEndGame returns false if soloJourney and two clients.
+	 * This shouldn't normally happen since soloJourney mode limits to 1 player,
+	 * but we test it anyway to ensure robustness.
+	 */
+	test('shouldEndGame returns false if soloJourney and two clients', () => {
+		const player1 = createMockPlayer({ hasLost: false });
+		const player2 = createMockPlayer({ hasLost: false });
+
+		game.clients.add(player1);
+		game.clients.add(player2);
+		game.soloJourney = true;
+		game.status = gameStatus.IN_GAME;
+
+		expect(game.clients.size).toBe(2);
+		expect(game.shouldEndGame()).toBe(false);
 	});
 
 	/**
