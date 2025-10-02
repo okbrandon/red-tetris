@@ -41,7 +41,7 @@ const PREFIX_SINGLEPLAYER = 'singleplayer@';
 /**
  * @constant {RegExp} ROOM_NAME_VALIDATION_REGEX - The regex pattern used to validate room names.
  */
-const ROOM_NAME_VALIDATION_REGEX = /^[a-zA-Z0-9_-]{3,16}$/;
+const ROOM_NAME_VALIDATION_REGEX = /^[a-zA-Z0-9_-]+$/;
 
 export default {
 	FRAME_COLS,
