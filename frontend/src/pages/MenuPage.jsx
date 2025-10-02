@@ -12,6 +12,7 @@ const MenuPage = () => {
     const dispatch = useDispatch();
     const { mode, gameStatus, roomName } = useSelector((state) => state.game);
     const soloStartRequested = useRef(false);
+    const previousStatus = useRef(gameStatus);
 
     const handleSoloJourney = () => {
         dispatch(startSoloGame());
@@ -37,13 +38,18 @@ const MenuPage = () => {
     }, [mode, roomName]);
 
     useEffect(() => {
-        if (gameStatus && gameStatus === 'in-game')
+        const hasJustStarted = previousStatus.current !== 'in-game' && gameStatus === 'in-game';
+
+        if (hasJustStarted) {
             navigate('/game');
+        }
+
+        previousStatus.current = gameStatus;
     }, [gameStatus, navigate]);
 
     return (
         <Wrapper>
-            <BackButton />
+            <BackButton onClick={() => navigate('/')} />
             <LogoTitle>Menu</LogoTitle>
             <Card>
                 <Subtitle>Choose how you want to play</Subtitle>
