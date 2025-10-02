@@ -472,6 +472,30 @@ describe('Player', () => {
 	});
 
 	/**
+	 * Confirms that handlePieceLanding does not merge currentPiece if move invalid.
+	 */
+	test('handlePieceLanding does not merge currentPiece if move invalid', () => {
+		const currentPiece = createMockPiece();
+		const next = createMockPiece();
+
+		player.nextPiece = jest.fn(() => next);
+
+		player.isValidMove = jest.fn()
+			.mockImplementationOnce(() => true)
+			.mockImplementationOnce(() => false);
+
+		player.currentPiece = currentPiece;
+		player.mergePieceIntoGrid = jest.fn(() => player.grid);
+		player.sendGrid = jest.fn();
+
+		player.handlePieceLanding();
+
+		expect(player.currentPiece).toBe(next);
+		expect(player.mergePieceIntoGrid).not.toHaveBeenCalledWith(next, expect.anything());
+		expect(player.sendGrid).toHaveBeenCalled();
+	});
+
+	/**
 	 * Confirms that movePiece does nothing if no room or hasLost.
 	 */
 	test('movePiece does nothing if no currentPiece', () => {
@@ -611,6 +635,36 @@ describe('Player', () => {
 		player.movePiece('down');
 
 		expect(spy).toHaveBeenCalled();
+	});
+
+	/**
+	 * Confirms that movePiece only calls sendGrid if rotate valid and move invalid.
+	 */
+	test('movePiece only calls sendGrid if rotate valid and move invalid', () => {
+		player.currentPiece = createMockPiece();
+		player.grid = structuredClone(gameSettings.DEFAULT_EMPTY_GRID);
+		player.isValidMove = jest.fn(() => false);
+		player.sendGrid = jest.fn();
+		player.movePiece('up');
+
+		expect(player.sendGrid).toHaveBeenCalled();
+	});
+
+	/**
+	 * Confirms that movePiece only calls mergePieceIntoGrid and sendGrid if invalid move and direction is not down.
+	 */
+	test('movePiece only calls mergePieceIntoGrid and sendGrid if invalid move and direction is not down', () => {
+		player.currentPiece = createMockPiece();
+		player.grid = structuredClone(gameSettings.DEFAULT_EMPTY_GRID);
+		player.isValidMove = jest.fn(() => false);
+
+		const mergeSpy = jest.spyOn(player, 'mergePieceIntoGrid');
+
+		player.sendGrid = jest.fn();
+		player.movePiece('left');
+
+		expect(mergeSpy).toHaveBeenCalled();
+		expect(player.sendGrid).toHaveBeenCalled();
 	});
 
 	/**
