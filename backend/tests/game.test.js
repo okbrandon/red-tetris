@@ -1,4 +1,4 @@
-import { afterEach, jest } from '@jest/globals';
+import { afterEach, expect, jest } from '@jest/globals';
 import Game from '../game.js';
 import Tetromino from '../tetromino.js';
 import gameSettings from '../constants/game-settings.js';
@@ -42,6 +42,14 @@ describe('Game', () => {
 		expect(game.soloJourney).toBe(false);
 		expect(game.updateInterval).toBeNull();
 		expect(game.maxPlayers).toBe(gameSettings.MAX_PLAYERS_PER_ROOM);
+	});
+
+	/**
+	 * Confirms that the constructor sets maxPlayers to 1 in soloJourney mode.
+	 */
+	test('constructor sets maxPlayers to 1 in soloJourney mode', () => {
+		const soloGame = new Game('room2', { id: 'soloOwner', username: 'SoloOwner' }, true);
+		expect(soloGame.maxPlayers).toBe(1);
 	});
 
 	/**
@@ -94,7 +102,7 @@ describe('Game', () => {
 	test('playerJoin throws if game started', () => {
 		const player = createMockPlayer();
 
-		game.status = gameStatus.PLAYING;
+		game.status = gameStatus.IN_GAME;
 
 		expect(() => game.playerJoin(player)).toThrow('Game has already started');
 	});
@@ -157,7 +165,7 @@ describe('Game', () => {
 
 		player.room = game;
 		game.clients.add(player);
-		game.status = gameStatus.PLAYING;
+		game.status = gameStatus.IN_GAME;
 		jest.spyOn(game, 'shouldEndGame').mockReturnValue(true);
 
 		const stopSpy = jest.spyOn(game, 'stop').mockImplementation(() => {});
@@ -213,7 +221,7 @@ describe('Game', () => {
 	 * Confirms that shouldEndGame returns true if clients.length is 0.
 	 */
 	test('shouldEndGame returns true if clients.length is 0', () => {
-		game.status = gameStatus.PLAYING;
+		game.status = gameStatus.IN_GAME;
 		game.clients.clear();
 
 		expect(game.shouldEndGame()).toBe(true);
@@ -224,7 +232,7 @@ describe('Game', () => {
 	 */
 	test('shouldEndGame returns true if soloJourney and client hasLost', () => {
 		game.soloJourney = true;
-		game.status = gameStatus.PLAYING;
+		game.status = gameStatus.IN_GAME;
 
 		const player = createMockPlayer({ hasLost: true });
 
@@ -244,7 +252,7 @@ describe('Game', () => {
 		game.clients.add(loser1);
 		game.clients.add(loser2);
 		game.soloJourney = false;
-		game.status = gameStatus.PLAYING;
+		game.status = gameStatus.IN_GAME;
 
 		expect(game.shouldEndGame()).toBe(true);
 		expect(winner.sendGameOver).toHaveBeenCalledWith('You win!');
@@ -259,11 +267,30 @@ describe('Game', () => {
 		const player1 = createMockPlayer({ hasLost: false });
 		const player2 = createMockPlayer({ hasLost: false });
 
-		game.status = gameStatus.PLAYING;
+		game.status = gameStatus.IN_GAME;
 		game.clients.add(player1);
 		game.clients.add(player2);
 
 		expect(game.shouldEndGame()).toBe(false);
+	});
+
+	/**
+	 * Confirms that shouldEndGame returns false if status is WAITING.
+	 */
+	test('shouldEndGame returns false if status is WAITING', () => {
+		game.status = gameStatus.WAITING;
+		expect(game.shouldEndGame()).toBe(false);
+	});
+
+	test('shouldEndGame returns true if soloJourney and only client hasLost', () => {
+		const player = createMockPlayer({ hasLost: true });
+
+		game.clients.add(player);
+		game.soloJourney = true;
+		game.status = gameStatus.IN_GAME;
+
+		expect(game.clients.size).toBe(1);
+		expect(game.shouldEndGame()).toBe(true);
 	});
 
 	/**
@@ -323,7 +350,7 @@ describe('Game', () => {
 	 * Confirms that start throws if already started.
 	 */
 	test('start throws if already started', () => {
-		game.status = gameStatus.PLAYING;
+		game.status = gameStatus.IN_GAME;
 
 		expect(() => game.start()).toThrow('Game has already started');
 	});
@@ -344,7 +371,7 @@ describe('Game', () => {
 		player.sendGrid = jest.fn();
 		game.start();
 
-		expect(game.status).toBe(gameStatus.PLAYING);
+		expect(game.status).toBe(gameStatus.IN_GAME);
 		expect(game.tetromino.generate).toHaveBeenCalled();
 		expect(player.generateEmptyGrid).toHaveBeenCalled();
 		expect(player.emit).toHaveBeenCalledWith(outgoingEvents.GAME_STARTED, expect.any(String));
@@ -355,7 +382,7 @@ describe('Game', () => {
 	 * Confirms that restart throws if not finished.
 	 */
 	test('restart throws if not finished', () => {
-		game.status = gameStatus.PLAYING;
+		game.status = gameStatus.IN_GAME;
 
 		expect(() => game.restart()).toThrow('Game is not finished');
 	});
@@ -409,7 +436,7 @@ describe('Game', () => {
 	test('handlePieceMove throws if no currentPiece', () => {
 		const player = createMockPlayer();
 
-		game.status = gameStatus.PLAYING;
+		game.status = gameStatus.IN_GAME;
 		player.currentPiece = null;
 
 		expect(() => game.handlePieceMove(player, 'left')).toThrow('Client has no current piece');
@@ -421,7 +448,7 @@ describe('Game', () => {
 	test('handlePieceMove calls movePiece', () => {
 		const player = createMockPlayer();
 
-		game.status = gameStatus.PLAYING;
+		game.status = gameStatus.IN_GAME;
 		player.movePiece = jest.fn();
 		game.handlePieceMove(player, 'left');
 
@@ -460,7 +487,7 @@ describe('Game', () => {
 
 		game.clients.add(author);
 		game.clients.add(other);
-		game.status = gameStatus.PLAYING;
+		game.status = gameStatus.IN_GAME;
 		game.soloJourney = false;
 		game.handlePenalties(author, 2);
 
