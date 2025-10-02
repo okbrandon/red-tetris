@@ -176,6 +176,24 @@ io.on("connection", (socket) => {
 			}));
 			return;
 		}
+		if (roomName.length < 3 || roomName.length > 16) {
+			socket.emit(outgoingEvents.ERROR, JSON.stringify({
+				message: 'Room name must be between 3 and 16 characters'
+			}));
+			return;
+		}
+		if (!/^[a-zA-Z0-9_-]+$/.test(roomName)) {
+			socket.emit(outgoingEvents.ERROR, JSON.stringify({
+				message: 'Room name can only contain letters, numbers, underscores, and dashes'
+			}));
+			return;
+		}
+		if (roomName.startsWith('singleplayer@')) {
+			socket.emit(outgoingEvents.ERROR, JSON.stringify({
+				message: 'Room name cannot start with "singleplayer@"'
+			}));
+			return;
+		}
 
 		const room = getRoom(roomName);
 
@@ -186,9 +204,9 @@ io.on("connection", (socket) => {
 				room.assignOwner(client);
 				room.playerJoin(client);
 
-				socket.join(roomName);
+				socket.join(room.id);
 				socket.emit(outgoingEvents.ROOM_CREATED, JSON.stringify({
-					roomName: roomName,
+					roomName: room.id,
 					soloJourney: soloJourney,
 					maxPlayers: room.maxPlayers
 				}));
