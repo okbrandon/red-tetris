@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Wrapper, Card, Subtitle, StartButton, LogoTitle, Input } from './HomePage.styled';
 import BackButton from '../components/BackButton';
 import { JoinForm, JoinHint } from './MultiplayerGamePage.styled';
-import { resetGameState } from '../features/game/gameSlice';
 import { showNotification } from '../features/notification/notificationSlice';
 import { setGameMode } from '../features/game/gameSlice';
 import { requestRoomJoin } from '../features/socket/socketThunks.js';
@@ -23,11 +22,18 @@ const MultiplayerGamePage = () => {
         }
 
         requestRoomJoin({ roomName: trimmed }); // TODO: should not join the room if there are already 4 players
-        dispatch(resetGameState());
         dispatch(setGameMode('multiplayer'));
         dispatch(showNotification({ type: 'success', message: `Joining lobby ${trimmed}…` }));
-        navigate('/lobby');
     };
+
+    useEffect(() => {
+        const joinLobby = lobbySettings.roomName && lobbySettings.gameStatus === 'waiting';
+
+        if (joinLobby) {
+            navigate('/lobby');
+        }
+
+    }, [lobbySettings, navigate]);
 
     return (
         <Wrapper>
