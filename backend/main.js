@@ -10,6 +10,7 @@ import Game from "./game.js";
 import incomingEvents from "./constants/incoming-events.js";
 import outgoingEvents from "./constants/outgoing-events.js";
 import gameStatus from "./constants/game-status.js";
+import gameSettings from "./constants/game-settings.js";
 
 const PORT = process.env.PORT || 3000;
 
@@ -182,13 +183,13 @@ io.on("connection", (socket) => {
 			}));
 			return;
 		}
-		if (!/^[a-zA-Z0-9_-]+$/.test(roomName)) {
+		if (!gameSettings.ROOM_NAME_VALIDATION_REGEX.test(roomName)) {
 			socket.emit(outgoingEvents.ERROR, JSON.stringify({
 				message: 'Room name can only contain letters, numbers, underscores, and dashes'
 			}));
 			return;
 		}
-		if (roomName.startsWith('singleplayer@')) {
+		if (roomName.startsWith(gameSettings.PREFIX_SINGLEPLAYER)) {
 			socket.emit(outgoingEvents.ERROR, JSON.stringify({
 				message: 'Room name cannot start with "singleplayer@"'
 			}));
