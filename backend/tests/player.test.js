@@ -113,6 +113,20 @@ describe('Player', () => {
 	});
 
 	/**
+	 * Confirms that sendGrid emits GAME_STATE with empty nextPieces if less than 2 pieces.
+	 */
+	test('sendGrid emits GAME_STATE with specter of other players', () => {
+		const otherPlayer = new Player(mockConnection, 'player2', 'Bob');
+		otherPlayer.getLandSpecter = jest.fn(() => 'bob-specter');
+		otherPlayer.hasLost = false;
+
+		player.room.clients.add(otherPlayer);
+		player.sendGrid();
+
+		expect(mockConnection.emit).toHaveBeenCalledWith(outgoingEvents.GAME_STATE, expect.anything());
+	});
+
+	/**
 	 * Confirms that sendGameOver sets hasLost and emits GAME_OVER event.
 	 */
 	test('sendGameOver sets hasLost and emits GAME_OVER', () => {
