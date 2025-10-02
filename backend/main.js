@@ -239,7 +239,7 @@ io.on("connection", (socket) => {
 			return;
 		}
 
-		if (room.status === gameStatus.PLAYING) {
+		if (room.status === gameStatus.IN_GAME) {
 			socket.emit(outgoingEvents.ERROR, JSON.stringify({
 				message: 'Game already started'
 			}));
@@ -267,7 +267,7 @@ io.on("connection", (socket) => {
 			return;
 		}
 
-		if (room.status === gameStatus.PLAYING) {
+		if (room.status === gameStatus.IN_GAME) {
 			socket.emit(outgoingEvents.ERROR, JSON.stringify({
 				message: 'Game already started'
 			}));

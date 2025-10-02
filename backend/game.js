@@ -84,7 +84,7 @@ class Game {
 		client.room = null;
 		this.clients.delete(client);
 
-		if (this.status == gameStatus.PLAYING) {
+		if (this.status == gameStatus.IN_GAME) {
 			if (this.shouldEndGame()) {
 				console.log('[' + this.id + '] GAME OVER (NO MORE PLAYERS)');
 
@@ -193,7 +193,7 @@ class Game {
 			throw new Error('Game has already started');
 		const clients = [...this.clients];
 
-		this.status = gameStatus.PLAYING;
+		this.status = gameStatus.IN_GAME;
 		this.soloJourney = clients.length === 1;
 		this.tetromino.generate(gameSettings.DEFAULT_PIECE_COUNT);
 
@@ -275,7 +275,7 @@ class Game {
 	 * @throws If the game isn't running or the player has no active piece.
 	 */
 	handlePieceMove(client, direction) {
-		if (this.status !== gameStatus.PLAYING)
+		if (this.status !== gameStatus.IN_GAME)
 			throw new Error('Game is not in progress');
 		if (!client.currentPiece)
 			throw new Error('Client has no current piece');
@@ -291,7 +291,7 @@ class Game {
 	handlePenalties(author, penalties) {
 		if (this.soloJourney)
 			return;
-		if (this.status !== gameStatus.PLAYING)
+		if (this.status !== gameStatus.IN_GAME)
 			throw new Error('Game is not in progress');
 
 		const clients = [...this.clients].filter(client => client !== author);
