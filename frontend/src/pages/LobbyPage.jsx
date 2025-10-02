@@ -5,7 +5,7 @@ import BackButton from '../components/BackButton';
 import { PlayerList, Player } from './LobbyPage.styled';
 import { showNotification } from '../features/notification/notificationSlice';
 import { requestRoomLeave, requestStartGame } from '../features/socket/socketThunks.js';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 const LobbyPage = () => {
     const username = useSelector((state) => state.user.username);
@@ -13,6 +13,7 @@ const LobbyPage = () => {
     const gameStatus = useSelector((state) => state.game.gameStatus);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const previousStatus = useRef(gameStatus);
 
     const multiplayer = game.multiplayer;
     const players = multiplayer?.players?.length
@@ -47,13 +48,14 @@ const LobbyPage = () => {
     };
 
     useEffect(() => {
-        if (gameStatus && gameStatus === 'in-game')
-            navigate('/game');
-    }, [gameStatus, navigate]);
+        const hasJustStarted = previousStatus.current !== 'in-game' && gameStatus === 'in-game';
 
-    useEffect(() => {
-        console.log('Game state on LobbyPage:', game);
-    }, [game]);
+        if (hasJustStarted) {
+            navigate('/game');
+        }
+
+        previousStatus.current = gameStatus;
+    }, [gameStatus, navigate]);
 
     return (
         <Wrapper>
