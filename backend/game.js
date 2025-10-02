@@ -16,7 +16,7 @@ class Game {
 	 */
 	constructor(id, owner = null, soloJourney = false) {
 		/** @type {string} */
-		this.id = id;
+		this.id = soloJourney ? 'singleplayer@' + id : id;
 		/** @type {Object|null} */
 		this.owner = owner;
 		/** @type {string} */
