@@ -116,15 +116,11 @@ class Tetromino {
 	 */
 	generate(n) {
 		for (let i = 0; i < n; i++) {
-			try {
-				const piece = this.getRandomPiece();
+			const piece = this.getRandomPiece();
 
-				if (!piece)
-					return;
-				this.pieces.add(piece);
-			} catch (error) {
-				console.error('Error generating piece:', error);
-			}
+			if (!piece)
+				return;
+			this.pieces.add(piece);
 		}
 		console.log(`Tetromino generated ${n} pieces`);
 	}
