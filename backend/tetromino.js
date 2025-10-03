@@ -19,8 +19,8 @@ class Tetromino {
 			{
 				shape: [
 					[0, 0, 0],
-					[1, 1, 1],
-					[0, 1, 0]
+					[0, 1, 0],
+					[1, 1, 1]
 				],
 				color: 'purple'
 			},
@@ -35,18 +35,18 @@ class Tetromino {
 			{
 				shape: [
 					[0, 0, 0],
-					[1, 1, 1],
-					[1, 0, 0]
+					[0, 0, 1],
+					[1, 1, 1]
 				],
 				color: 'orange'
 			},
 			{
 				shape: [
 					[0, 0, 0],
-					[1, 1, 1],
-					[0, 0, 1]
+					[1, 0, 0],
+					[1, 1, 1]
 				],
-				color: 'orange'
+				color: 'blue'
 			},
 			{
 				shape: [
@@ -54,7 +54,7 @@ class Tetromino {
 					[1, 1, 0],
 					[0, 1, 1]
 				],
-				color: 'green'
+				color: 'red'
 			},
 			{
 				shape: [
@@ -67,8 +67,8 @@ class Tetromino {
 			{
 				shape: [
 					[0, 0, 0, 0],
-					[0, 0, 0, 0],
 					[1, 1, 1, 1],
+					[0, 0, 0, 0],
 					[0, 0, 0, 0]
 				],
 				color: 'cyan'
