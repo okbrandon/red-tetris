@@ -44,7 +44,7 @@ describe('Tetromino', () => {
 		const pos = tetro.getDefaultPosition(size);
 
 		expect(pos.x).toBe(Math.floor((gameSettings.FRAME_COLS - size) / 2));
-		expect(pos.y).toBe(0);
+		expect(pos.y).toBe(1);
 	});
 
 	/**
