@@ -43,6 +43,21 @@ const PREFIX_SINGLEPLAYER = 'singleplayer@';
  */
 const ROOM_NAME_VALIDATION_REGEX = /^[a-zA-Z0-9_-]+$/;
 
+/**
+ * @constant {Object} BPS_SCORING - The scoring system based on the number of lines cleared at once.
+ * Based on classic Tetris scoring:
+ * - 1 (Single) line: 40 points
+ * - 2 (Double) lines: 100 points
+ * - 3 (Triple) lines: 300 points
+ * - 4 (Tetris) lines: 1200 points
+ */
+const BPS_SCORING = {
+	1: { points: 40, description: 'Single' },
+	2: { points: 100, description: 'Double' },
+	3: { points: 300, description: 'Triple' },
+	4: { points: 1200, description: 'Tetris' }
+};
+
 export default {
 	FRAME_COLS,
 	FRAME_ROWS,
@@ -50,5 +65,6 @@ export default {
 	DEFAULT_EMPTY_GRID,
 	MAX_PLAYERS_PER_ROOM,
 	PREFIX_SINGLEPLAYER,
-	ROOM_NAME_VALIDATION_REGEX
+	ROOM_NAME_VALIDATION_REGEX,
+	BPS_SCORING
 };
