@@ -136,7 +136,10 @@ class Game {
 	 * Broadcasts a lines cleared event to all clients when a player clears lines.
 	 *
 	 * @param {Object} author - The player who cleared the lines.
-	 * @param {Array} details - Details about the cleared lines (e.g., number of lines, description).
+	 * @param {Object} details - Details about the cleared lines.
+	 * 	@property {number} clearedLines - Number of lines cleared.
+	 * 	@property {number} scoredPoints - Points scored for clearing lines.
+	 * 	@property {string} description - Description of the event.
 	 */
 	broadcastLinesCleared(author, details) {
 		const clients = [...this.clients];
