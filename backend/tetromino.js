@@ -27,7 +27,7 @@ class Tetromino {
 			{
 				shape: [
 					[1, 1],
-					[1, 1],
+					[1, 1]
 				],
 				color: 'yellow'
 			},
