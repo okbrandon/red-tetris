@@ -91,7 +91,9 @@ const joinRoom = (socket, room, client) => {
 
 		socket.join(roomName);
 		socket.emit(outgoingEvents.ROOM_JOINED, JSON.stringify({
-			roomName: roomName
+			roomName: roomName,
+			soloJourney: room.soloJourney,
+			maxPlayers: room.maxPlayers
 		}));
 
 		room.broadcastRoom();
