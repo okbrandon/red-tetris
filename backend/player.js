@@ -24,6 +24,7 @@ class Player {
 		this.currentPieceIndex = 0;
 		this.grid = null;
 		this.hasLost = false;
+		this.score = 0;
 	}
 
 	/**
@@ -60,7 +61,9 @@ class Player {
 		const clientsData = clients.map(client => ({
 			id: client.id,
 			username: client.username,
-			specter: client.getLandSpecter(),
+			hasLost: client.hasLost,
+			score: client.score,
+			specter: client.getLandSpecter()
 		}));
 
 		this.emit(outgoingEvents.GAME_STATE, {
@@ -81,6 +84,7 @@ class Player {
 				username: this.username,
 				hasLost: this.hasLost,
 				specter: this.getLandSpecter(),
+				score: this.score
 			},
 			clients: clientsData
 		});
@@ -103,8 +107,11 @@ class Player {
 					username: this.room.owner.username,
 				},
 				status: this.room.status,
-				soloJourney: this.room.soloJourney
+				soloJourney: this.room.soloJourney,
+				maxPlayers: this.room.maxPlayers
 			},
+			hasLost: this.hasLost,
+			score: this.score,
 			message: message,
 		});
 	}
@@ -342,6 +349,20 @@ class Player {
 
 		if (clearedLines - 1 > 0)
 			this.room.handlePenalties(this, clearedLines - 1);
+
+		if (clearedLines > 0) {
+			const bpsEntry = gameSettings.BPS_SCORING[clearedLines] || gameSettings.BPS_SCORING[4];
+			const score = bpsEntry.points;
+			const description = bpsEntry.description;
+
+			this.score += score;
+			this.room.broadcastLinesCleared(this, {
+				clearedLines: clearedLines,
+				scoredPoints: score,
+				description: description
+			});
+			console.log(`Player ${this.username} cleared ${clearedLines} line(s) (${description}) for ${score} points. Total score: ${this.score}`);
+		}
 	}
 
 	/**

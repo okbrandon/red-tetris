@@ -27,7 +27,8 @@ describe('Player', () => {
 			rows: gameSettings.FRAME_ROWS,
 			cols: gameSettings.FRAME_COLS,
 			clients: new Set([player]),
-			handlePenalties: jest.fn()
+			handlePenalties: jest.fn(),
+			broadcastLinesCleared: jest.fn()
 		};
 		player.grid = structuredClone(gameSettings.DEFAULT_EMPTY_GRID);
 		player.pieces = new Set([createMockPiece(), createMockPiece({ color: 'blue' })]);

@@ -112,16 +112,52 @@ class Game {
 				room: this.id,
 				owner: {
 					id: this.owner.id,
-					username: this.owner.username
+					username: this.owner.username,
+					hasLost: this.owner.hasLost,
+					score: this.owner.score
 				},
 				you: {
 					id: client.id,
-					username: client.username
+					username: client.username,
+					hasLost: client.hasLost,
+					score: client.score
 				},
 				clients: clients.map(c => ({
 					id: c.id,
-					username: c.username
+					username: c.username,
+					hasLost: c.hasLost,
+					score: c.score
 				}))
+			}));
+		});
+	}
+
+	/**
+	 * Broadcasts a lines cleared event to all clients when a player clears lines.
+	 *
+	 * @param {Object} author - The player who cleared the lines.
+	 * @param {Object} details - Details about the cleared lines.
+	 * 	@property {number} clearedLines - Number of lines cleared.
+	 * 	@property {number} scoredPoints - Points scored for clearing lines.
+	 * 	@property {string} description - Description of the event.
+	 */
+	broadcastLinesCleared(author, details) {
+		const clients = [...this.clients];
+
+		clients.forEach(client => {
+			client.emit(outgoingEvents.LINES_CLEARED, JSON.stringify({
+				room: this.id,
+				you: {
+					id: client.id,
+					username: client.username,
+					score: client.score
+				},
+				scorer: {
+					id: author.id,
+					username: author.username,
+					score: author.score
+				},
+				details: details
 			}));
 		});
 	}
@@ -216,10 +252,14 @@ class Game {
 				you: {
 					id: client.id,
 					username: client.username,
+					hasLost: client.hasLost,
+					score: client.score
 				},
 				clients: clients.map(c => ({
 					id: c.id,
-					username: c.username
+					username: c.username,
+					hasLost: c.hasLost,
+					score: c.score
 				})),
 				pieces: [...client.pieces].map(piece => ({
 					shape: piece.shape,
