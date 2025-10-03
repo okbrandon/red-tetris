@@ -250,6 +250,22 @@ describe('Game', () => {
 	});
 
 	/**
+	 * Confirms that broadcastLinesCleared emits to all clients.
+	 */
+	test('broadcastLinesCleared emits LINES_CLEARED to all clients', () => {
+		const player1 = createMockPlayer({ id: 'p1' });
+		const player2 = createMockPlayer({ id: 'p2' });
+
+		game.clients.add(player1);
+		game.clients.add(player2);
+		game.owner = player1;
+		game.broadcastLinesCleared(3);
+
+		expect(player1.emit).toHaveBeenCalledWith(outgoingEvents.LINES_CLEARED, expect.any(String));
+		expect(player2.emit).toHaveBeenCalledWith(outgoingEvents.LINES_CLEARED, expect.any(String));
+	});
+
+	/**
 	 * Confirms that shouldEndGame returns true if status is FINISHED.
 	 */
 	test('shouldEndGame returns true if status is FINISHED', () => {
