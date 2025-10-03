@@ -18,33 +18,32 @@ class Tetromino {
 		this.templates = [
 			{
 				shape: [
-					[0, 0, 0],
 					[0, 1, 0],
-					[1, 1, 1]
+					[1, 1, 1],
+					[0, 0, 0]
 				],
 				color: 'purple'
 			},
 			{
 				shape: [
-					[0, 1, 1, 0],
-					[0, 1, 1, 0],
-					[0, 0, 0, 0]
+					[1, 1],
+					[1, 1],
 				],
 				color: 'yellow'
 			},
 			{
 				shape: [
-					[0, 0, 0],
 					[0, 0, 1],
-					[1, 1, 1]
+					[1, 1, 1],
+					[0, 0, 0]
 				],
 				color: 'orange'
 			},
 			{
 				shape: [
-					[0, 0, 0],
 					[1, 0, 0],
-					[1, 1, 1]
+					[1, 1, 1],
+					[0, 0, 0]
 				],
 				color: 'blue'
 			},
@@ -92,7 +91,7 @@ class Tetromino {
 	getDefaultPosition(size) {
 		return {
 			x: Math.floor((gameSettings.FRAME_COLS - size) / 2),
-			y: 0
+			y: 1
 		}
 	}
 
