@@ -272,7 +272,14 @@ io.on("connection", (socket) => {
 			return;
 		}
 
-		room.start();
+		try {
+			room.start();
+		} catch (error) {
+			socket.emit(outgoingEvents.ERROR, JSON.stringify({
+				message: error.message
+			}));
+			return;
+		}
 	});
 
 	// Handle game restarting
