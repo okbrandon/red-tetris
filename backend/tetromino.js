@@ -80,6 +80,8 @@ class Tetromino {
 
 		/** @type {Set<Piece>} */
 		this.pieces = new Set;
+		/** @type {Set<Piece>} */
+		this._bag = null;
 	}
 
 	/**
@@ -95,12 +97,14 @@ class Tetromino {
 	}
 
 	/**
-	 * Selects a random template and creates a new Piece from it.
+	 * Selects a random template and creates a new Piece from it, avoiding immediate repeats.
 	 * @returns {Piece|null} A new Piece instance, or null if creation fails.
 	 */
 	getRandomPiece() {
-		const random = Math.floor(Math.random() * this.templates.length);
-		const template = this.templates[random];
+		if (!this._bag || this._bag.length === 0) {
+			this._bag = this.shuffle([...this.templates]);
+		}
+		const template = this._bag.pop();
 
 		try {
 			return Piece.fromTemplate(template);
@@ -108,6 +112,21 @@ class Tetromino {
 			console.error('Error creating piece:', error);
 			return null;
 		}
+	}
+
+	/**
+	 * Shuffles an array using Fisher-Yates algorithm.
+	 * @param {Array} array
+	 * @returns {Array}
+	 */
+	shuffle(array) {
+		const arr = [...array];
+
+		for (let i = arr.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[arr[i], arr[j]] = [arr[j], arr[i]];
+		}
+		return arr;
 	}
 
 	/**
