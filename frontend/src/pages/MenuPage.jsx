@@ -1,9 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { Wrapper, LogoTitle, Card, Subtitle, StartButton } from './HomePage.styled';
 import BackButton from '../components/BackButton';
-import { SOLO_ROOM_NAME, startSoloGame } from '../features/game/gameSlice.js';
+import { SOLO_ROOM_NAME } from '../features/game/gameSlice.js';
 import { showNotification } from '../features/notification/notificationSlice';
 import { requestRoomJoin, requestStartGame } from '../features/socket/socketThunks.js';
 
@@ -11,41 +11,22 @@ const MenuPage = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { mode, gameStatus, roomName } = useSelector((state) => state.game);
-    const soloStartRequested = useRef(false);
-    const previousStatus = useRef(gameStatus);
+    const { username } = useSelector((state) => state.user);
 
     const handleSoloJourney = () => {
-        dispatch(startSoloGame());
-        soloStartRequested.current = false;
-        requestRoomJoin({ roomName: SOLO_ROOM_NAME });
+        requestRoomJoin({ roomName: SOLO_ROOM_NAME, soloJourney: true });
         dispatch(showNotification({ type: 'info', message: 'Starting solo journey...'}));
     }
 
-    useEffect(() => {
-        if (!soloStartRequested.current
-            && mode === 'solo'
-            && roomName === SOLO_ROOM_NAME
-            && gameStatus === 'waiting') {
-            soloStartRequested.current = true;
-            requestStartGame();
+    useEffect(() => { // Redirect to /game when solo game starts
+        if (mode === 'solo' && roomName) {
+            if (gameStatus !== 'in-game') {
+                requestStartGame();
+            } else if (gameStatus === 'in-game') {
+                navigate(`/${roomName}/${username}`);
+            }
         }
-    }, [gameStatus, mode, roomName]);
-
-    useEffect(() => {
-        if (mode !== 'solo' || roomName !== SOLO_ROOM_NAME) {
-            soloStartRequested.current = false;
-        }
-    }, [mode, roomName]);
-
-    useEffect(() => {
-        const hasJustStarted = previousStatus.current !== 'in-game' && gameStatus === 'in-game';
-
-        if (hasJustStarted) {
-            navigate('/game');
-        }
-
-        previousStatus.current = gameStatus;
-    }, [gameStatus, navigate]);
+    }, [mode, roomName, gameStatus, navigate, username]);
 
     return (
         <Wrapper>

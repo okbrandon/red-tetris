@@ -9,7 +9,7 @@ import {
 } from './socketSlice.js';
 import { showNotification } from '../notification/notificationSlice.js';
 import { setServerIdentity } from '../user/userSlice.js';
-import { setGameState, setRoomName, setGameStatus, resetGameState, setLobbySettings } from '../game/gameSlice.js';
+import { setGameState, setRoomName, setGameStatus, resetGameState, setLobbySettings, setGameMode } from '../game/gameSlice.js';
 import { store } from '../../store.js';
 
 let listenersBound = false;
@@ -74,44 +74,52 @@ export const initializeSocket = () => {
         dispatch(showNotification({ type: 'error', message }));
     });
 
-    addListener(SERVER_EVENTS.CLIENT_UPDATED, (payload) => { // done
+    addListener(SERVER_EVENTS.CLIENT_UPDATED, (payload) => {
         dispatch(socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.CLIENT_UPDATED, payload }));
         if (payload) {
             dispatch(setServerIdentity(payload));
         }
     });
 
-    addListener(SERVER_EVENTS.ROOM_BROADCAST, (payload) => { // done
+    addListener(SERVER_EVENTS.ROOM_BROADCAST, (payload) => {
         dispatch(socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.ROOM_BROADCAST, payload }));
         dispatch(setLobbySettings(payload));
     });
 
-    addListener(SERVER_EVENTS.ROOM_CREATED, (payload) => { // done
+    addListener(SERVER_EVENTS.ROOM_CREATED, (payload) => {
         dispatch(socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.ROOM_CREATED, payload }));
-        dispatch(setRoomName(payload));
+        dispatch(setRoomName(payload.roomName));
+        dispatch(setGameMode(payload.soloJourney ? 'solo' : 'multiplayer'));
+        if (!payload.soloJourney) {
+            dispatch(setGameStatus({ room: { status: 'waiting' } }));
+        }
     });
 
-    addListener(SERVER_EVENTS.ROOM_JOINED, (payload) => { // done
+    addListener(SERVER_EVENTS.ROOM_JOINED, (payload) => {
         dispatch(socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.ROOM_JOINED, payload }));
-        dispatch(setRoomName(payload));
+        dispatch(setRoomName(payload.roomName));
+        dispatch(setGameMode(payload.soloJourney ? 'solo' : 'multiplayer'));
+        if (!payload.soloJourney) {
+            dispatch(setGameStatus({ room: { status: 'waiting' } }));
+        }
     });
 
-    addListener(SERVER_EVENTS.ROOM_LEFT, (payload) => { // done
+    addListener(SERVER_EVENTS.ROOM_LEFT, (payload) => {
         dispatch(socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.ROOM_LEFT, payload }));
         dispatch(resetGameState());
     });
 
-    addListener(SERVER_EVENTS.GAME_STARTED, (payload) => { // done
+    addListener(SERVER_EVENTS.GAME_STARTED, (payload) => {
         dispatch(socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.GAME_STARTED, payload }));
         dispatch(setGameStatus({ room: { status: 'in-game' } }));
     });
 
-    addListener(SERVER_EVENTS.GAME_STATE, (payload) => { // done
+    addListener(SERVER_EVENTS.GAME_STATE, (payload) => {
         dispatch(socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.GAME_STATE, payload }));
         dispatch(setGameState(payload));
     });
 
-    addListener(SERVER_EVENTS.GAME_OVER, (payload) => { // done
+    addListener(SERVER_EVENTS.GAME_OVER, (payload) => {
         dispatch(socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.GAME_OVER, payload }));
         const message = typeof payload?.message === 'string' ? payload.message : 'Game Over';
         dispatch(setGameStatus({ room: { status: 'game-over' }, message }));

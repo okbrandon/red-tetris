@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Wrapper, Card, Subtitle, StartButton, LogoTitle, Input } from './HomePage.styled';
-import BackButton from '../components/BackButton';
-import { JoinForm, JoinHint } from './MultiplayerGamePage.styled';
-import { showNotification } from '../features/notification/notificationSlice';
-import { setGameMode } from '../features/game/gameSlice';
+import { Wrapper, Card, Subtitle, StartButton, LogoTitle, Input } from './HomePage.styled.js';
+import BackButton from '../components/BackButton.jsx';
+import { JoinForm, JoinHint } from './JoinPage.styled';
+import { showNotification } from '../features/notification/notificationSlice.js';
 import { requestRoomJoin } from '../features/socket/socketThunks.js';
 
-const MultiplayerGamePage = () => {
+const JoinPage = () => {
     const dispatch = useDispatch();
     const lobbySettings = useSelector((state) => state.game);
+    const { username } = useSelector((state) => state.user);
     const [roomName, setRoomName] = useState(() => lobbySettings.roomName || '');
     const navigate = useNavigate();
 
@@ -20,20 +20,18 @@ const MultiplayerGamePage = () => {
             dispatch(showNotification({ type: 'error', message: 'Enter a room name to join a lobby.' }));
             return;
         }
-
-        requestRoomJoin({ roomName: trimmed }); // TODO: should not join the room if there are already 4 players
-        dispatch(setGameMode('multiplayer'));
+        console.log('Joining room:', trimmed);
+        requestRoomJoin({ roomName: trimmed, soloJourney: false });
         dispatch(showNotification({ type: 'success', message: `Joining lobby ${trimmed}…` }));
     };
-
+    // Brandon will add to room-joined `soloJourney: Boolean` in the payload
+    // for the moment my logic is not working but should when that is done.
     useEffect(() => {
-        const joinLobby = lobbySettings.roomName && lobbySettings.gameStatus === 'waiting';
-
-        if (joinLobby) {
-            navigate('/lobby');
+        console.log("lobbySettings changed:", lobbySettings);
+        if (lobbySettings.mode === 'multiplayer' && lobbySettings.roomName) {
+            navigate(`/${lobbySettings.roomName}/${username}`);
         }
-
-    }, [lobbySettings, navigate]);
+    }, [lobbySettings.mode, lobbySettings, navigate]);
 
     return (
         <Wrapper>
@@ -62,4 +60,4 @@ const MultiplayerGamePage = () => {
     );
 };
 
-export default MultiplayerGamePage;
+export default JoinPage;
