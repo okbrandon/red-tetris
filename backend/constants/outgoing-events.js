@@ -150,6 +150,13 @@ const GAME_STATE = 'game-state';
  */
 const GAME_OVER = 'game-over';
 
+/**
+ * @constant {string} LINES_CLEARED - Sent when a player clears lines.
+ *
+ * @description This event is sent by the server to a client when they clear one or more lines in the game.
+ */
+const LINES_CLEARED = 'lines-cleared';
+
 export default {
 	ERROR,
 	CLIENT_UPDATED,
@@ -160,4 +167,5 @@ export default {
 	GAME_STARTED,
 	GAME_STATE,
 	GAME_OVER,
+	LINES_CLEARED
 };

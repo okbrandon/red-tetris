@@ -18,35 +18,34 @@ class Tetromino {
 		this.templates = [
 			{
 				shape: [
-					[0, 0, 0],
+					[0, 1, 0],
 					[1, 1, 1],
-					[0, 1, 0]
+					[0, 0, 0]
 				],
 				color: 'purple'
 			},
 			{
 				shape: [
-					[0, 1, 1, 0],
-					[0, 1, 1, 0],
-					[0, 0, 0, 0]
+					[1, 1],
+					[1, 1]
 				],
 				color: 'yellow'
 			},
 			{
 				shape: [
-					[0, 0, 0],
+					[0, 0, 1],
 					[1, 1, 1],
-					[1, 0, 0]
+					[0, 0, 0]
 				],
 				color: 'orange'
 			},
 			{
 				shape: [
-					[0, 0, 0],
+					[1, 0, 0],
 					[1, 1, 1],
-					[0, 0, 1]
+					[0, 0, 0]
 				],
-				color: 'orange'
+				color: 'blue'
 			},
 			{
 				shape: [
@@ -54,7 +53,7 @@ class Tetromino {
 					[1, 1, 0],
 					[0, 1, 1]
 				],
-				color: 'green'
+				color: 'red'
 			},
 			{
 				shape: [
@@ -67,8 +66,8 @@ class Tetromino {
 			{
 				shape: [
 					[0, 0, 0, 0],
-					[0, 0, 0, 0],
 					[1, 1, 1, 1],
+					[0, 0, 0, 0],
 					[0, 0, 0, 0]
 				],
 				color: 'cyan'
@@ -80,6 +79,8 @@ class Tetromino {
 
 		/** @type {Set<Piece>} */
 		this.pieces = new Set;
+		/** @type {Set<Piece>} */
+		this._bag = null;
 	}
 
 	/**
@@ -90,17 +91,19 @@ class Tetromino {
 	getDefaultPosition(size) {
 		return {
 			x: Math.floor((gameSettings.FRAME_COLS - size) / 2),
-			y: 0
+			y: 1
 		}
 	}
 
 	/**
-	 * Selects a random template and creates a new Piece from it.
+	 * Selects a random template and creates a new Piece from it, avoiding immediate repeats.
 	 * @returns {Piece|null} A new Piece instance, or null if creation fails.
 	 */
 	getRandomPiece() {
-		const random = Math.floor(Math.random() * this.templates.length);
-		const template = this.templates[random];
+		if (!this._bag || this._bag.length === 0) {
+			this._bag = this.shuffle([...this.templates]);
+		}
+		const template = this._bag.pop();
 
 		try {
 			return Piece.fromTemplate(template);
@@ -111,20 +114,31 @@ class Tetromino {
 	}
 
 	/**
+	 * Shuffles an array using Fisher-Yates algorithm.
+	 * @param {Array} array
+	 * @returns {Array}
+	 */
+	shuffle(array) {
+		const arr = [...array];
+
+		for (let i = arr.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[arr[i], arr[j]] = [arr[j], arr[i]];
+		}
+		return arr;
+	}
+
+	/**
 	 * Generates a number of random pieces and stores them in the set.
 	 * @param {number} n - Number of pieces to generate.
 	 */
 	generate(n) {
 		for (let i = 0; i < n; i++) {
-			try {
-				const piece = this.getRandomPiece();
+			const piece = this.getRandomPiece();
 
-				if (!piece)
-					return;
-				this.pieces.add(piece);
-			} catch (error) {
-				console.error('Error generating piece:', error);
-			}
+			if (!piece)
+				return;
+			this.pieces.add(piece);
 		}
 		console.log(`Tetromino generated ${n} pieces`);
 	}
