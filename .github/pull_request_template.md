@@ -3,19 +3,12 @@
 
 ## Summary
 - What changed and why (short bullets)
-- 
 
 ## Screenshots / Demo
 
 ## Breaking Changes / Follow-ups
-- 
+-
 
 ## Issue Links
 - Closes #
 - Relates to #
-
-## Checklist
-- [ ] Targets the correct branch (feature PRs → dev)
-- [ ] Lint/tests/build pass
-- [ ] Tests added/updated (if needed)
-- [ ] Docs updated (if needed)
