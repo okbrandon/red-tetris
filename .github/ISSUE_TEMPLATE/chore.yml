@@ -1,0 +1,35 @@
+name: "🧹 Chore / Maintenance"
+description: Non‑feature work like refactors, deps bumps, CI changes.
+labels: [chore]
+title: "chore: <short summary>"
+body:
+- type: input
+  id: goal
+  attributes:
+    label: Goal
+    placeholder: e.g., Set up Socket.IO communication between frontend and backend
+  validations:
+    required: true
+- type: textarea
+  id: tasks
+  attributes:
+    label: Tasks
+    description: Bullet list of steps and acceptance criteria.
+    placeholder: |
+      - [ ] Create shared socket event types
+      - [ ] Connect FE to BE via `/socket.io`
+      - [ ] Handle reconnect & backoff
+      - [ ] Add basic logging middleware
+    render: markdown
+  validations:
+    required: true
+- type: dropdown
+  id: area
+  attributes:
+    label: Area
+    options:
+      - Frontend
+      - Backend
+      - DevEx / Tooling
+      - CI / CD
+      - Tests
