@@ -87,7 +87,16 @@ export const gameSlice = createSlice({
             state.you = you || null;
             state.isOwner = you && owner && you.id === owner.id;
             if (Array.isArray(clients) && clients.length > 0) {
-                state.multiplayer.players = clients;
+                if (state.gameStatus === 'in-game') {
+                    state.multiplayer.players = state.multiplayer.players
+                        .filter(player => clients.some(client => client.id === player.id))
+                        .map(player => ({
+                            ...player,
+                            ...clients.find(client => client.id === player.id)
+                        }));
+                } else {
+                    state.multiplayer.players = clients;
+                }
             }
         },
         setRoomName: (state, action) => { // room_created / room_joined
