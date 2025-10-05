@@ -44,7 +44,7 @@ function App() {
 
         const navigationEntries = window.performance?.getEntriesByType?.('navigation') ?? [];
         const navigationType = navigationEntries[0]?.type;
-        const legacyNavigationType = navigationEntries[0]?.type;
+        const legacyNavigationType = window.performance?.navigation?.type;
         const legacyReloadType = 'reload';
         const isReload = navigationType === 'reload' || legacyNavigationType === legacyReloadType || legacyNavigationType === 1;
 
