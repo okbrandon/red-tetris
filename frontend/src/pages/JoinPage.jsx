@@ -20,7 +20,6 @@ const JoinPage = () => {
             dispatch(showNotification({ type: 'error', message: 'Enter a room name to join a lobby.' }));
             return;
         }
-        console.log('Joining room:', trimmed);
         requestRoomJoin({ roomName: trimmed, soloJourney: false });
         dispatch(showNotification({ type: 'success', message: `Joining lobby ${trimmed}…` }));
     };
