@@ -20,11 +20,6 @@ const GamePage = () => {
     const isMultiplayer = mode === 'multiplayer';
     const resultOutcome = gameResult?.outcome ?? 'info';
 
-    const handleLeaveGame = () => {
-        requestRoomLeave();
-        navigate('/menu');
-    };
-
     useEffect(() => {
         if (gameStatus !== 'game-over') {
             return;
@@ -39,6 +34,12 @@ const GamePage = () => {
         }
     }, [gameStatus, isResultModalOpen]);
 
+    useEffect(() => {
+        if (!gameStatus) {
+            navigate('/menu');
+        }
+    }, [gameStatus, navigate]);
+
     const handleResultConfirm = () => {
         setResultModalOpen(false);
         requestRoomLeave();
@@ -46,11 +47,11 @@ const GamePage = () => {
     };
 
     return (
-        gameStatus === 'waiting' ? (
+        gameStatus === 'waiting' || !grid[0].length ? (
             <LobbyPage />
         ) : (
             <PageWrapper>
-                <BackButton onClick={handleLeaveGame} />
+                <BackButton onClick={() => requestRoomLeave() } />
                 <GameLogoTitle>{isMultiplayer ? 'Multiplayer' : 'Game'}</GameLogoTitle>
                 {isMultiplayer
                     ? <MultiplayerArena grid={grid} />

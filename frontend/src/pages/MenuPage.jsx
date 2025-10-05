@@ -18,7 +18,7 @@ const MenuPage = () => {
         dispatch(showNotification({ type: 'info', message: 'Starting solo journey...'}));
     }
 
-    useEffect(() => { // Redirect to /game when solo game starts
+    useEffect(() => {
         if (mode === 'solo' && roomName) {
             if (gameStatus !== 'in-game') {
                 requestStartGame();
@@ -27,7 +27,7 @@ const MenuPage = () => {
             }
         }
     }, [mode, roomName, gameStatus, navigate, username]);
-
+ 
     return (
         <Wrapper>
             <BackButton onClick={() => navigate('/')} />

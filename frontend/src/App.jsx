@@ -17,11 +17,6 @@ function RedirectOnRefresh() {
             return
         }
         initialHandledRef.current = true
-
-        // const allowedStaticPaths = new Set(['/', '/menu', '/join', '/lobby', '/game'])
-        // const dynamicRoomPath = /^\/[^/]+\/[^/]+$/
-        // const { pathname } = window.location
-
         navigate('/', { replace: true })
     }, [navigate])
 
@@ -38,7 +33,6 @@ function App() {
                 <Route path='/' element={<HomePage />} />
                 <Route path='/menu' element={<MenuPage />} />
                 <Route path='/join' element={<JoinPage />} />
-                <Route path='/lobby' element={<LobbyPage />} />
                 <Route path='/:room/:player_name' element={<GamePage />} />
             </Routes>
         </Router>
