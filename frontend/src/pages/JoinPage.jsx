@@ -26,11 +26,10 @@ const JoinPage = () => {
     // Brandon will add to room-joined `soloJourney: Boolean` in the payload
     // for the moment my logic is not working but should when that is done.
     useEffect(() => {
-        console.log("lobbySettings changed:", lobbySettings);
         if (lobbySettings.mode === 'multiplayer' && lobbySettings.roomName) {
             navigate(`/${lobbySettings.roomName}/${username}`);
         }
-    }, [lobbySettings.mode, lobbySettings, navigate]);
+    }, [lobbySettings.mode, lobbySettings.roomName, username, navigate]);
 
     return (
         <Wrapper>
