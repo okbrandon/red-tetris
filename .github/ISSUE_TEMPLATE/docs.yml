@@ -1,0 +1,24 @@
+name: "📝 Documentation"
+description: Docs improvements or additions.
+labels: [documentation]
+title: "docs: <short summary>"
+body:
+- type: input
+  id: page
+  attributes:
+    label: Page / section
+    placeholder: e.g., README – local dev setup
+  validations:
+    required: true
+- type: textarea
+  id: change
+  attributes:
+    label: Proposed change
+    placeholder: What needs to be added/updated/removed?
+  validations:
+    required: true
+- type: textarea
+  id: references
+  attributes:
+    label: References / links
+    placeholder: Related issues, PRs, external docs
