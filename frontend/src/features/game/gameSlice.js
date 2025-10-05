@@ -88,11 +88,13 @@ export const gameSlice = createSlice({
             state.isOwner = you && owner && you.id === owner.id;
             if (Array.isArray(clients) && clients.length > 0) {
                 if (state.gameStatus === 'in-game') {
+                    // Build a Map for O(1) client lookup by id
+                    const clientMap = new Map(clients.map(client => [client.id, client]));
                     state.multiplayer.players = state.multiplayer.players
-                        .filter(player => clients.some(client => client.id === player.id))
+                        .filter(player => clientMap.has(player.id))
                         .map(player => ({
                             ...player,
-                            ...clients.find(client => client.id === player.id)
+                            ...clientMap.get(player.id)
                         }));
                 } else {
                     state.multiplayer.players = clients;
