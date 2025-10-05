@@ -5,23 +5,19 @@ import BackButton from '../components/BackButton';
 import { PlayerList, Player } from './LobbyPage.styled';
 import { showNotification } from '../features/notification/notificationSlice';
 import { requestRoomLeave, requestStartGame } from '../features/socket/socketThunks.js';
-import { useEffect, useRef } from 'react';
 
 const LobbyPage = () => {
-    const username = useSelector((state) => state.user.username);
+    const { username, id } = useSelector((state) => state.user);
     const game = useSelector((state) => state.game);
-    const gameStatus = useSelector((state) => state.game.gameStatus);
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const previousStatus = useRef(gameStatus);
 
     const multiplayer = game.multiplayer;
     const players = multiplayer?.players?.length
         ? multiplayer.players.map((player) => player.username || player.id)
         : [username || 'You'];
-    const you = game?.you?.username || username || 'You';
     const ownerId = game?.owner?.id;
-    const isOwner = game?.you?.id && game.you.id === ownerId;
+    const isOwner = id === ownerId;
 
     const lobbyLabel = game?.roomName
         ? `Lobby name: ${game.roomName}`
@@ -47,16 +43,6 @@ const LobbyPage = () => {
         navigate('/menu');
     };
 
-    useEffect(() => {
-        const hasJustStarted = previousStatus.current !== 'in-game' && gameStatus === 'in-game';
-
-        if (hasJustStarted) {
-            navigate('/game');
-        }
-
-        previousStatus.current = gameStatus;
-    }, [gameStatus, navigate]);
-
     return (
         <Wrapper>
             <BackButton onClick={handleLeaveLobby} />
@@ -64,7 +50,7 @@ const LobbyPage = () => {
             <LogoTitle>Lobby</LogoTitle>
 
             <Card>
-                <Subtitle>Welcome, {you}</Subtitle>
+                <Subtitle>Welcome, {username}</Subtitle>
                 <Subtitle>{lobbyLabel}</Subtitle>
                 <Subtitle>{`Slots: up to ${maxSlots} players`}</Subtitle>
 

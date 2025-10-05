@@ -4,7 +4,7 @@ import HomePage from './pages/HomePage'
 import MenuPage from './pages/MenuPage'
 import LobbyPage from './pages/LobbyPage'
 import GamePage from './pages/GamePage'
-import MultiplayerGamePage from './pages/MultiplayerGamePage'
+import JoinPage from './pages/JoinPage'
 import AnimatedBackground from './components/AnimatedBackground'
 import Notification from './components/Notification'
 
@@ -17,10 +17,7 @@ function RedirectOnRefresh() {
             return
         }
         initialHandledRef.current = true
-
-        if (window.location.pathname !== '/') {
-            navigate('/', { replace: true })
-        }
+        navigate('/', { replace: true })
     }, [navigate])
 
     return null
@@ -35,9 +32,8 @@ function App() {
             <Routes>
                 <Route path='/' element={<HomePage />} />
                 <Route path='/menu' element={<MenuPage />} />
-                <Route path='/join' element={<MultiplayerGamePage />} />
-                <Route path='/lobby' element={<LobbyPage />} />
-                <Route path='/game' element={<GamePage />} />
+                <Route path='/join' element={<JoinPage />} />
+                <Route path='/:room/:player_name' element={<GamePage />} />
             </Routes>
         </Router>
     )

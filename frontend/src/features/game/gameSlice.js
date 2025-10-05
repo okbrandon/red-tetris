@@ -8,10 +8,10 @@ const createInitialMultiplayerState = () => ({
 });
 
 const createInitialState = () => ({
-    mode: 'solo',
+    mode: '',
     owner: null,
     isOwner: false,
-    gameStatus: 'waiting',
+    gameStatus: '',
     gameResult: null,
     score: 0,
     roomName: '',
@@ -27,8 +27,9 @@ export const gameSlice = createSlice({
     initialState: createInitialState(),
     reducers: {
         setGameMode: (state, action) => {
-            const mode = action.payload === 'multiplayer' ? 'multiplayer' : 'solo';
-            state.mode = mode;
+            const mode = action.payload;
+
+            state.mode = action.payload;
             if (mode === 'solo') {
                 state.multiplayer = createInitialMultiplayerState();
                 state.score = 0;
@@ -93,15 +94,9 @@ export const gameSlice = createSlice({
         setRoomName: (state, action) => { // room_created / room_joined
             state.roomName = action.payload.roomName ?? '';
         },
-        resetGameState: () => createInitialState(), // room_left
-        startSoloGame: () => ({
-            ...createInitialState(),
-            mode: 'solo',
-            roomName: '',
-            gameStatus: 'waiting',
-        }),
+        resetGameState: () => createInitialState() // room_left
     },
 });
 
-export const { setGameMode, setGameState, setLobbySettings, resetGameState, setRoomName, setGameStatus, startSoloGame } = gameSlice.actions;
+export const { setGameMode, setGameState, setLobbySettings, resetGameState, setRoomName, setGameStatus } = gameSlice.actions;
 export default gameSlice.reducer;

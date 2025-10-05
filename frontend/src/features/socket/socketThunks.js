@@ -9,7 +9,7 @@ import {
 } from './socketSlice.js';
 import { showNotification } from '../notification/notificationSlice.js';
 import { setServerIdentity } from '../user/userSlice.js';
-import { setGameState, setRoomName, setGameStatus, resetGameState, setLobbySettings } from '../game/gameSlice.js';
+import { setGameState, setRoomName, setGameStatus, resetGameState, setLobbySettings, setGameMode } from '../game/gameSlice.js';
 import { store } from '../../store.js';
 
 let listenersBound = false;
@@ -44,14 +44,34 @@ export const initializeSocket = () => {
 
     const cleanup = [];
 
-    const addListener = (event, handler, { raw = false } = {}) => {
+    // const addListener = (event, handler, { raw = false } = {}) => {
+    //     const wrapped = raw
+    //         ? handler
+    //         : (data) => handler(parseServerPayload(data));
+    //     socket.on(event, wrapped);
+    //     cleanup.push(() => socket.off(event, wrapped));
+    // };
+
+    const logListener = (event, direction, payload) => {
+        console.log(`[Socket Event] ${direction.toUpperCase()} - ${event}:`, payload);
+    };
+
+    const addListenerWithLogging = (event, handler, { raw = false } = {}) => {
         const wrapped = raw
-            ? handler
-            : (data) => handler(parseServerPayload(data));
+            ? (data) => {
+                  logListener(event, 'incoming', data);
+                  handler(data);
+              }
+            : (data) => {
+                  const parsedData = parseServerPayload(data);
+                  logListener(event, 'incoming', parsedData);
+                  handler(parsedData);
+              };
         socket.on(event, wrapped);
         cleanup.push(() => socket.off(event, wrapped));
     };
 
+    const addListener = addListenerWithLogging;
     addListener(SOCKET_EVENTS.CONNECT, () => {
         dispatch(connectSucceeded(socketClient.getId()));
         dispatch(socketEventReceived({ direction: 'lifecycle', type: SOCKET_EVENTS.CONNECT }));
@@ -74,44 +94,52 @@ export const initializeSocket = () => {
         dispatch(showNotification({ type: 'error', message }));
     });
 
-    addListener(SERVER_EVENTS.CLIENT_UPDATED, (payload) => { // done
+    addListener(SERVER_EVENTS.CLIENT_UPDATED, (payload) => {
         dispatch(socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.CLIENT_UPDATED, payload }));
         if (payload) {
             dispatch(setServerIdentity(payload));
         }
     });
 
-    addListener(SERVER_EVENTS.ROOM_BROADCAST, (payload) => { // done
+    addListener(SERVER_EVENTS.ROOM_BROADCAST, (payload) => {
         dispatch(socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.ROOM_BROADCAST, payload }));
         dispatch(setLobbySettings(payload));
     });
 
-    addListener(SERVER_EVENTS.ROOM_CREATED, (payload) => { // done
+    addListener(SERVER_EVENTS.ROOM_CREATED, (payload) => {
         dispatch(socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.ROOM_CREATED, payload }));
-        dispatch(setRoomName(payload));
+        dispatch(setRoomName(payload.roomName));
+        dispatch(setGameMode(payload.soloJourney ? 'solo' : 'multiplayer'));
+        if (!payload.soloJourney) {
+            dispatch(setGameStatus({ room: { status: 'waiting' } }));
+        }
     });
 
-    addListener(SERVER_EVENTS.ROOM_JOINED, (payload) => { // done
+    addListener(SERVER_EVENTS.ROOM_JOINED, (payload) => {
         dispatch(socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.ROOM_JOINED, payload }));
-        dispatch(setRoomName(payload));
+        dispatch(setRoomName(payload.roomName));
+        dispatch(setGameMode(payload.soloJourney ? 'solo' : 'multiplayer'));
+        if (!payload.soloJourney) {
+            dispatch(setGameStatus({ room: { status: 'waiting' } }));
+        }
     });
 
-    addListener(SERVER_EVENTS.ROOM_LEFT, (payload) => { // done
+    addListener(SERVER_EVENTS.ROOM_LEFT, (payload) => {
         dispatch(socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.ROOM_LEFT, payload }));
         dispatch(resetGameState());
     });
 
-    addListener(SERVER_EVENTS.GAME_STARTED, (payload) => { // done
+    addListener(SERVER_EVENTS.GAME_STARTED, (payload) => {
         dispatch(socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.GAME_STARTED, payload }));
         dispatch(setGameStatus({ room: { status: 'in-game' } }));
     });
 
-    addListener(SERVER_EVENTS.GAME_STATE, (payload) => { // done
+    addListener(SERVER_EVENTS.GAME_STATE, (payload) => {
         dispatch(socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.GAME_STATE, payload }));
         dispatch(setGameState(payload));
     });
 
-    addListener(SERVER_EVENTS.GAME_OVER, (payload) => { // done
+    addListener(SERVER_EVENTS.GAME_OVER, (payload) => {
         dispatch(socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.GAME_OVER, payload }));
         const message = typeof payload?.message === 'string' ? payload.message : 'Game Over';
         dispatch(setGameStatus({ room: { status: 'game-over' }, message }));
@@ -140,7 +168,12 @@ export const ensureSocketConnection = () => {
     }
 };
 
+const logEmit = (event, payload) => {
+    console.log(`[Socket Event] OUTGOING - ${event}:`, payload);
+};
+
 const emitWithTracking = (type, payload) => {
+    logEmit(type, payload);
     dispatch(socketEventReceived({ direction: 'outgoing', type, payload }));
     socketClient.emit(type, payload);
 };
