@@ -44,14 +44,34 @@ export const initializeSocket = () => {
 
     const cleanup = [];
 
-    const addListener = (event, handler, { raw = false } = {}) => {
+    // const addListener = (event, handler, { raw = false } = {}) => {
+    //     const wrapped = raw
+    //         ? handler
+    //         : (data) => handler(parseServerPayload(data));
+    //     socket.on(event, wrapped);
+    //     cleanup.push(() => socket.off(event, wrapped));
+    // };
+
+    const logListener = (event, direction, payload) => {
+        console.log(`[Socket Event] ${direction.toUpperCase()} - ${event}:`, payload);
+    };
+
+    const addListenerWithLogging = (event, handler, { raw = false } = {}) => {
         const wrapped = raw
-            ? handler
-            : (data) => handler(parseServerPayload(data));
+            ? (data) => {
+                  logListener(event, 'incoming', data);
+                  handler(data);
+              }
+            : (data) => {
+                  const parsedData = parseServerPayload(data);
+                  logListener(event, 'incoming', parsedData);
+                  handler(parsedData);
+              };
         socket.on(event, wrapped);
         cleanup.push(() => socket.off(event, wrapped));
     };
 
+    const addListener = addListenerWithLogging;
     addListener(SOCKET_EVENTS.CONNECT, () => {
         dispatch(connectSucceeded(socketClient.getId()));
         dispatch(socketEventReceived({ direction: 'lifecycle', type: SOCKET_EVENTS.CONNECT }));
@@ -148,7 +168,12 @@ export const ensureSocketConnection = () => {
     }
 };
 
+const logEmit = (event, payload) => {
+    console.log(`[Socket Event] OUTGOING - ${event}:`, payload);
+};
+
 const emitWithTracking = (type, payload) => {
+    logEmit(type, payload);
     dispatch(socketEventReceived({ direction: 'outgoing', type, payload }));
     socketClient.emit(type, payload);
 };
