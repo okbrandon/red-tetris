@@ -1,0 +1,91 @@
+name: "🐞 Bug report"
+description: Report a reproducible problem.
+labels: [bug]
+title: "fix: <short summary>"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out a bug report!
+        Please search existing issues first to avoid duplicates.
+  - type: checkboxes
+    id: duplicates
+    attributes:
+      label: Is there an existing issue for this?
+      options:
+        - label: I have searched the existing issues
+          required: true
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: A clear, concise description of the bug.
+      placeholder: e.g., Leaving a game causes the client to hang on a blank screen
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Provide a minimal, exact sequence (include room/game state when relevant).
+      placeholder: |
+        1. Join a room
+        2. Start a game
+        3. Click "Leave game"
+        4. Observe client error
+      render: bash
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      placeholder: What should have happened?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      placeholder: What actually happened? Include screenshots or logs.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs & stack traces
+      description: Paste any relevant console/server logs. Use backticks for code blocks.
+      render: shell
+  - type: input
+    id: version
+    attributes:
+      label: App/version/commit
+      description: Git commit or version tag where the issue occurs.
+      placeholder: e.g., 1.2.3 or a1b2c3d
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: e.g., Node 20.x, Chrome 129, OS X 14.6, Docker yes/no
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope (where does it break?)
+      multiple: true
+      options:
+        - Frontend (React)
+        - Backend (Socket.IO server)
+        - Shared types / protocol
+        - CI / Build
+        - Other
+  - type: checkboxes
+    id: regression
+    attributes:
+      label: Regression?
+      options:
+        - label: This worked in a previous version
+        - label: This is a new issue
+  - type: textarea
+    id: extra
+    attributes:
+      label: Additional context / screenshots

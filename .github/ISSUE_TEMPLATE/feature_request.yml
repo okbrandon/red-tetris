@@ -1,0 +1,44 @@
+name: "✨ Feature request"
+description: Suggest an idea to improve Red‑Tetris.
+labels: [enhancement]
+title: "feat: <short summary>"
+body:
+- type: markdown
+  attributes:
+    value: |
+      Thanks for your idea! Please check existing issues to avoid duplicates.
+- type: input
+  id: problem
+  attributes:
+    label: Problem to solve
+    description: What user problem or use‑case does this address?
+    placeholder: Players can’t invite friends directly from a room
+  validations:
+    required: true
+- type: textarea
+  id: proposal
+  attributes:
+    label: Proposed solution
+    description: Describe the change. Include UX flow, API, or data model notes if applicable.
+    placeholder: |
+      Add an "Invite" button in the room header that copies a one‑time join link
+  validations:
+    required: true
+- type: textarea
+  id: alternatives
+  attributes:
+    label: Alternatives considered
+    placeholder: Any other approaches you thought about?
+- type: textarea
+  id: scope
+  attributes:
+    label: Scope & impact
+    description: Which parts of the system are affected and how big is the change?
+    placeholder: Frontend (new modal), Backend (join token endpoint)
+- type: checkboxes
+  id: checklist
+  attributes:
+    label: Checklist
+    options:
+      - label: I’m willing to submit a PR to implement this
+      - label: I’ve checked it aligns with the project roadmap
