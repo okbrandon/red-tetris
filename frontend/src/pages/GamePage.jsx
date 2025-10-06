@@ -12,7 +12,7 @@ import LobbyPage from  './LobbyPage.jsx';
 
 const GamePage = () => {
     const { room, player_name: playerName } = useParams();
-    const { mode, gameStatus, grid, gameResult } = useSelector((state) => state.game);
+    const { mode, gameStatus, grid, gameResult, isOwner } = useSelector((state) => state.game);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [isResultModalOpen, setResultModalOpen] = useState(false);
@@ -40,7 +40,7 @@ const GamePage = () => {
         }
     }, [gameStatus, navigate]);
 
-    const handleResultConfirm = () => {
+    const handleReturnMenu = () => {
         setResultModalOpen(false);
         requestRoomLeave();
         navigate('/menu');
@@ -63,7 +63,8 @@ const GamePage = () => {
                 <GameResultModal
                     isOpen={isResultModalOpen}
                     outcome={resultOutcome}
-                    onConfirm={handleResultConfirm}
+                    onConfirm={handleReturnMenu}
+                    isOwner={isOwner}
                 />
             </PageWrapper>
         )

@@ -7,6 +7,7 @@ import {
     Message,
     ActionButton,
 } from './GameResultModal.styled.js';
+import { requestRestartGame } from '../features/socket/socketThunks.js';
 
 const VARIANTS = {
     win: {
@@ -35,12 +36,16 @@ const VARIANTS = {
     },
 };
 
-const GameResultModal = ({ isOpen, outcome = 'info', onConfirm }) => {
+const GameResultModal = ({ isOpen, outcome = 'info', onConfirm, isOwner }) => {
     if (!isOpen) {
         return null;
     }
 
     const variant = VARIANTS[outcome] ?? VARIANTS.info;
+
+    const handleRestart = () => {
+        requestRestartGame();
+    };
 
     return (
         <Overlay role='presentation'>
@@ -48,6 +53,11 @@ const GameResultModal = ({ isOpen, outcome = 'info', onConfirm }) => {
                 <OutcomeBadge $variant={variant}>{variant.badge}</OutcomeBadge>
                 <Title id='game-result-title'>{variant.title}</Title>
                 <Message>{outcome == 'win' ? "you won !" : outcome == 'info' ? variant.defaultMessage : 'you lost !'}</Message>
+                {isOwner &&
+                    <ActionButton type='button' onClick={handleRestart}>
+                        Restart Game
+                    </ActionButton>
+                }
                 <ActionButton type='button' onClick={onConfirm}>
                     Return to Menu
                 </ActionButton>
