@@ -52,7 +52,7 @@ const GameResultModal = ({ isOpen, outcome = 'info', onConfirm, isOwner }) => {
             <Dialog role='dialog' aria-modal='true' aria-labelledby='game-result-title'>
                 <OutcomeBadge $variant={variant}>{variant.badge}</OutcomeBadge>
                 <Title id='game-result-title'>{variant.title}</Title>
-                <Message>{outcome == 'win' ? "you won !" : outcome == 'info' ? variant.defaultMessage : 'you lost !'}</Message>
+                <Message>{outcome === 'win' ? "you won !" : outcome === 'info' ? variant.defaultMessage : 'you lost !'}</Message>
                 {isOwner &&
                     <ActionButton type='button' onClick={handleRestart}>
                         Restart Game
