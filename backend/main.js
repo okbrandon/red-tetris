@@ -73,7 +73,7 @@ const createRoom = (id, soloJourney) => {
 
 	const room = new Game(id, null, soloJourney);
 
-	rooms.set(id, room);
+	rooms.set(room.id, room);
 	return room;
 }
 
@@ -191,9 +191,9 @@ io.on("connection", (socket) => {
 			}));
 			return;
 		}
-		if (roomName.startsWith(gameSettings.PREFIX_SINGLEPLAYER)) {
+		if (roomName.includes(gameSettings.TAG_SINGLEPLAYER)) {
 			socket.emit(outgoingEvents.ERROR, JSON.stringify({
-				message: 'Room name cannot start with "singleplayer@"'
+				message: 'Room name has a private tag'
 			}));
 			return;
 		}

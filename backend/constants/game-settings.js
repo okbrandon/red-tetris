@@ -34,9 +34,9 @@ const DEFAULT_EMPTY_GRID = Array.from({ length: FRAME_ROWS }, () => Array(FRAME_
 const MAX_PLAYERS_PER_ROOM = 4;
 
 /**
- * @constant {string} PREFIX_SINGLEPLAYER - The prefix used for singleplayer game IDs.
+ * @constant {string} TAG_SINGLEPLAYER - The tag used for singleplayer game IDs.
  */
-const PREFIX_SINGLEPLAYER = 'singleplayer@';
+const TAG_SINGLEPLAYER = '@';
 
 /**
  * @constant {RegExp} ROOM_NAME_VALIDATION_REGEX - The regex pattern used to validate room names.
@@ -64,7 +64,7 @@ export default {
 	DEFAULT_PIECE_COUNT,
 	DEFAULT_EMPTY_GRID,
 	MAX_PLAYERS_PER_ROOM,
-	PREFIX_SINGLEPLAYER,
+	TAG_SINGLEPLAYER,
 	ROOM_NAME_VALIDATION_REGEX,
 	BPS_SCORING
 };
