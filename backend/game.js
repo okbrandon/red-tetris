@@ -6,6 +6,7 @@ import Tetromino from './tetromino.js';
 import gameSettings from './constants/game-settings.js';
 import gameStatus from './constants/game-status.js';
 import outgoingEvents from './constants/outgoing-events.js';
+import utils from './utils.js';
 
 class Game {
 
@@ -16,7 +17,7 @@ class Game {
 	 */
 	constructor(id, owner = null, soloJourney = false) {
 		/** @type {string} */
-		this.id = soloJourney ? 'singleplayer@' + id : id;
+		this.id = soloJourney ? utils.randomString(5) + gameSettings.TAG_SINGLEPLAYER + id : id;
 		/** @type {Object|null} */
 		this.owner = owner;
 		/** @type {string} */
