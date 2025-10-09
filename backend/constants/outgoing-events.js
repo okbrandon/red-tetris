@@ -151,6 +151,15 @@ const GAME_STATE = 'game-state';
 const GAME_OVER = 'game-over';
 
 /**
+ * @constant {string} GAME_LOST - Sent when a player loses the game.
+ *
+ * @description This event is sent by the server to a specific client to notify them that they have lost the game.
+ * The event indicates that the player's hasLost status has been set to true and provides information about their final state in the game.
+ * It contains data such as the room ID and details about the player who has lost.
+ */
+const GAME_LOST = 'game-lost';
+
+/**
  * @constant {string} LINES_CLEARED - Sent when a player clears lines.
  *
  * @description This event is sent by the server to a client when they clear one or more lines in the game.
@@ -167,5 +176,6 @@ export default {
 	GAME_STARTED,
 	GAME_STATE,
 	GAME_OVER,
+	GAME_LOST,
 	LINES_CLEARED
 };

@@ -95,23 +95,78 @@ class Player {
 	 * @param {string} [message='Game Over'] - Reason for game over.
 	 */
 	sendGameOver(message = 'Game Over') {
-		if (this.hasLost)
-			return;
-		console.log('Client ' + this.username + ' has lost. (' + message + ')');
-		this.hasLost = true;
+		console.log('Client ' + this.username + ' has received game over. (' + message + ')');
+
+		const clients = [...this.room.clients];
+		const winner = clients.find(c => !c.hasLost);
+
 		this.emit(outgoingEvents.GAME_OVER, {
 			room: {
 				id: this.room.id,
 				owner: {
 					id: this.room.owner.id,
 					username: this.room.owner.username,
+					score: this.room.owner.score,
+					hasLost: this.room.owner.hasLost
 				},
 				status: this.room.status,
 				soloJourney: this.room.soloJourney,
 				maxPlayers: this.room.maxPlayers
 			},
-			hasLost: this.hasLost,
-			score: this.score,
+			winner: winner ? {
+				id: winner.id,
+				username: winner.username,
+				score: winner.score,
+				hasLost: winner.hasLost
+			} : null,
+			you: {
+				id: this.id,
+				username: this.username,
+				hasLost: this.hasLost,
+				score: this.score,
+				specter: this.getLandSpecter()
+			},
+			clients: clients.map(client => ({
+				id: client.id,
+				username: client.username,
+				hasLost: client.hasLost,
+				score: client.score,
+				specter: client.getLandSpecter()
+			})),
+			message: message,
+		});
+	}
+
+	/**
+	 * Triggers game lost for this player.
+	 * @param {string} [message='You have lost the game'] - Reason for losing the game.
+	 */
+	sendGameLost(message = 'You have lost the game') {
+		if (this.hasLost)
+			return;
+
+		console.log('Client ' + this.username + ' has lost. (' + message + ')');
+		this.hasLost = true;
+		this.emit(outgoingEvents.GAME_LOST, {
+			room: {
+				id: this.room.id,
+				owner: {
+					id: this.room.owner.id,
+					username: this.room.owner.username,
+					score: this.room.owner.score,
+					hasLost: this.room.owner.hasLost
+				},
+				status: this.room.status,
+				soloJourney: this.room.soloJourney,
+				maxPlayers: this.room.maxPlayers
+			},
+			you: {
+				id: this.id,
+				username: this.username,
+				hasLost: this.hasLost,
+				score: this.score,
+				specter: this.getLandSpecter()
+			},
 			message: message,
 		});
 	}
@@ -377,7 +432,7 @@ class Player {
 
 		this.clearFullLines();
 		if (!this.isValidMove(nextPiece, this.grid, nextPiece.position)) {
-			this.sendGameOver();
+			this.sendGameLost('No space for next piece');
 			return;
 		}
 
@@ -472,8 +527,11 @@ class Player {
 			console.log('No room to start interval');
 			return;
 		}
-		if (this.hasLost)
+
+		if (this.hasLost) {
+			this.sendGrid();
 			return;
+		}
 
 		this.movePiece();
 	}
