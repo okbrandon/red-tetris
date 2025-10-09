@@ -88,7 +88,6 @@ class Game {
 		if (this.status == gameStatus.IN_GAME) {
 			if (this.shouldEndGame()) {
 				console.log('[' + this.id + '] GAME OVER (NO MORE PLAYERS)');
-
 				this.stop();
 				return;
 			}
@@ -184,12 +183,6 @@ class Game {
 			const losers = clients.filter(client => client.hasLost);
 
 			if (losers.length === clients.length - 1) {
-				const winner = clients.find(client => !client.hasLost);
-
-				clients.forEach(client => {
-					client.sendGameOver(winner.id === client.id ? 'You win!' : 'You lose!');
-				});
-
 				return true;
 			}
 		}
@@ -299,12 +292,11 @@ class Game {
 		if (this.updateInterval)
 			clearInterval(this.updateInterval);
 		this.updateInterval = null;
+		this.status = gameStatus.FINISHED;
 
 		this.clients.forEach(client => {
 			client.sendGameOver();
 		});
-
-		this.status = gameStatus.FINISHED;
 
 		console.log('[' + this.id + '] GAME STOPPED');
 	}
