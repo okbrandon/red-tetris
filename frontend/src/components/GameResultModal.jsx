@@ -70,7 +70,10 @@ const GameResultModal = ({ isOpen, outcome, onConfirm, isOwner }) => {
 
 GameResultModal.propTypes = {
     isOpen: PropTypes.bool.isRequired,
-    outcome: PropTypes.object,
+    outcome: PropTypes.shape({
+        outcome: PropTypes.string,
+        message: PropTypes.string,
+    }),
     onConfirm: PropTypes.func.isRequired,
     isOwner: PropTypes.bool.isRequired,
 };
