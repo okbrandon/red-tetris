@@ -41,7 +41,9 @@ const GameResultModal = ({ isOpen, outcome, onConfirm, isOwner }) => {
         return null;
     }
 
-    const variant = outcome ? VARIANTS[outcome.outcome] : VARIANTS.info;
+    const variant = (outcome && Object.prototype.hasOwnProperty.call(VARIANTS, outcome.outcome))
+        ? VARIANTS[outcome.outcome]
+        : VARIANTS.info;
 
     const handleRestart = () => {
         requestRestartGame();

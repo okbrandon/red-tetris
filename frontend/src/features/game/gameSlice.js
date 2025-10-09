@@ -58,7 +58,14 @@ export const gameSlice = createSlice({
             };
         },
         setGameStatus: (state, action) => {
-            state.gameStatus = action.payload;
+            state.gameStatus = action.payload.status;
+
+            if (action.payload?.winner) {
+                const winner = action.payload.winner;
+                state.playerOutcome = (winner.id === state.you?.id)
+                    ? { outcome: 'win', message: 'You are the last player standing!' }
+                    : { outcome: 'lose', message: `${winner.username} has won the game.` }
+            }
         },
         setPlayerOutcome: (state, action) => {
             state.playerOutcome = action.payload;
