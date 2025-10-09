@@ -36,12 +36,14 @@ const VARIANTS = {
     },
 };
 
-const GameResultModal = ({ isOpen, outcome = 'info', onConfirm, isOwner }) => {
+const GameResultModal = ({ isOpen, outcome, onConfirm, isOwner }) => {
     if (!isOpen) {
         return null;
     }
 
-    const variant = VARIANTS[outcome] ?? VARIANTS.info;
+    const variant = (outcome && Object.prototype.hasOwnProperty.call(VARIANTS, outcome.outcome))
+        ? VARIANTS[outcome.outcome]
+        : VARIANTS.info;
 
     const handleRestart = () => {
         requestRestartGame();
@@ -52,7 +54,7 @@ const GameResultModal = ({ isOpen, outcome = 'info', onConfirm, isOwner }) => {
             <Dialog role='dialog' aria-modal='true' aria-labelledby='game-result-title'>
                 <OutcomeBadge $variant={variant}>{variant.badge}</OutcomeBadge>
                 <Title id='game-result-title'>{variant.title}</Title>
-                <Message>{outcome === 'win' ? "you won !" : outcome === 'info' ? variant.defaultMessage : 'you lost !'}</Message>
+                <Message>{outcome?.message || 'Game Over'}</Message>
                 {isOwner &&
                     <ActionButton type='button' onClick={handleRestart}>
                         Restart Game
@@ -67,10 +69,13 @@ const GameResultModal = ({ isOpen, outcome = 'info', onConfirm, isOwner }) => {
 };
 
 GameResultModal.propTypes = {
-    isOpen: PropTypes.bool,
-    outcome: PropTypes.oneOf(['win', 'lose', 'info']),
-    message: PropTypes.string,
+    isOpen: PropTypes.bool.isRequired,
+    outcome: PropTypes.shape({
+        outcome: PropTypes.string,
+        message: PropTypes.string,
+    }),
     onConfirm: PropTypes.func.isRequired,
+    isOwner: PropTypes.bool.isRequired,
 };
 
 export default GameResultModal;

@@ -12,13 +12,12 @@ import LobbyPage from  './LobbyPage.jsx';
 
 const GamePage = () => {
     const { room, player_name: playerName } = useParams();
-    const { mode, gameStatus, grid, gameResult, isOwner } = useSelector((state) => state.game);
+    const { mode, gameStatus, grid, playerOutcome, isOwner } = useSelector((state) => state.game);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [isResultModalOpen, setResultModalOpen] = useState(false);
 
     const isMultiplayer = mode === 'multiplayer';
-    const resultOutcome = gameResult?.outcome ?? 'info';
 
     useEffect(() => {
         if (gameStatus !== 'game-over') {
@@ -62,7 +61,7 @@ const GamePage = () => {
                     )}
                 <GameResultModal
                     isOpen={isResultModalOpen}
-                    outcome={resultOutcome}
+                    outcome={playerOutcome}
                     onConfirm={handleReturnMenu}
                     isOwner={isOwner}
                 />

@@ -12,7 +12,7 @@ const createInitialState = () => ({
     owner: null,
     isOwner: false,
     gameStatus: '',
-    gameResult: null,
+    playerOutcome: null,
     score: 0,
     roomName: '',
     you: null,
@@ -57,29 +57,18 @@ export const gameSlice = createSlice({
                 players: clients,
             };
         },
-        setGameStatus: (state, action) => { // game_started / game_over
-            const status = action.payload.room?.status || '';
+        setGameStatus: (state, action) => {
+            state.gameStatus = action.payload.status;
 
-            state.gameStatus = status;
-
-            if (status === 'game-over') {
-                const rawMessage = action.payload.message || '';
-                const normalized = rawMessage.toLowerCase();
-                let outcome = 'info';
-
-                if (normalized.includes('win')) {
-                    outcome = 'win';
-                } else if (normalized.includes('lose')) {
-                    outcome = 'lose';
-                }
-
-                state.gameResult = {
-                    message: rawMessage,
-                    outcome,
-                };
-            } else {
-                state.gameResult = null;
+            if (action.payload?.winner) {
+                const winner = action.payload.winner;
+                state.playerOutcome = (winner.id === state.you?.id)
+                    ? { outcome: 'win', message: 'You are the last player standing!' }
+                    : { outcome: 'lose', message: `${winner.username} has won the game.` }
             }
+        },
+        setPlayerOutcome: (state, action) => {
+            state.playerOutcome = action.payload;
         },
         setLobbySettings: (state, action) => { // room_broadcast
             const { room, owner, you, clients } = action.payload;
@@ -109,5 +98,13 @@ export const gameSlice = createSlice({
     },
 });
 
-export const { setGameMode, setGameState, setLobbySettings, resetGameState, setRoomName, setGameStatus } = gameSlice.actions;
+export const {
+    setGameMode,
+    setGameState,
+    setLobbySettings,
+    resetGameState,
+    setRoomName,
+    setGameStatus,
+    setPlayerOutcome,
+} = gameSlice.actions;
 export default gameSlice.reducer;
