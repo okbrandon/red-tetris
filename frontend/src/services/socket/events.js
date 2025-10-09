@@ -17,6 +17,7 @@ export const SERVER_EVENTS = Object.freeze({
     GAME_STARTED: 'game-started',
     GAME_STATE: 'game-state',
     GAME_OVER: 'game-over',
+    GAME_LOST: 'game-lost',
 });
 
 export const SOCKET_EVENTS = Object.freeze({

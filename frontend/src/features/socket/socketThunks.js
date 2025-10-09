@@ -9,7 +9,7 @@ import {
 } from './socketSlice.js';
 import { showNotification } from '../notification/notificationSlice.js';
 import { setServerIdentity } from '../user/userSlice.js';
-import { setGameState, setRoomName, setGameStatus, resetGameState, setLobbySettings, setGameMode } from '../game/gameSlice.js';
+import { setGameState, setRoomName, setGameStatus, resetGameState, setLobbySettings, setGameMode, setPlayerOutcome } from '../game/gameSlice.js';
 import { store } from '../../store.js';
 
 let listenersBound = false;
@@ -111,7 +111,7 @@ export const initializeSocket = () => {
         dispatch(setRoomName(payload.roomName));
         dispatch(setGameMode(payload.soloJourney ? 'solo' : 'multiplayer'));
         if (!payload.soloJourney) {
-            dispatch(setGameStatus({ room: { status: 'waiting' } }));
+            dispatch(setGameStatus('waiting'));
         }
     });
 
@@ -120,7 +120,7 @@ export const initializeSocket = () => {
         dispatch(setRoomName(payload.roomName));
         dispatch(setGameMode(payload.soloJourney ? 'solo' : 'multiplayer'));
         if (!payload.soloJourney) {
-            dispatch(setGameStatus({ room: { status: 'waiting' } }));
+            dispatch(setGameStatus('waiting'));
         }
     });
 
@@ -131,7 +131,7 @@ export const initializeSocket = () => {
 
     addListener(SERVER_EVENTS.GAME_STARTED, (payload) => {
         dispatch(socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.GAME_STARTED, payload }));
-        dispatch(setGameStatus({ room: { status: 'in-game' } }));
+        dispatch(setGameStatus('in-game'));
     });
 
     addListener(SERVER_EVENTS.GAME_STATE, (payload) => {
@@ -142,8 +142,14 @@ export const initializeSocket = () => {
     addListener(SERVER_EVENTS.GAME_OVER, (payload) => {
         dispatch(socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.GAME_OVER, payload }));
         const message = typeof payload?.message === 'string' ? payload.message : 'Game Over';
-        dispatch(setGameStatus({ room: { status: 'game-over' }, message }));
+        dispatch(setGameStatus('game-over'));
+        // TODO - new dispatch to set player outcome (win/lose)
     });
+
+    addListener(SERVER_EVENTS.GAME_LOST, (payload) => {
+        dispatch(socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.GAME_LOST, payload }));
+        dispatch(setPlayerOutcome({ outcome: 'lose', message: payload?.message || 'You lost' }));
+    })
 
     return () => {
         cleanup.forEach((fn) => fn());
