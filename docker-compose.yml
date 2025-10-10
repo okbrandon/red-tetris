@@ -7,9 +7,25 @@ services:
     networks:
       - public
     environment:
-      - DEBUG=backend:*
+      MONGO_URI: ${MONGO_URI}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
     ports:
       - "3000:3000"
+
+  mongodb:
+    image: mongo:latest
+    container_name: red-tetris-mongodb
+    restart: always
+    networks:
+      - public
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
 
   # frontend:
   #   build: ./frontend
@@ -23,3 +39,7 @@ services:
 networks:
   public:
     driver: bridge
+
+volumes:
+  mongo-data:
+    driver: local
