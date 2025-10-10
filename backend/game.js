@@ -335,6 +335,27 @@ class Game {
 		});
 	}
 
+	/**
+	 * Determines the winner of the game, if any.
+	 * @returns {Object|null} The winning player or null if no winner.
+	 */
+	getWinner() {
+		if (this.status !== gameStatus.FINISHED)
+			return null;
+
+		if (this.soloJourney) {
+			const client = [...this.clients][0];
+			return client.hasLost ? null : client;
+		} else {
+			const clients = [...this.clients];
+			const winners = clients.filter(client => !client.hasLost);
+
+			if (winners.length === 1)
+				return winners[0];
+			return null;
+		}
+	}
+
 }
 
 export default Game;

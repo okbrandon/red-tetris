@@ -155,7 +155,7 @@ io.on("connection", (socket) => {
 			return;
 		}
 
-		client.username = data.username;
+		client.updateUsername(data.username);
 		socket.emit(outgoingEvents.CLIENT_UPDATED, JSON.stringify({
 			id: client.id,
 			username: client.username

@@ -1,6 +1,10 @@
 import { MongoClient } from 'mongodb';
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://mongodb:27017';
+const MONGO_ADMIN = process.env.MONGO_INITDB_ROOT_USERNAME || 'mongoadmin';
+const MONGO_PASSWORD = process.env.MONGO_INITDB_ROOT_PASSWORD || 'adminpass';
+const MONGO_HOST = process.env.MONGO_HOST || 'mongodb';
+const MONGO_PORT = process.env.MONGO_PORT || '27017';
+const MONGO_URI = process.env.MONGO_URI || `mongodb://${MONGO_ADMIN}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/?authSource=admin`;
 const DB_NAME = process.env.MONGO_INITDB_DATABASE || 'red-tetris';
 
 class Mongo {

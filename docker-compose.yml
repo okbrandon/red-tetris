@@ -7,8 +7,13 @@ services:
     networks:
       - public
     environment:
-      MONGO_URI: ${MONGO_URI}
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_HOST: ${MONGO_HOST}
+      MONGO_PORT: ${MONGO_PORT}
+    depends_on:
+      - mongodb
     ports:
       - "3000:3000"
 
