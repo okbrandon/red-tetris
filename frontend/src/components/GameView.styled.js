@@ -31,11 +31,13 @@ export const BoardArea = styled.section`
 `;
 
 export const BoardFrame = styled.div`
+    position: relative;
     padding: clamp(0.6rem, 1.4vw, 1rem);
     border-radius: 18px;
     border: 1px solid rgba(162, 130, 235, 0.25);
     background: rgba(18, 15, 32, 0.84);
     box-shadow: inset 0 1px 0 rgba(217, 206, 255, 0.12);
+    overflow: hidden;
 `;
 
 export const PanelArea = styled.section`

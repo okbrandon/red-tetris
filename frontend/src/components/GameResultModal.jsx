@@ -36,7 +36,13 @@ const VARIANTS = {
     },
 };
 
-const GameResultModal = ({ isOpen, outcome, onConfirm, isOwner }) => {
+const GameResultModal = ({
+    isOpen,
+    outcome,
+    onConfirm,
+    isOwner,
+    placement = 'page',
+}) => {
     if (!isOpen) {
         return null;
     }
@@ -50,7 +56,7 @@ const GameResultModal = ({ isOpen, outcome, onConfirm, isOwner }) => {
     };
 
     return (
-        <Overlay role='presentation'>
+        <Overlay role='presentation' $scope={placement}>
             <Dialog role='dialog' aria-modal='true' aria-labelledby='game-result-title'>
                 <OutcomeBadge $variant={variant}>{variant.badge}</OutcomeBadge>
                 <Title id='game-result-title'>{variant.title}</Title>
@@ -76,6 +82,7 @@ GameResultModal.propTypes = {
     }),
     onConfirm: PropTypes.func.isRequired,
     isOwner: PropTypes.bool.isRequired,
+    placement: PropTypes.oneOf(['page', 'board']),
 };
 
 export default GameResultModal;

@@ -12,24 +12,28 @@ const fadeIn = keyframes`
 `;
 
 export const Overlay = styled.div`
-    position: fixed;
+    position: ${({ $scope }) => ($scope === 'page' ? 'fixed' : 'absolute')};
     inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(5, 4, 12, 0.78);
-    backdrop-filter: blur(12px);
-    z-index: 2000;
-    padding: clamp(1rem, 4vw, 2rem);
+    padding: clamp(0.8rem, 3vw, 1.6rem);
+    border-radius: ${({ $scope }) => ($scope === 'page' ? '0' : 'inherit')};
+    background: ${({ $scope }) => ($scope === 'page'
+        ? 'rgba(5, 4, 12, 0.78)'
+        : 'rgba(6, 4, 14, 0.82)')};
+    backdrop-filter: blur(6px);
+    z-index: ${({ $scope }) => ($scope === 'page' ? 2000 : 5)};
+    box-sizing: border-box;
 `;
 
 export const Dialog = styled.div`
-    width: min(420px, 92vw);
+    width: min(360px, 100%);
     border-radius: 20px;
     border: 1px solid rgba(162, 130, 235, 0.28);
     background: linear-gradient(160deg, rgba(30, 26, 54, 0.95), rgba(16, 13, 30, 0.96));
     box-shadow: 0 28px 60px rgba(8, 5, 20, 0.6);
-    padding: clamp(1.4rem, 3.2vw, 2rem);
+    padding: clamp(1.2rem, 3vw, 1.8rem);
     display: grid;
     gap: clamp(0.7rem, 1.6vw, 1rem);
     text-align: center;

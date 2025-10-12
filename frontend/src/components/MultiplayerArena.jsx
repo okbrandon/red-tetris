@@ -108,7 +108,7 @@ const estimateOpponentCellSize = (baseCellSize, opponentCount, tallestBoardRows 
     return Math.max(minimum, Math.min(safeCandidate, tierCap));
 };
 
-const MultiplayerArena = ({ grid }) => {
+const MultiplayerArena = ({ grid, resultModal }) => {
     const cellSize = useResponsiveValue(useCallback(computePrimaryCellSize, []));
 
     const { you, multiplayer } = useSelector((state) => state.game);
@@ -155,11 +155,24 @@ const MultiplayerArena = ({ grid }) => {
                 </OpponentColumn>
 
                 <MainColumn>
-                    <GameView grid={grid} />
+                    <GameView grid={grid} resultModal={resultModal} />
                 </MainColumn>
             </ArenaLayout>
         </ArenaContainer>
     );
+};
+
+MultiplayerArena.propTypes = {
+    grid: PropTypes.arrayOf(PropTypes.array).isRequired,
+    resultModal: PropTypes.shape({
+        isOpen: PropTypes.bool,
+        outcome: PropTypes.shape({
+            outcome: PropTypes.string,
+            message: PropTypes.string,
+        }),
+        onConfirm: PropTypes.func,
+        isOwner: PropTypes.bool,
+    }),
 };
 
 export default MultiplayerArena;

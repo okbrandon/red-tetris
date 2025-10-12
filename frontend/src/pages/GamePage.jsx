@@ -6,7 +6,6 @@ import GameView from '../components/GameView.jsx';
 import { PageWrapper, SoloArena, GameLogoTitle } from './GamePage.styled';
 import MultiplayerArena from '../components/MultiplayerArena';
 import { requestRoomLeave } from '../features/socket/socketThunks.js';
-import GameResultModal from '../components/GameResultModal.jsx';
 import LobbyPage from  './LobbyPage.jsx';
 
 
@@ -45,6 +44,13 @@ const GamePage = () => {
         navigate('/menu');
     };
 
+    const resultModalProps = {
+        isOpen: isResultModalOpen,
+        outcome: playerOutcome,
+        onConfirm: handleReturnMenu,
+        isOwner,
+    };
+
     return (
         gameStatus === 'waiting' || !grid[0].length ? (
             <LobbyPage />
@@ -53,18 +59,12 @@ const GamePage = () => {
                 <BackButton onClick={() => requestRoomLeave() } />
                 <GameLogoTitle>{isMultiplayer ? 'Multiplayer' : 'Game'}</GameLogoTitle>
                 {isMultiplayer
-                    ? <MultiplayerArena grid={grid} />
+                    ? <MultiplayerArena grid={grid} resultModal={resultModalProps} />
                     : (
                         <SoloArena>
-                            <GameView grid={grid} />
+                            <GameView grid={grid} resultModal={resultModalProps} />
                         </SoloArena>
                     )}
-                <GameResultModal
-                    isOpen={isResultModalOpen}
-                    outcome={playerOutcome}
-                    onConfirm={handleReturnMenu}
-                    isOwner={isOwner}
-                />
             </PageWrapper>
         )
     );
