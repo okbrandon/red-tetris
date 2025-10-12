@@ -71,6 +71,10 @@ const GameView = ({ grid, resultModal }) => {
     const modalConfig = resultModal ?? {};
     const shouldShowResult = Boolean(modalConfig.isOpen && typeof modalConfig.onConfirm === 'function');
 
+    useEffect(() => {
+        console.log('modalConfig changed:', modalConfig);
+    }, [modalConfig]);
+
     return (
         <Layout>
             <BoardArea>
@@ -89,6 +93,8 @@ const GameView = ({ grid, resultModal }) => {
                             outcome={modalConfig.outcome}
                             onConfirm={modalConfig.onConfirm}
                             isOwner={Boolean(modalConfig.isOwner)}
+                            canSpectate={Boolean(modalConfig.canSpectate)}
+                            onSpectate={modalConfig.onSpectate}
                             placement='board'
                         />
                     )}

@@ -42,6 +42,8 @@ const GameResultModal = ({
     onConfirm,
     isOwner,
     placement = 'page',
+    canSpectate = false,
+    onSpectate,
 }) => {
     if (!isOpen) {
         return null;
@@ -66,6 +68,11 @@ const GameResultModal = ({
                         Restart Game
                     </ActionButton>
                 }
+                {canSpectate && typeof onSpectate === 'function' && (
+                    <ActionButton type='button' onClick={onSpectate}>
+                        Spectate Match
+                    </ActionButton>
+                )}
                 <ActionButton type='button' onClick={onConfirm}>
                     Return to Menu
                 </ActionButton>
@@ -83,6 +90,8 @@ GameResultModal.propTypes = {
     onConfirm: PropTypes.func.isRequired,
     isOwner: PropTypes.bool.isRequired,
     placement: PropTypes.oneOf(['page', 'board']),
+    canSpectate: PropTypes.bool,
+    onSpectate: PropTypes.func,
 };
 
 export default GameResultModal;

@@ -26,8 +26,6 @@ const LobbyPage = () => {
                 ? `Joining lobby ${game.roomName}`
                 : 'Lobby ready to connect';
 
-    const maxSlots = game.maxPlayers || 4;
-
     const handleStartGame = () => {
         if (!isOwner) {
             dispatch(showNotification({ type: 'error', message: 'Only the lobby owner can start the game.' }));
@@ -51,7 +49,7 @@ const LobbyPage = () => {
             <Card>
                 <Subtitle>Welcome, {username}</Subtitle>
                 <Subtitle>{lobbyLabel}</Subtitle>
-                <Subtitle>{`Slots: up to ${maxSlots} players`}</Subtitle>
+                <Subtitle>{`Slots: up to 4 players`}</Subtitle>
 
                 <PlayerList>
                     {players.map((player, index) => (

@@ -7,7 +7,10 @@ const createInitialState = () => ({
     owner: null,
     isOwner: false,
     gameStatus: '',
-    playerOutcome: null,
+    playerOutcome: {
+        outcome: '',
+        message: '',
+    },
     score: 0,
     roomName: '',
     you: null,
@@ -32,6 +35,7 @@ export const gameSlice = createSlice({
             if (mode === 'solo') {
                 state.players = [];
                 state.score = 0;
+                state.spectator = { eligible: false, active: false };
             }
         },
         setGameState: (state, action) => {
@@ -54,7 +58,16 @@ export const gameSlice = createSlice({
             state.players = Array.isArray(clients) ? clients : [];
         },
         setGameStatus: (state, action) => {
-            state.gameStatus = action.payload.status;
+            const status = action.payload.status;
+            state.gameStatus = status;
+
+            if (status === 'in-game' || status === 'waiting') {
+                if (status === 'in-game') {
+                    state.playerOutcome = { outcome: '', message: '' };
+                }
+            } else if (status === 'game-over') {
+                state.spectator = { eligible: false, active: false };
+            }
 
             if (action.payload?.winner) {
                 const winner = action.payload.winner;
@@ -65,6 +78,7 @@ export const gameSlice = createSlice({
         },
         setPlayerOutcome: (state, action) => {
             state.playerOutcome = action.payload;
+            state.spectator.eligible = Boolean(action.payload?.canSpectate);
         },
         setLobbySettings: (state, action) => { // room_broadcast
             const { room, owner, you, clients } = action.payload;
@@ -90,6 +104,9 @@ export const gameSlice = createSlice({
         setRoomName: (state, action) => { // room_created / room_joined
             state.roomName = action.payload.roomName ?? '';
         },
+        setSpectatorActive: (state, action) => {
+            state.spectator.active = Boolean(action.payload);
+        },
         resetGameState: () => createInitialState() // room_left
     },
 });
@@ -102,5 +119,6 @@ export const {
     setRoomName,
     setGameStatus,
     setPlayerOutcome,
+    setSpectatorActive,
 } = gameSlice.actions;
 export default gameSlice.reducer;

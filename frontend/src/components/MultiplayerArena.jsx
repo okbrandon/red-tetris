@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import GameView from './GameView.jsx';
 import useResponsiveValue from '../hooks/useResponsiveValue.js';
 import { deriveBoardDimensions } from '../utils/tetris.js';
+import SpectatorArena from './SpectatorArena.jsx';
 import {
     ArenaContainer,
     ArenaLayout,
@@ -108,7 +109,7 @@ const estimateOpponentCellSize = (baseCellSize, opponentCount, tallestBoardRows 
     return Math.max(minimum, Math.min(safeCandidate, tierCap));
 };
 
-const MultiplayerArena = ({ grid, resultModal }) => {
+const MultiplayerArena = ({ grid, resultModal, showSpectators = false, onExitSpectators }) => {
     const cellSize = useResponsiveValue(useCallback(computePrimaryCellSize, []));
 
     const { you, players } = useSelector((state) => state.game);
@@ -132,6 +133,14 @@ const MultiplayerArena = ({ grid, resultModal }) => {
         () => estimateOpponentCellSize(cellSize, opponents.length, tallestOpponentRows),
         [cellSize, opponents.length, tallestOpponentRows]
     );
+
+    if (showSpectators) {
+        return (
+            <ArenaContainer>
+                <SpectatorArena onExit={onExitSpectators} />
+            </ArenaContainer>
+        );
+    }
 
     return (
         <ArenaContainer>
@@ -172,7 +181,11 @@ MultiplayerArena.propTypes = {
         }),
         onConfirm: PropTypes.func,
         isOwner: PropTypes.bool,
+        canSpectate: PropTypes.bool,
+        onSpectate: PropTypes.func,
     }),
+    showSpectators: PropTypes.bool,
+    onExitSpectators: PropTypes.func,
 };
 
 export default MultiplayerArena;

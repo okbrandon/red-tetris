@@ -1,36 +1,36 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import BackButton from '../components/BackButton';
 import GameView from '../components/GameView.jsx';
 import { PageWrapper, SoloArena, GameLogoTitle } from './GamePage.styled';
 import MultiplayerArena from '../components/MultiplayerArena';
 import { requestRoomLeave } from '../features/socket/socketThunks.js';
 import LobbyPage from  './LobbyPage.jsx';
+import { setSpectatorActive } from '../features/game/gameSlice.js';
 
 
 const GamePage = () => {
-    const { room, player_name: playerName } = useParams();
-    const { mode, gameStatus, grid, playerOutcome, isOwner } = useSelector((state) => state.game);
+    const { mode, gameStatus, grid, playerOutcome, isOwner, spectator } = useSelector((state) => state.game);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [isResultModalOpen, setResultModalOpen] = useState(false);
 
     const isMultiplayer = mode === 'multiplayer';
 
+    const hasOutcome = Boolean(playerOutcome && playerOutcome.outcome);
+
     useEffect(() => {
-        if (gameStatus !== 'game-over') {
-            return;
+        if (gameStatus === 'game-over' || (gameStatus === 'in-game' && hasOutcome)) {
+            setResultModalOpen(true);
         }
-
-        setResultModalOpen(true);
-    }, [dispatch, gameStatus, isMultiplayer, navigate]);
+    }, [gameStatus, hasOutcome]);
 
     useEffect(() => {
-        if (gameStatus !== 'game-over' && isResultModalOpen) {
+        if (gameStatus === 'in-game' && !hasOutcome && isResultModalOpen) {
             setResultModalOpen(false);
         }
-    }, [gameStatus, isResultModalOpen]);
+    }, [gameStatus, hasOutcome, isResultModalOpen]);
 
     useEffect(() => {
         if (!gameStatus) {
@@ -40,8 +40,19 @@ const GamePage = () => {
 
     const handleReturnMenu = () => {
         setResultModalOpen(false);
+        dispatch(setSpectatorActive(false));
         requestRoomLeave();
         navigate('/menu');
+    };
+
+    const handleSpectate = () => {
+        dispatch(setSpectatorActive(true));
+        setResultModalOpen(false);
+    };
+
+    const handleLeaveRoom = () => {
+        dispatch(setSpectatorActive(false));
+        requestRoomLeave();
     };
 
     const resultModalProps = {
@@ -49,6 +60,8 @@ const GamePage = () => {
         outcome: playerOutcome,
         onConfirm: handleReturnMenu,
         isOwner,
+        canSpectate: Boolean(spectator?.eligible),
+        onSpectate: handleSpectate,
     };
 
     return (
@@ -56,10 +69,17 @@ const GamePage = () => {
             <LobbyPage />
         ) : (
             <PageWrapper>
-                <BackButton onClick={() => requestRoomLeave() } />
+                <BackButton onClick={handleLeaveRoom} />
                 <GameLogoTitle>{isMultiplayer ? 'Multiplayer' : 'Game'}</GameLogoTitle>
                 {isMultiplayer
-                    ? <MultiplayerArena grid={grid} resultModal={resultModalProps} />
+                    ? (
+                        <MultiplayerArena
+                            grid={grid}
+                            resultModal={resultModalProps}
+                            showSpectators={Boolean(spectator?.active)}
+                            onExitSpectators={() => dispatch(setSpectatorActive(false))}
+                        />
+                    )
                     : (
                         <SoloArena>
                             <GameView grid={grid} resultModal={resultModalProps} />

@@ -25,7 +25,7 @@ const MenuPage = () => {
                 navigate(`/${roomName}/${owner.username}`);
             }
         }
-    }, [mode, roomName, gameStatus, navigate, owner.username]);
+    }, [mode, roomName, gameStatus, navigate, owner?.username]);
 
     return (
         <Wrapper>

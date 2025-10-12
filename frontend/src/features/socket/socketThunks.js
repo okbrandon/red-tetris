@@ -150,8 +150,7 @@ export const initializeSocket = () => {
         const gameState = state?.game ?? {};
         const players = Array.isArray(gameState.players) ? gameState.players : [];
         const canSpectate = gameState.mode === 'multiplayer'
-            && players.length >= 3
-            && !gameState.spectator?.eligible
+            && players.length >= 2
             && gameState.gameStatus === 'in-game';
 
         dispatch(setPlayerOutcome({
