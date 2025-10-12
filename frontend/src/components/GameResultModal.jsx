@@ -37,18 +37,14 @@ const VARIANTS = {
 };
 
 const GameResultModal = ({
-    isOpen,
     outcome,
     onConfirm,
     isOwner,
     placement = 'page',
     canSpectate = false,
+    isGameOver = false,
     onSpectate,
 }) => {
-    if (!isOpen) {
-        return null;
-    }
-
     const variant = (outcome && Object.prototype.hasOwnProperty.call(VARIANTS, outcome.outcome))
         ? VARIANTS[outcome.outcome]
         : VARIANTS.info;
@@ -63,7 +59,7 @@ const GameResultModal = ({
                 <OutcomeBadge $variant={variant}>{variant.badge}</OutcomeBadge>
                 <Title id='game-result-title'>{variant.title}</Title>
                 <Message>{outcome?.message || 'Game Over'}</Message>
-                {isOwner &&
+                {isOwner && isGameOver &&
                     <ActionButton type='button' onClick={handleRestart}>
                         Restart Game
                     </ActionButton>
@@ -82,7 +78,6 @@ const GameResultModal = ({
 };
 
 GameResultModal.propTypes = {
-    isOpen: PropTypes.bool.isRequired,
     outcome: PropTypes.shape({
         outcome: PropTypes.string,
         message: PropTypes.string,

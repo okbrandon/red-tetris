@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import BackButton from '../components/BackButton';
@@ -38,31 +38,32 @@ const GamePage = () => {
         }
     }, [gameStatus, navigate]);
 
-    const handleReturnMenu = () => {
+    const handleReturnMenu = useCallback(() => {
         setResultModalOpen(false);
         dispatch(setSpectatorActive(false));
         requestRoomLeave();
         navigate('/menu');
-    };
+    }, [dispatch, navigate]);
 
-    const handleSpectate = () => {
+    const handleSpectate = useCallback(() => {
         dispatch(setSpectatorActive(true));
         setResultModalOpen(false);
-    };
+    }, [dispatch]);
 
-    const handleLeaveRoom = () => {
+    const handleLeaveRoom = useCallback(() => {
         dispatch(setSpectatorActive(false));
         requestRoomLeave();
-    };
+    }, [dispatch]);
 
-    const resultModalProps = {
+    const resultModalProps = useMemo(() => ({
         isOpen: isResultModalOpen,
         outcome: playerOutcome,
         onConfirm: handleReturnMenu,
         isOwner,
         canSpectate: Boolean(spectator?.eligible),
         onSpectate: handleSpectate,
-    };
+        isGameOver: gameStatus === 'game-over',
+    }), [isResultModalOpen, playerOutcome, handleReturnMenu, isOwner, spectator, gameStatus]);
 
     return (
         gameStatus === 'waiting' || !grid[0].length ? (

@@ -89,12 +89,12 @@ const GameView = ({ grid, resultModal }) => {
                     />
                     {shouldShowResult && (
                         <GameResultModal
-                            isOpen={modalConfig.isOpen}
                             outcome={modalConfig.outcome}
                             onConfirm={modalConfig.onConfirm}
                             isOwner={Boolean(modalConfig.isOwner)}
                             canSpectate={Boolean(modalConfig.canSpectate)}
                             onSpectate={modalConfig.onSpectate}
+                            isGameOver={Boolean(modalConfig.isGameOver)}
                             placement='board'
                         />
                     )}
