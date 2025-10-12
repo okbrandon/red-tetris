@@ -146,7 +146,19 @@ export const initializeSocket = () => {
 
     addListener(SERVER_EVENTS.GAME_LOST, (payload) => {
         dispatch(socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.GAME_LOST, payload }));
-        dispatch(setPlayerOutcome({ outcome: 'lose', message: payload?.message || 'You lost' }));
+        const state = getState();
+        const gameState = state?.game ?? {};
+        const players = Array.isArray(gameState.players) ? gameState.players : [];
+        const canSpectate = gameState.mode === 'multiplayer'
+            && players.length >= 3
+            && !gameState.spectator?.eligible
+            && gameState.gameStatus === 'in-game';
+
+        dispatch(setPlayerOutcome({
+            outcome: 'lose',
+            message: payload?.message || 'You lost',
+            canSpectate,
+        }));
     });
 
     return () => {

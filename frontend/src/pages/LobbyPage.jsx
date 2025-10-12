@@ -12,9 +12,8 @@ const LobbyPage = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const multiplayer = game.multiplayer;
-    const players = multiplayer?.players?.length
-        ? multiplayer.players.map((player) => player.username || player.id)
+    const players = game.players?.length
+        ? game.players.map((player) => player.username || player.id)
         : [username || 'You'];
     const ownerId = game?.owner?.id;
     const isOwner = id === ownerId;

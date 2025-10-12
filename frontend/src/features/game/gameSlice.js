@@ -2,11 +2,6 @@ import { createSlice } from '@reduxjs/toolkit';
 
 export const SOLO_ROOM_NAME = 'solo-local';
 
-const createInitialMultiplayerState = () => ({
-    players: [],
-    maxPlayers: 4,
-});
-
 const createInitialState = () => ({
     mode: '',
     owner: null,
@@ -19,7 +14,11 @@ const createInitialState = () => ({
     grid: [[]],
     nextPieces: [],
     currentPiece: null,
-    multiplayer: createInitialMultiplayerState(),
+    spectator: {
+        eligible: false,
+        active: false,
+    },
+    players: [],
 });
 
 export const gameSlice = createSlice({
@@ -31,7 +30,7 @@ export const gameSlice = createSlice({
 
             state.mode = action.payload;
             if (mode === 'solo') {
-                state.multiplayer = createInitialMultiplayerState();
+                state.players = [];
                 state.score = 0;
             }
         },
@@ -52,10 +51,7 @@ export const gameSlice = createSlice({
                 state.score = score;
             }
 
-            state.multiplayer = {
-                ...state.multiplayer,
-                players: clients,
-            };
+            state.players = Array.isArray(clients) ? clients : [];
         },
         setGameStatus: (state, action) => {
             state.gameStatus = action.payload.status;
@@ -80,14 +76,14 @@ export const gameSlice = createSlice({
                 if (state.gameStatus && state.gameStatus !== 'waiting') {
                     // Build a Map for O(1) client lookup by id
                     const clientMap = new Map(clients.map(client => [client.id, client]));
-                    state.multiplayer.players = state.multiplayer.players
+                    state.players = state.players
                         .filter(player => clientMap.has(player.id))
                         .map(player => ({
                             ...player,
                             ...clientMap.get(player.id)
                         }));
                 } else {
-                    state.multiplayer.players = clients;
+                    state.players = clients;
                 }
             }
         },

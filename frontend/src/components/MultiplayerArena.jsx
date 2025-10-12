@@ -111,13 +111,13 @@ const estimateOpponentCellSize = (baseCellSize, opponentCount, tallestBoardRows 
 const MultiplayerArena = ({ grid, resultModal }) => {
     const cellSize = useResponsiveValue(useCallback(computePrimaryCellSize, []));
 
-    const { you, multiplayer } = useSelector((state) => state.game);
+    const { you, players } = useSelector((state) => state.game);
 
     const player = you ?? null;
 
     const yourId = player?.id;
-    const opponents = Array.isArray(multiplayer?.players)
-        ? multiplayer.players.filter((opponent) => (yourId ? opponent?.id !== yourId : true))
+    const opponents = Array.isArray(players)
+        ? players.filter((opponent) => (yourId ? opponent?.id !== yourId : true))
         : [];
 
     const tallestOpponentRows = useMemo(() => {
