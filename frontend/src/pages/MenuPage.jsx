@@ -10,8 +10,7 @@ import { requestRoomJoin, requestStartGame } from '../features/socket/socketThun
 const MenuPage = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const { mode, gameStatus, roomName } = useSelector((state) => state.game);
-    const { username } = useSelector((state) => state.user);
+    const { mode, gameStatus, roomName, owner } = useSelector((state) => state.game);
 
     const handleSoloJourney = () => {
         requestRoomJoin({ roomName: SOLO_ROOM_NAME, soloJourney: true });
@@ -23,11 +22,11 @@ const MenuPage = () => {
             if (gameStatus !== 'in-game') {
                 requestStartGame();
             } else if (gameStatus === 'in-game') {
-                navigate(`/${roomName}/${username}`);
+                navigate(`/${roomName}/${owner.username}`);
             }
         }
-    }, [mode, roomName, gameStatus, navigate, username]);
- 
+    }, [mode, roomName, gameStatus, navigate, owner.username]);
+
     return (
         <Wrapper>
             <BackButton onClick={() => navigate('/')} />

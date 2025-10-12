@@ -23,13 +23,12 @@ const JoinPage = () => {
         requestRoomJoin({ roomName: trimmed, soloJourney: false });
         dispatch(showNotification({ type: 'success', message: `Joining lobby ${trimmed}…` }));
     };
-    // Brandon will add to room-joined `soloJourney: Boolean` in the payload
-    // for the moment my logic is not working but should when that is done.
+
     useEffect(() => {
         if (lobbySettings.mode === 'multiplayer' && lobbySettings.roomName) {
-            navigate(`/${lobbySettings.roomName}/${username}`);
+            navigate(`/${lobbySettings.roomName}/${lobbySettings.owner?.username}`);
         }
-    }, [lobbySettings.mode, lobbySettings.roomName, username, navigate]);
+    }, [lobbySettings.mode, lobbySettings.roomName, lobbySettings.owner, navigate]);
 
     return (
         <Wrapper>
