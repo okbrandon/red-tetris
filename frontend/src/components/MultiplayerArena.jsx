@@ -11,7 +11,7 @@ import {
     ArenaLayout,
     OpponentColumn,
     SectionLabel,
-    OpponentList,
+    OpponentGrid,
     OpponentCard,
     OpponentBadge,
     OpponentName,
@@ -20,6 +20,14 @@ import {
     EmptyNotice,
     MainColumn,
 } from './MultiplayerArena.styled.js';
+
+const deriveCardScale = (count) => {
+    if (count <= 1) return 1;
+    if (count === 2) return 0.95;
+    if (count === 3) return 0.9;
+    const scaled = 0.9 - (count - 3) * 0.045;
+    return Math.max(scaled, 0.6);
+};
 
 const OpponentBoard = ({ opponent, index, cellSize }) => {
     const board = opponent?.specter ?? [];
@@ -134,6 +142,16 @@ const MultiplayerArena = ({ grid, resultModal, showSpectators = false, onExitSpe
         [cellSize, opponents.length, tallestOpponentRows]
     );
 
+    const cardScale = useMemo(
+        () => deriveCardScale(opponents.length),
+        [opponents.length]
+    );
+
+    const cardScaleStyle = useMemo(
+        () => ({ '--card-scale': cardScale }),
+        [cardScale]
+    );
+
     if (showSpectators) {
         return (
             <ArenaContainer>
@@ -145,10 +163,10 @@ const MultiplayerArena = ({ grid, resultModal, showSpectators = false, onExitSpe
     return (
         <ArenaContainer>
             <ArenaLayout>
-                <OpponentColumn>
+                <OpponentColumn style={cardScaleStyle}>
                     <SectionLabel>{`Opponents${opponents.length ? ` (${opponents.length})` : ''}`}</SectionLabel>
                     {opponents.length ? (
-                        <OpponentList aria-label='Opponent boards'>
+                        <OpponentGrid aria-label='Opponent boards'>
                             {opponents.map((opponent, index) => (
                                 <OpponentBoard
                                     key={opponent?.id || opponent?.username || opponent?.name || `opponent-${index}`}
@@ -157,7 +175,7 @@ const MultiplayerArena = ({ grid, resultModal, showSpectators = false, onExitSpe
                                     cellSize={opponentCellSize}
                                 />
                             ))}
-                        </OpponentList>
+                        </OpponentGrid>
                     ) : (
                         <EmptyNotice>Waiting for challengers…</EmptyNotice>
                     )}

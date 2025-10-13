@@ -23,23 +23,25 @@ export const ArenaLayout = styled.div`
 
     @media (min-width: 880px) {
         display: grid;
-        grid-template-columns: clamp(280px, 34vw, 380px) minmax(0, 1fr);
+        grid-template-columns: clamp(340px, 42vw, 520px) minmax(0, 1fr);
         align-items: stretch;
     }
 `;
 
 export const OpponentColumn = styled.section`
+    --card-scale: 1;
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: clamp(0.8rem, 1.6vw, 1.2rem);
+    gap: clamp(0.75rem, 1.4vw, 1.1rem);
     min-height: 0;
     max-height: 100%;
-    padding: clamp(1rem, 1.8vw, 1.6rem);
-    border-radius: 18px;
-    border: 1px solid rgba(142, 107, 225, 0.25);
-    background: linear-gradient(160deg, rgba(24, 21, 39, 0.96), rgba(18, 15, 32, 0.9));
-    box-shadow: 0 20px 34px rgba(8, 6, 18, 0.36);
+    padding: clamp(0.9rem, 1.8vw, 1.4rem);
+    border-radius: 16px;
+    border: 1px solid rgba(142, 107, 225, 0.2);
+    background: rgba(20, 17, 33, 0.82);
+    box-shadow: 0 12px 24px rgba(10, 8, 18, 0.28);
+    flex: 1 1 auto;
 `;
 
 export const SectionLabel = styled.h3`
@@ -51,67 +53,57 @@ export const SectionLabel = styled.h3`
     text-align: left;
 `;
 
-export const OpponentList = styled.div`
+export const OpponentGrid = styled.div`
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: clamp(0.75rem, 1.3vw, 1rem);
-    flex: 1 1 auto;
-    min-height: 0;
-    align-content: start;
-    justify-items: center;
-
-    @media (max-width: 679px) {
-        grid-template-columns: 1fr;
-        justify-items: stretch;
-    }
+    grid-template-columns: repeat(auto-fit, minmax(calc(150px * var(--card-scale, 1)), 1fr));
+    gap: calc(0.7rem * var(--card-scale, 1));
+    flex: 0 0 auto;
+    justify-items: stretch;
 `;
 
 export const OpponentCard = styled.div`
-    width: min(100%, 220px);
+    width: 100%;
     min-width: 0;
-    border-radius: 16px;
+    border-radius: calc(12px * var(--card-scale, 1));
     border: 1px solid rgba(142, 107, 225, 0.18);
-    background: linear-gradient(155deg, rgba(28, 24, 46, 0.92), rgba(16, 13, 28, 0.96));
-    padding: 14px 18px 18px;
+    background: rgba(30, 27, 45, 0.92);
+    padding: calc(12px * var(--card-scale, 1));
     display: grid;
-    gap: 0.6rem;
+    gap: calc(0.55rem * var(--card-scale, 1));
     justify-items: center;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 18px 30px rgba(10, 7, 20, 0.32);
     box-sizing: border-box;
-    flex: 0 0 auto;
 `;
 
 export const OpponentBadge = styled.span`
-    padding: 0.2rem 0.6rem;
+    padding: calc(0.18rem * var(--card-scale, 1)) calc(0.55rem * var(--card-scale, 1));
     border-radius: 999px;
-    border: 1px solid rgba(162, 130, 235, 0.32);
-    background: rgba(28, 24, 46, 0.6);
-    font-size: 0.65rem;
-    letter-spacing: 0.24em;
+    border: 1px solid rgba(162, 130, 235, 0.28);
+    background: rgba(28, 24, 46, 0.5);
+    font-size: calc(0.62rem * var(--card-scale, 1));
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: rgba(190, 183, 232, 0.8);
+    color: rgba(190, 183, 232, 0.78);
 `;
 
 export const OpponentName = styled.span`
-    font-size: 0.8rem;
-    letter-spacing: 0.14em;
+    font-size: calc(0.78rem * var(--card-scale, 1));
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: rgba(229, 222, 255, 0.88);
 `;
 
 export const OpponentHeader = styled.div`
-    display: grid;
-    gap: 0.4rem;
-    justify-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: calc(0.35rem * var(--card-scale, 1));
+    align-items: center;
     text-align: center;
 `;
 
 export const MiniBoard = styled.div`
     display: flex;
     justify-content: center;
-    border-radius: 12px;
+    border-radius: calc(10px * var(--card-scale, 1));
     overflow: hidden;
     opacity: 0.95;
     pointer-events: none;
@@ -120,11 +112,11 @@ export const MiniBoard = styled.div`
 
 export const EmptyNotice = styled.p`
     margin: 0;
-    padding: clamp(0.6rem, 1.4vw, 0.85rem);
-    border-radius: 12px;
+    padding: clamp(0.6rem, 1.2vw, 0.8rem);
+    border-radius: 10px;
     border: 1px solid rgba(142, 107, 225, 0.2);
-    background: rgba(21, 19, 34, 0.54);
-    font-size: 0.76rem;
+    background: rgba(21, 19, 34, 0.5);
+    font-size: 0.74rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: rgba(199, 191, 234, 0.68);
