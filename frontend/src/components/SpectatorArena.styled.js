@@ -15,7 +15,7 @@ export const SpectatorLayout = styled.div`
     grid-template-columns: minmax(0, 1fr);
 
     @media (min-width: 960px) {
-        grid-template-columns: minmax(0, 1fr) clamp(280px, 30%, 340px);
+        grid-template-columns: minmax(0, 1fr) clamp(320px, 36%, 420px);
         align-items: start;
     }
 `;
@@ -141,14 +141,15 @@ export const StatValue = styled.dd`
 `;
 
 export const SpectatorList = styled.section`
+    --card-scale: 1;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: clamp(0.8rem, 1.4vw, 1.1rem);
+    grid-template-columns: repeat(auto-fit, minmax(calc(170px * var(--card-scale, 1)), 1fr));
+    gap: calc(0.85rem * var(--card-scale, 1));
 `;
 
 export const SpectatorCard = styled.div`
     position: relative;
-    border-radius: 18px;
+    border-radius: calc(18px * var(--card-scale, 1));
     border: 1px solid ${({ $active }) => ($active ? 'rgba(198, 160, 255, 0.55)' : 'rgba(142, 107, 225, 0.22)')};
     background: ${({ $active }) => ($active
         ? 'linear-gradient(160deg, rgba(42, 33, 72, 0.95), rgba(24, 20, 46, 0.96))'
@@ -156,9 +157,9 @@ export const SpectatorCard = styled.div`
     box-shadow: ${({ $active }) => ($active
         ? '0 24px 38px rgba(14, 9, 30, 0.46)'
         : '0 16px 28px rgba(10, 7, 20, 0.34)')};
-    padding: 1rem;
+    padding: calc(1rem * var(--card-scale, 1));
     display: grid;
-    gap: 0.7rem;
+    gap: calc(0.7rem * var(--card-scale, 1));
     cursor: pointer;
     transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
     outline: none;
@@ -172,14 +173,14 @@ export const SpectatorCard = styled.div`
 `;
 
 export const SpectatorLabel = styled.span`
-    font-size: 0.64rem;
+    font-size: calc(0.64rem * var(--card-scale, 1));
     letter-spacing: 0.22em;
     text-transform: uppercase;
     color: rgba(190, 183, 232, 0.78);
 `;
 
 export const SpectatorName = styled.span`
-    font-size: 0.82rem;
+    font-size: calc(0.82rem * var(--card-scale, 1));
     letter-spacing: 0.16em;
     text-transform: uppercase;
     color: rgba(229, 222, 255, 0.92);
@@ -187,7 +188,7 @@ export const SpectatorName = styled.span`
 
 export const SpectatorMiniBoard = styled.div`
     width: 100%;
-    border-radius: 14px;
+    border-radius: calc(14px * var(--card-scale, 1));
     overflow: hidden;
     pointer-events: none;
 `;

@@ -27,12 +27,20 @@ import {
     EmptyState,
 } from './SpectatorArena.styled.js';
 
+const deriveSpectatorScale = (count) => {
+    if (count <= 1) return 1;
+    if (count === 2) return 0.95;
+    if (count === 3) return 0.9;
+    const scaled = 0.9 - (count - 3) * 0.045;
+    return Math.max(scaled, 0.6);
+};
+
 const computeFocusedCellSize = (rows = 20, cols = 10) => {
     if (typeof window === 'undefined') return 30;
     const w = window.innerWidth;
     const h = window.innerHeight;
-    const sidebarWidth = w >= 960 ? Math.min(Math.max(w * 0.28, 260), 340) : 0;
-    const padding = w >= 960 ? 160 : 80;
+    const sidebarWidth = w >= 960 ? Math.min(Math.max(w * 0.36, 320), 420) : 0;
+    const padding = w >= 960 ? 176 : 92;
     const availableWidth = Math.max(w - sidebarWidth - padding, 300);
     const maxByWidth = availableWidth / cols;
     const availableHeight = Math.max(h - 320, 320);
@@ -100,7 +108,15 @@ const SpectatorArena = ({ onExit }) => {
     const focusedCellSize = useResponsiveValue(
         useCallback(() => computeFocusedCellSize(safeRows, safeCols), [safeRows, safeCols])
     );
-    const previewCellSize = Math.max(8, Math.floor((focusedCellSize || 20) * 0.42));
+    const spectatorScale = useMemo(
+        () => deriveSpectatorScale(opponents.length),
+        [opponents.length]
+    );
+    const previewCellSize = useMemo(() => {
+        const base = Math.max(7, Math.floor((focusedCellSize || 20) * 0.4));
+        const widthAllowance = Math.floor(Math.max(6, ((170 - 32) * spectatorScale) / 10));
+        return Math.max(6, Math.min(base, widthAllowance));
+    }, [focusedCellSize, spectatorScale]);
     const focusedStats = useMemo(() => computeStats(focusedPlayer), [focusedPlayer]);
 
     return (
@@ -147,7 +163,10 @@ const SpectatorArena = ({ onExit }) => {
                                 )}
                             </FocusedContent>
                         </FocusedPanel>
-                        <SpectatorList aria-label='Players to spectate'>
+                        <SpectatorList
+                            aria-label='Players to spectate'
+                            style={{ '--card-scale': spectatorScale }}
+                        >
                             {opponents.map((opponent, index) => {
                                 const miniBoard = Array.isArray(opponent?.specter) ? opponent.specter : [];
                                 const { rows: miniRows, cols: miniCols } = deriveBoardDimensions(miniBoard);
