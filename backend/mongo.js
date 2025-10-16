@@ -34,7 +34,7 @@ class Mongo {
 		if (this.db)
 			return this.db;
 
-		this.client = new MongoClient(MONGO_URI, { useUnifiedTopology: true });
+		this.client = new MongoClient(MONGO_URI);
 		await this.client.connect();
 
 		this.db = this.client.db(DB_NAME);
