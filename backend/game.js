@@ -182,6 +182,11 @@ class Game {
 		} else {
 			const losers = clients.filter(client => client.hasLost);
 
+			// All players lost
+			if (losers.length === clients.length) {
+				return true;
+			}
+			// Only one player left
 			if (losers.length === clients.length - 1) {
 				return true;
 			}
