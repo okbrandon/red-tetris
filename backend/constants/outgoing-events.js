@@ -166,6 +166,13 @@ const GAME_LOST = 'game-lost';
  */
 const LINES_CLEARED = 'lines-cleared';
 
+/**
+ * @constant {string} PLAYER_STATS_BOARD - Sent to update the client with their recent game statistics.
+ *
+ * @description This event is sent by the server to a specific client to provide them with their recent game statistics.
+ */
+const PLAYER_STATS_BOARD = 'player-stats-board';
+
 export default {
 	ERROR,
 	CLIENT_UPDATED,
@@ -177,5 +184,6 @@ export default {
 	GAME_STATE,
 	GAME_OVER,
 	GAME_LOST,
-	LINES_CLEARED
+	LINES_CLEARED,
+	PLAYER_STATS_BOARD
 };

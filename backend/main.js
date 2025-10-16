@@ -11,6 +11,7 @@ import incomingEvents from "./constants/incoming-events.js";
 import outgoingEvents from "./constants/outgoing-events.js";
 import gameStatus from "./constants/game-status.js";
 import gameSettings from "./constants/game-settings.js";
+import mongo from "./mongo.js";
 
 const PORT = process.env.PORT || 3000;
 
@@ -124,6 +125,7 @@ const leaveRoom = (socket, room, client) => {
 		socket.emit(outgoingEvents.ROOM_LEFT, JSON.stringify({
 			roomName: room.id
 		}));
+		client.sendPlayerStatsBoard();
 		console.log(`[${client.id}] Left room ${room.id}`);
 	} catch (error) {
 		socket.emit(outgoingEvents.ERROR, JSON.stringify({
@@ -154,11 +156,12 @@ io.on("connection", (socket) => {
 			return;
 		}
 
-		client.username = data.username;
+		client.updateUsername(data.username);
 		socket.emit(outgoingEvents.CLIENT_UPDATED, JSON.stringify({
 			id: client.id,
 			username: client.username
 		}));
+		client.sendPlayerStatsBoard();
 		console.log(`[${client.id}] Updated username to ${client.username}`);
 	});
 
@@ -364,8 +367,15 @@ io.on("connection", (socket) => {
 
 
 /**
- * Starts the HTTP server.
+ * Starts the HTTP server. Connects to MongoDB first.
  */
-httpServer.listen(PORT, () => {
-	console.log(`Server running at http://localhost:${PORT}/`);
-});
+mongo.connect()
+	.then(() => {
+		httpServer.listen(PORT, () => {
+			console.log(`Server running at http://localhost:${PORT}/`);
+		});
+	})
+	.catch((err) => {
+		console.error('[MongoDB] Connection failed:', err);
+		process.exit(1);
+	});
