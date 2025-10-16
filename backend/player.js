@@ -29,10 +29,19 @@ class Player {
 		this.statistics = null;
 	}
 
+	/**
+	 * Updates the player's username and reloads statistics.
+	 * @param {*} username - New username.
+	 */
 	updateUsername(username) {
 		this.username = username;
 		this.statistics = new Statistics(this.username);
-		this.statistics.load().catch(console.error);
+		this.statistics.load().then(() => {
+			console.log('Loaded statistics for', this.username);
+			this.sendPlayerStatsBoard();
+		}).catch((err) => {
+			console.error('Failed to load statistics for', this.username, err);
+		});
 	}
 
 	/**
@@ -130,15 +139,13 @@ class Player {
 				id: this.id,
 				username: this.username,
 				hasLost: this.hasLost,
-				score: this.score,
-				specter: this.getLandSpecter()
+				score: this.score
 			},
 			clients: clients.map(client => ({
 				id: client.id,
 				username: client.username,
 				hasLost: client.hasLost,
-				score: client.score,
-				specter: client.getLandSpecter()
+				score: client.score
 			})),
 			message: message,
 		};
@@ -146,16 +153,7 @@ class Player {
 		this.emit(outgoingEvents.GAME_OVER, {
 			...gameResult
 		});
-
-		if (!this.statistics) {
-			console.log('No statistics instance for', this.username);
-			return;
-		}
-		this.statistics.addGameResult({
-			...gameResult,
-			timestamp: new Date()
-		});
-		this.statistics.save().catch(console.error);
+		this.saveStatistics(gameResult);
 	}
 
 	/**
@@ -189,6 +187,21 @@ class Player {
 				specter: this.getLandSpecter()
 			},
 			message: message,
+		});
+	}
+
+	/**
+	 * Sends the player's statistics board.
+	 * Requires that statistics have been loaded.
+	 */
+	sendPlayerStatsBoard() {
+		if (!this.statistics) {
+			console.log('No statistics instance for', this.username);
+			return;
+		}
+
+		this.emit(outgoingEvents.PLAYER_STATS_BOARD, {
+			gameHistory: this.statistics.getStats()
 		});
 	}
 
@@ -558,6 +571,27 @@ class Player {
 	}
 
 	/**
+	 * Saves game result to player statistics.
+	 *
+	 * @param {Object} gameResult - The game result to save.
+	 */
+	saveStatistics(gameResult) {
+		if (!this.statistics) {
+			console.log('No statistics instance for', this.username);
+			return;
+		}
+		this.statistics.addGameResult({
+			...gameResult,
+			timestamp: new Date()
+		});
+		this.statistics.save().then(() => {
+			console.log('Statistics saved for', this.username);
+		}).catch((err) => {
+			console.error('Failed to save statistics for', this.username, err);
+		});
+	}
+
+	/**
 	 * Resets the player's state.
 	 */
 	reset() {
@@ -566,6 +600,7 @@ class Player {
 		this.currentPieceIndex = 0;
 		this.grid = null;
 		this.hasLost = false;
+		this.score = 0;
 	}
 
 }

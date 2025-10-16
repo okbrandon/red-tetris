@@ -125,6 +125,7 @@ const leaveRoom = (socket, room, client) => {
 		socket.emit(outgoingEvents.ROOM_LEFT, JSON.stringify({
 			roomName: room.id
 		}));
+		client.sendPlayerStatsBoard();
 		console.log(`[${client.id}] Left room ${room.id}`);
 	} catch (error) {
 		socket.emit(outgoingEvents.ERROR, JSON.stringify({
@@ -160,6 +161,7 @@ io.on("connection", (socket) => {
 			id: client.id,
 			username: client.username
 		}));
+		client.sendPlayerStatsBoard();
 		console.log(`[${client.id}] Updated username to ${client.username}`);
 	});
 
