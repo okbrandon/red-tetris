@@ -1,3 +1,7 @@
+/**
+ * @fileoverview MongoDB connection and management.
+ * Singleton pattern to ensure one connection instance.
+ */
 import { MongoClient } from 'mongodb';
 
 const MONGO_ADMIN = process.env.MONGO_INITDB_ROOT_USERNAME || 'mongoadmin';
@@ -9,6 +13,9 @@ const DB_NAME = process.env.MONGO_INITDB_DATABASE || 'red-tetris';
 
 class Mongo {
 
+	/**
+	 * Singleton instance of Mongo class.
+	 */
 	constructor() {
 		if (Mongo.instance)
 			return Mongo.instance;
@@ -19,6 +26,10 @@ class Mongo {
 		Mongo.instance = this;
 	}
 
+	/**
+	 * Connects to MongoDB if not already connected.
+	 * @returns {Promise<Db>} - The connected database instance.
+	 */
 	async connect() {
 		if (this.db)
 			return this.db;
@@ -31,12 +42,19 @@ class Mongo {
 		return this.db;
 	}
 
+	/**
+	 * Gets the connected database instance.
+	 * @returns {Db} - The connected database instance.
+	 */
 	getDb() {
 		if (!this.db)
 			throw new Error('MongoDB not connected. Call connect() first.');
 		return this.db;
 	}
 
+	/**
+	 * Closes the MongoDB connection.
+	 */
 	async close() {
 		if (this.client)
 			await this.client.close();
