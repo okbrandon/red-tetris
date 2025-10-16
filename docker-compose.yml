@@ -18,7 +18,7 @@ services:
       - "3000:3000"
 
   mongodb:
-    image: mongo:latest
+    image: mongo:8.0.15-noble
     container_name: red-tetris-mongodb
     restart: always
     networks:
@@ -31,6 +31,7 @@ services:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
+    command: mongod --quiet
 
   # frontend:
   #   build: ./frontend
