@@ -316,6 +316,7 @@ class Player {
 	 * @returns {Array<Array<Object>>} - The updated grid.
 	 */
 	updatePieceOnGrid(piece, grid, updateCell) {
+		const gridClone = structuredClone(grid);
 		const shape = piece.shape;
 		const rows = this.room.rows;
 		const cols = this.room.cols;
@@ -328,16 +329,16 @@ class Player {
 
 					if (gridX >= 0 && gridX < cols && gridY >= 0 && gridY < rows) {
 
-						if (grid[gridY][gridX]?.indestructible)
+						if (gridClone[gridY][gridX]?.indestructible)
 							return;
 
-						grid[gridY][gridX] = updateCell(piece);
+						gridClone[gridY][gridX] = updateCell(piece);
 					}
 				}
 			});
 		});
 
-		return grid;
+		return gridClone;
 	}
 
 	/**
@@ -348,7 +349,8 @@ class Player {
 	 * @returns {Array<Array<Object>>} - The updated grid.
 	 */
 	mergePieceIntoGrid(piece, grid, isGhost = false) {
-		return this.updatePieceOnGrid(piece, grid, (piece) => ({
+		const gridClone = structuredClone(grid);
+		return this.updatePieceOnGrid(piece, gridClone, (piece) => ({
 			filled: true,
 			color: piece.color,
 			indestructible: false,
@@ -363,7 +365,8 @@ class Player {
 	 * @returns {Array<Array<Object>>} - The updated grid.
 	 */
 	removePieceFromGrid(piece, grid) {
-		return this.updatePieceOnGrid(piece, grid, () => ({
+		const gridClone = structuredClone(grid);
+		return this.updatePieceOnGrid(piece, gridClone, () => ({
 			filled: false,
 			color: 'transparent',
 			indestructible: false,
@@ -545,10 +548,6 @@ class Player {
 					this.handlePieceLanding();
 				}
 			}
-		}
-
-		if (!hardDrop) {
-			this.grid = this.mergePieceIntoGrid(this.currentPiece, this.grid);
 		}
 
 		this.sendGrid();
