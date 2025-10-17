@@ -7,6 +7,7 @@ import gameSettings from './constants/game-settings.js';
 import gameStatus from './constants/game-status.js';
 import outgoingEvents from './constants/outgoing-events.js';
 import utils from './utils.js';
+import gameModes from './constants/game-modes.js';
 
 class Game {
 
@@ -14,8 +15,9 @@ class Game {
 	 * @param {string} id - Unique ID for the game room.
 	 * @param {Object} [owner=null] - Initial owner of the game room.
 	 * @param {boolean} [soloJourney=false] - Whether the game is in solo journey mode.
+	 * @param {string} [mode=gameModes.CLASSIC] - The game mode to use.
 	 */
-	constructor(id, owner = null, soloJourney = false) {
+	constructor(id, owner = null, soloJourney = false, mode = gameModes.CLASSIC) {
 		/** @type {string} */
 		this.id = soloJourney ? utils.randomString(5) + gameSettings.TAG_SINGLEPLAYER + id : id;
 		/** @type {Object|null} */
@@ -38,6 +40,27 @@ class Game {
 		this.updateInterval = null;
 		/** @type {number} */
 		this.maxPlayers = soloJourney ? 1 : gameSettings.MAX_PLAYERS_PER_ROOM;
+		/** @type {string} */
+		this.mode = Object.values(gameModes).includes(mode) ? mode : gameModes.CLASSIC;
+		/** @type {number} */
+		this.ticks = 0;
+		/** @type {number} */
+		this.tickingInterval = mode === gameModes.FAST_PACED ? 500 : 1000;
+		/** @type {boolean} */
+		this.isProcessingTick = false;
+	}
+
+	/**
+	 * Changes the game mode.
+	 * @param {string} newMode - The new game mode to set.
+	 * @throws Will throw an error if the new mode is invalid.
+	 */
+	changeMode(newMode) {
+		if (!Object.values(gameModes).includes(newMode))
+			throw new Error('Invalid game mode');
+
+		this.mode = newMode;
+		this.tickingInterval = this.mode === gameModes.FAST_PACED ? 500 : 1000;
 	}
 
 	/**
@@ -203,20 +226,33 @@ class Game {
 			return;
 
 		this.updateInterval = setInterval(() => {
-			const clients = [...this.clients];
+			if (this.ticks % this.tickingInterval === 0) {
+				if (!this.isProcessingTick) {
+					this.isProcessingTick = true;
 
-			if (this.shouldEndGame()) {
-				console.log('[' + this.id + '] GAME OVER (END GAME CHECK)');
-				this.stop();
-				return;
+					setImmediate(async () => {
+						try {
+							const clients = [...this.clients];
+
+							if (this.shouldEndGame()) {
+								console.log('[' + this.id + '] GAME OVER (END GAME CHECK)');
+								this.stop();
+								return;
+							}
+
+							console.log('[' + this.id + '] GAME TICK (' + this.ticks + ')');
+							for (const client of clients) {
+								await Promise.resolve().then(() => client.tickInterval());
+							}
+						} finally {
+							this.isProcessingTick = false;
+						}
+					});
+				}
 			}
 
-			console.log('[' + this.id + '] GAME TICK');
-
-			clients.forEach(client => {
-				client.tickInterval();
-			});
-		}, 1000);
+			this.ticks += 1;
+		}, 1);
 	}
 
 	/**

@@ -127,7 +127,8 @@ class Player {
 				},
 				status: this.room.status,
 				soloJourney: this.room.soloJourney,
-				maxPlayers: this.room.maxPlayers
+				maxPlayers: this.room.maxPlayers,
+				mode: this.room.mode
 			},
 			winner: winner ? {
 				id: winner.id,
