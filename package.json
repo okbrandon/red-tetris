@@ -1,6 +1,7 @@
 {
   "name": "red-tetris",
   "version": "0.0.0",
+  "private": true,
   "description": "",
   "scripts": {
     "release": "standard-version",
