@@ -3,19 +3,19 @@ import { sendClientUpdate } from '../socket/socketThunks.js';
 import { store } from '../../store.js';
 
 export const updateUsername = (username) => {
-    const trimmed = typeof username === 'string' ? username.trim() : '';
+  const trimmed = typeof username === 'string' ? username.trim() : '';
 
-    store.dispatch(setUsername(trimmed));
+  store.dispatch(setUsername(trimmed));
 
-    if (typeof window !== 'undefined') {
-        if (trimmed.length > 0) {
-            window.localStorage.setItem('username', trimmed);
-        } else {
-            window.localStorage.removeItem('username');
-        }
-    }
-
+  if (typeof window !== 'undefined') {
     if (trimmed.length > 0) {
-        sendClientUpdate({ username: trimmed });
+      window.localStorage.setItem('username', trimmed);
+    } else {
+      window.localStorage.removeItem('username');
     }
+  }
+
+  if (trimmed.length > 0) {
+    sendClientUpdate({ username: trimmed });
+  }
 };

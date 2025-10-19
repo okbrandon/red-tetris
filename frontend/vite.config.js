@@ -1,10 +1,10 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import { fileURLToPath } from 'node:url'
-import path from 'node:path'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
 
 // Resolve Node-style __dirname for this ESM config file.
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -25,6 +25,6 @@ export default defineConfig({
       features: path.resolve(__dirname, 'src/features'),
       providers: path.resolve(__dirname, 'src/providers'),
       services: path.resolve(__dirname, 'src/services'),
-    }
-  }
-})
+    },
+  },
+});

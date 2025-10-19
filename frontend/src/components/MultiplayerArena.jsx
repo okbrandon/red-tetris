@@ -8,155 +8,147 @@ import { deriveBoardDimensions } from '../utils/tetris.js';
 import SpectatorArena from './SpectatorArena.jsx';
 import { deriveCardScale, estimateOpponentCellSize } from '../utils/arenaSizing.js';
 import {
-    ArenaContainer,
-    ArenaLayout,
-    OpponentColumn,
-    SectionLabel,
-    OpponentGrid,
-    OpponentCard,
-    OpponentBadge,
-    OpponentName,
-    OpponentHeader,
-    MiniBoard,
-    EmptyNotice,
-    MainColumn,
+  ArenaContainer,
+  ArenaLayout,
+  OpponentColumn,
+  SectionLabel,
+  OpponentGrid,
+  OpponentCard,
+  OpponentBadge,
+  OpponentName,
+  OpponentHeader,
+  MiniBoard,
+  EmptyNotice,
+  MainColumn,
 } from './MultiplayerArena.styled.js';
 
 const OpponentBoard = ({ opponent, index, cellSize }) => {
-    const board = opponent?.specter ?? [];
-    const { rows, cols } = deriveBoardDimensions(board);
-    const name = opponent?.username ?? `Opponent ${index + 1}`;
+  const board = opponent?.specter ?? [];
+  const { rows, cols } = deriveBoardDimensions(board);
+  const name = opponent?.username ?? `Opponent ${index + 1}`;
 
-    return (
-        <OpponentCard>
-            <OpponentHeader>
-                <OpponentBadge>{`Player ${index + 1}`}</OpponentBadge>
-                <OpponentName>{name}</OpponentName>
-            </OpponentHeader>
-            <MiniBoard>
-                <TetrisGrid
-                    rows={rows}
-                    cols={cols}
-                    cellSize={cellSize}
-                    showGrid={false}
-                    grid={board}
-                />
-            </MiniBoard>
-        </OpponentCard>
-    );
+  return (
+    <OpponentCard>
+      <OpponentHeader>
+        <OpponentBadge>{`Player ${index + 1}`}</OpponentBadge>
+        <OpponentName>{name}</OpponentName>
+      </OpponentHeader>
+      <MiniBoard>
+        <TetrisGrid rows={rows} cols={cols} cellSize={cellSize} showGrid={false} grid={board} />
+      </MiniBoard>
+    </OpponentCard>
+  );
 };
 
 OpponentBoard.propTypes = {
-    opponent: PropTypes.shape({
-        id: PropTypes.string,
-        username: PropTypes.string,
-        name: PropTypes.string,
-        specter: PropTypes.array,
-        board: PropTypes.array,
-        stats: PropTypes.object,
-    }).isRequired,
-    index: PropTypes.number.isRequired,
-    cellSize: PropTypes.number.isRequired,
+  opponent: PropTypes.shape({
+    id: PropTypes.string,
+    username: PropTypes.string,
+    name: PropTypes.string,
+    specter: PropTypes.array,
+    board: PropTypes.array,
+    stats: PropTypes.object,
+  }).isRequired,
+  index: PropTypes.number.isRequired,
+  cellSize: PropTypes.number.isRequired,
 };
 
 const computePrimaryCellSize = () => {
-    if (typeof window === 'undefined') return 32;
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    const sidebarWidth = w >= 880 ? Math.min(Math.max(w * 0.34, 280), 400) : 0;
-    const layoutPadding = w >= 880 ? 64 : 32;
-    const availableWidth = w - sidebarWidth - layoutPadding;
-    const widthBased = availableWidth / 10;
-    const verticalPadding = Math.max(h * 0.3, 260);
-    const availableHeight = Math.max(h - verticalPadding, 240);
-    const heightBased = availableHeight / 20;
-    const raw = Math.floor(Math.min(widthBased, heightBased));
-    return Math.max(20, Math.min(raw, 42));
+  if (typeof window === 'undefined') return 32;
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const sidebarWidth = w >= 880 ? Math.min(Math.max(w * 0.34, 280), 400) : 0;
+  const layoutPadding = w >= 880 ? 64 : 32;
+  const availableWidth = w - sidebarWidth - layoutPadding;
+  const widthBased = availableWidth / 10;
+  const verticalPadding = Math.max(h * 0.3, 260);
+  const availableHeight = Math.max(h - verticalPadding, 240);
+  const heightBased = availableHeight / 20;
+  const raw = Math.floor(Math.min(widthBased, heightBased));
+  return Math.max(20, Math.min(raw, 42));
 };
 
 const MultiplayerArena = ({ grid, resultModal, showSpectators = false, onLeaveGame }) => {
-    const cellSize = useResponsiveValue(useCallback(computePrimaryCellSize, []));
+  const cellSize = useResponsiveValue(useCallback(computePrimaryCellSize, []));
 
-    const { you, players } = useSelector((state) => state.game);
+  const { you, players } = useSelector((state) => state.game);
 
-    const player = you ?? null;
+  const player = you ?? null;
 
-    const yourId = player?.id;
-    const opponents = Array.isArray(players)
-        ? players.filter((opponent) => (yourId ? opponent?.id !== yourId : true))
-        : [];
+  const yourId = player?.id;
+  const opponents = Array.isArray(players)
+    ? players.filter((opponent) => (yourId ? opponent?.id !== yourId : true))
+    : [];
 
-    const tallestOpponentRows = useMemo(() => {
-        if (!opponents.length) return 20;
-        return opponents.reduce((maxRows, opponent) => {
-            const { rows } = deriveBoardDimensions(opponent?.specter ?? []);
-            return rows > maxRows ? rows : maxRows;
-        }, 0) || 20;
-    }, [opponents]);
-
-    const opponentCellSize = useMemo(
-        () => estimateOpponentCellSize(cellSize, opponents.length, tallestOpponentRows),
-        [cellSize, opponents.length, tallestOpponentRows]
-    );
-
-    const cardScale = useMemo(
-        () => deriveCardScale(opponents.length),
-        [opponents.length]
-    );
-
-    const cardScaleStyle = useMemo(
-        () => ({ '--card-scale': cardScale }),
-        [cardScale]
-    );
-
-    if (showSpectators) {
-        return <SpectatorArena onLeaveGame={onLeaveGame} />
-    }
-
+  const tallestOpponentRows = useMemo(() => {
+    if (!opponents.length) return 20;
     return (
-        <ArenaContainer>
-            <ArenaLayout>
-                <OpponentColumn style={cardScaleStyle}>
-                    <SectionLabel>{`Opponents${opponents.length ? ` (${opponents.length})` : ''}`}</SectionLabel>
-                    {opponents.length ? (
-                        <OpponentGrid aria-label='Opponent boards'>
-                            {opponents.map((opponent, index) => (
-                                <OpponentBoard
-                                    key={opponent?.id || opponent?.username || opponent?.name || `opponent-${index}`}
-                                    opponent={opponent}
-                                    index={index}
-                                    cellSize={opponentCellSize}
-                                />
-                            ))}
-                        </OpponentGrid>
-                    ) : (
-                        <EmptyNotice>Waiting for challengers…</EmptyNotice>
-                    )}
-                </OpponentColumn>
-
-                <MainColumn>
-                    <GameView grid={grid} resultModal={resultModal} />
-                </MainColumn>
-            </ArenaLayout>
-        </ArenaContainer>
+      opponents.reduce((maxRows, opponent) => {
+        const { rows } = deriveBoardDimensions(opponent?.specter ?? []);
+        return rows > maxRows ? rows : maxRows;
+      }, 0) || 20
     );
+  }, [opponents]);
+
+  const opponentCellSize = useMemo(
+    () => estimateOpponentCellSize(cellSize, opponents.length, tallestOpponentRows),
+    [cellSize, opponents.length, tallestOpponentRows]
+  );
+
+  const cardScale = useMemo(() => deriveCardScale(opponents.length), [opponents.length]);
+
+  const cardScaleStyle = useMemo(() => ({ '--card-scale': cardScale }), [cardScale]);
+
+  if (showSpectators) {
+    return <SpectatorArena onLeaveGame={onLeaveGame} />;
+  }
+
+  return (
+    <ArenaContainer>
+      <ArenaLayout>
+        <OpponentColumn style={cardScaleStyle}>
+          <SectionLabel>{`Opponents${
+            opponents.length ? ` (${opponents.length})` : ''
+          }`}</SectionLabel>
+          {opponents.length ? (
+            <OpponentGrid aria-label="Opponent boards">
+              {opponents.map((opponent, index) => (
+                <OpponentBoard
+                  key={opponent?.id || opponent?.username || opponent?.name || `opponent-${index}`}
+                  opponent={opponent}
+                  index={index}
+                  cellSize={opponentCellSize}
+                />
+              ))}
+            </OpponentGrid>
+          ) : (
+            <EmptyNotice>Waiting for challengers…</EmptyNotice>
+          )}
+        </OpponentColumn>
+
+        <MainColumn>
+          <GameView grid={grid} resultModal={resultModal} />
+        </MainColumn>
+      </ArenaLayout>
+    </ArenaContainer>
+  );
 };
 
 MultiplayerArena.propTypes = {
-    grid: PropTypes.arrayOf(PropTypes.array).isRequired,
-    resultModal: PropTypes.shape({
-        isOpen: PropTypes.bool,
-        outcome: PropTypes.shape({
-            outcome: PropTypes.string,
-            message: PropTypes.string,
-        }),
-        onConfirm: PropTypes.func,
-        isOwner: PropTypes.bool,
-        canSpectate: PropTypes.bool,
-        onSpectate: PropTypes.func,
+  grid: PropTypes.arrayOf(PropTypes.array).isRequired,
+  resultModal: PropTypes.shape({
+    isOpen: PropTypes.bool,
+    outcome: PropTypes.shape({
+      outcome: PropTypes.string,
+      message: PropTypes.string,
     }),
-    showSpectators: PropTypes.bool,
-    onLeaveGame: PropTypes.func,
+    onConfirm: PropTypes.func,
+    isOwner: PropTypes.bool,
+    canSpectate: PropTypes.bool,
+    onSpectate: PropTypes.func,
+  }),
+  showSpectators: PropTypes.bool,
+  onLeaveGame: PropTypes.func,
 };
 
 export default MultiplayerArena;

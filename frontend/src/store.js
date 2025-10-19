@@ -5,10 +5,10 @@ import notificationReducer from './features/notification/notificationSlice';
 import socketReducer from './features/socket/socketSlice';
 
 export const store = configureStore({
-    reducer: {
-        game: gameReducer,
-        user: userReducer,
-        notification: notificationReducer,
-        socket: socketReducer,
-    },
+  reducer: {
+    game: gameReducer,
+    user: userReducer,
+    notification: notificationReducer,
+    socket: socketReducer,
+  },
 });
