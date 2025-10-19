@@ -21,7 +21,7 @@ FG_GREEN := \033[32m
 
 .DEFAULT_GOAL := help
 
-.PHONY: help env docker-build docker-up docker-down docker-restart docker-logs \
+.PHONY: help env docker-up docker-down docker-restart docker-logs \
 	docker-reset docker-clean-volumes deps deps-frontend deps-backend \
 	build build-frontend test test-frontend test-backend lint lint-frontend
 
