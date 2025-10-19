@@ -1,12 +1,13 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 export const ArenaContainer = styled.div`
-    width: 80%;
+    width: min(100%, 94vw);
+    max-width: 1600px;
     height: 100%;
     flex: 1;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: stretch;
     margin: 0 auto;
     box-sizing: border-box;
 `;
@@ -23,24 +24,20 @@ export const ArenaLayout = styled.div`
 
     @media (min-width: 880px) {
         display: grid;
-        grid-template-columns: clamp(340px, 42vw, 520px) minmax(0, 1fr);
+        grid-template-columns: clamp(340px, 40vw, 520px) minmax(0, 1fr);
         align-items: stretch;
     }
 `;
 
 export const OpponentColumn = styled.section`
     --card-scale: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: clamp(0.75rem, 1.4vw, 1.1rem);
+    display: grid;
+    grid-template-rows: auto 1fr;
+    align-items: start;
+    gap: clamp(0.7rem, 1.4vw, 1.1rem);
     min-height: 0;
     max-height: 100%;
-    padding: clamp(0.9rem, 1.8vw, 1.4rem);
-    border-radius: 16px;
-    border: 1px solid rgba(142, 107, 225, 0.2);
-    background: rgba(20, 17, 33, 0.82);
-    box-shadow: 0 12px 24px rgba(10, 8, 18, 0.28);
+    padding: 0;
     flex: 1 1 auto;
 `;
 
@@ -54,10 +51,11 @@ export const SectionLabel = styled.h3`
 `;
 
 export const OpponentGrid = styled.div`
+    --card-min: clamp(140px, 20vw, 200px);
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(calc(150px * var(--card-scale, 1)), 1fr));
-    gap: calc(0.7rem * var(--card-scale, 1));
-    flex: 0 0 auto;
+    grid-template-columns: repeat(auto-fit, minmax(var(--card-min), 1fr));
+    gap: clamp(0.7rem, 1.2vw, 1.2rem);
+    flex: 1 1 auto;
     justify-items: stretch;
 `;
 
@@ -65,13 +63,31 @@ export const OpponentCard = styled.div`
     width: 100%;
     min-width: 0;
     border-radius: calc(12px * var(--card-scale, 1));
-    border: 1px solid rgba(142, 107, 225, 0.18);
-    background: rgba(30, 27, 45, 0.92);
-    padding: calc(12px * var(--card-scale, 1));
+    border: 1px solid rgba(142, 107, 225, 0.2);
+    background: rgba(26, 22, 44, 0.92);
+    padding: clamp(0.9rem, 1.8vw, 1.1rem);
     display: grid;
-    gap: calc(0.55rem * var(--card-scale, 1));
+    gap: calc(0.5rem * var(--card-scale, 1));
     justify-items: center;
     box-sizing: border-box;
+    cursor: ${({ $interactive }) => ($interactive ? 'pointer' : 'default')};
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+
+    &[data-active='true'] {
+        border-color: rgba(198, 160, 255, 0.55);
+        background: linear-gradient(160deg, rgba(42, 33, 72, 0.95), rgba(24, 20, 46, 0.96));
+        box-shadow: 0 24px 38px rgba(14, 9, 30, 0.46);
+    }
+
+    ${({ $interactive }) => $interactive && css`
+        &:hover,
+        &:focus-visible {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 34px rgba(18, 13, 34, 0.45);
+            border-color: rgba(198, 160, 255, 0.45);
+            outline: none;
+        }
+    `}
 `;
 
 export const OpponentBadge = styled.span`
@@ -103,11 +119,13 @@ export const OpponentHeader = styled.div`
 export const MiniBoard = styled.div`
     display: flex;
     justify-content: center;
-    border-radius: calc(10px * var(--card-scale, 1));
-    overflow: hidden;
-    opacity: 0.95;
-    pointer-events: none;
+    align-items: center;
     width: 100%;
+    border-radius: calc(12px * var(--card-scale, 1));
+    border: 1px solid rgba(162, 130, 235, 0.2);
+    background: rgba(16, 13, 28, 0.9);
+    overflow: hidden;
+    pointer-events: none;
 `;
 
 export const EmptyNotice = styled.p`
@@ -129,7 +147,7 @@ export const MainColumn = styled.section`
     flex-direction: column;
     gap: clamp(0.6rem, 1.4vw, 1rem);
     min-height: 0;
-    align-items: center;
+    align-items: stretch;
     justify-content: center;
     max-height: 100%;
 `;

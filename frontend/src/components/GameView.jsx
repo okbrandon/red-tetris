@@ -71,10 +71,6 @@ const GameView = ({ grid, resultModal }) => {
     const modalConfig = resultModal ?? {};
     const shouldShowResult = Boolean(modalConfig.isOpen && typeof modalConfig.onConfirm === 'function');
 
-    useEffect(() => {
-        console.log('modalConfig changed:', modalConfig);
-    }, [modalConfig]);
-
     return (
         <Layout>
             <BoardArea>

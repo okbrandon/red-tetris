@@ -78,7 +78,7 @@ const GamePage = () => {
                             grid={grid}
                             resultModal={resultModalProps}
                             showSpectators={Boolean(spectator?.active)}
-                            onExitSpectators={() => dispatch(setSpectatorActive(false))}
+                            onLeaveGame={handleLeaveRoom}
                         />
                     )
                     : (

@@ -8,7 +8,7 @@ export const BackButtonContainer = styled.div`
     z-index: 3;
 `;
 
-export const BackButton = styled(StartButton)`e
+export const BackButton = styled(StartButton)`
     padding: 0.6rem 1rem;
     min-width: auto;
     font-size: 0.9rem;

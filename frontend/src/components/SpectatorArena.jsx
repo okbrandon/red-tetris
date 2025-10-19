@@ -4,36 +4,34 @@ import { useSelector } from 'react-redux';
 import TetrisGrid from './TetrisGrid.jsx';
 import useResponsiveValue from '../hooks/useResponsiveValue.js';
 import { deriveBoardDimensions } from '../utils/tetris.js';
+import { deriveCardScale, estimateOpponentCellSize } from '../utils/arenaSizing.js';
 import {
-    SpectatorContainer,
-    SpectatorLayout,
+    ArenaContainer as SpectatorContainer,
+    ArenaLayout as SpectatorLayout,
+    OpponentColumn as SpectatorColumn,
+    OpponentGrid as SpectatorList,
+    OpponentCard as SpectatorCard,
+    OpponentHeader as SpectatorCardHeader,
+    OpponentBadge as SpectatorBadge,
+    OpponentName as SpectatorName,
+    MiniBoard as SpectatorMiniBoard,
+    MainColumn as SpectatorMain,
     SpectatorActions,
     ExitButton,
     FocusedPanel,
     FocusedHeader,
     FocusedBadge,
     FocusedName,
-    FocusedContent,
-    SpectatorBoard,
+    FocusedBody,
+    SpectatorBoardFrame,
     FocusedStats,
     StatRow,
     StatLabel,
     StatValue,
-    SpectatorList,
-    SpectatorCard,
-    SpectatorLabel,
-    SpectatorName,
-    SpectatorMiniBoard,
     EmptyState,
+    SectionLabel,
+    EmptyNotice,
 } from './SpectatorArena.styled.js';
-
-const deriveSpectatorScale = (count) => {
-    if (count <= 1) return 1;
-    if (count === 2) return 0.95;
-    if (count === 3) return 0.9;
-    const scaled = 0.9 - (count - 3) * 0.045;
-    return Math.max(scaled, 0.6);
-};
 
 const computeFocusedCellSize = (rows = 20, cols = 10) => {
     if (typeof window === 'undefined') return 30;
@@ -70,7 +68,7 @@ const computeStats = (player) => {
     return entries;
 };
 
-const SpectatorArena = ({ onExit }) => {
+const SpectatorArena = ({ onLeaveGame }) => {
     const { you, players: gamePlayers } = useSelector((state) => state.game);
 
     const players = Array.isArray(gamePlayers) ? gamePlayers : [];
@@ -108,76 +106,49 @@ const SpectatorArena = ({ onExit }) => {
     const focusedCellSize = useResponsiveValue(
         useCallback(() => computeFocusedCellSize(safeRows, safeCols), [safeRows, safeCols])
     );
+    const tallestSpecterRows = useMemo(() => {
+        if (!opponents.length) return 20;
+        return opponents.reduce((maxRows, opponent) => {
+            const board = Array.isArray(opponent?.specter) ? opponent.specter : [];
+            const { rows: boardRows } = deriveBoardDimensions(board);
+            return boardRows > maxRows ? boardRows : maxRows;
+        }, 0) || 20;
+    }, [opponents]);
     const spectatorScale = useMemo(
-        () => deriveSpectatorScale(opponents.length),
+        () => deriveCardScale(opponents.length),
         [opponents.length]
     );
-    const previewCellSize = useMemo(() => {
-        const base = Math.max(7, Math.floor((focusedCellSize || 20) * 0.4));
-        const widthAllowance = Math.floor(Math.max(6, ((170 - 32) * spectatorScale) / 10));
-        return Math.max(6, Math.min(base, widthAllowance));
-    }, [focusedCellSize, spectatorScale]);
+    const previewCellSize = useMemo(
+        () => estimateOpponentCellSize(focusedCellSize || 20, opponents.length, tallestSpecterRows),
+        [focusedCellSize, opponents.length, tallestSpecterRows]
+    );
     const focusedStats = useMemo(() => computeStats(focusedPlayer), [focusedPlayer]);
+    const cardScaleStyle = useMemo(
+        () => ({ '--card-scale': spectatorScale }),
+        [spectatorScale]
+    );
 
     return (
         <SpectatorContainer>
             <SpectatorLayout>
-                {typeof onExit === 'function' && (
-                    <SpectatorActions>
-                        <ExitButton type='button' onClick={onExit}>
-                            Return to Arena View
-                        </ExitButton>
-                    </SpectatorActions>
-                )}
-                {!opponents.length ? (
-                    <EmptyState>No active players to spectate right now.</EmptyState>
-                ) : null}
-                {opponents.length > 0 && (
-                    <>
-                        <FocusedPanel>
-                            <FocusedHeader>
-                                <FocusedBadge>Watching</FocusedBadge>
-                                <FocusedName>
-                                    {focusedPlayer?.username || focusedPlayer?.name || 'Opponent'}
-                                </FocusedName>
-                            </FocusedHeader>
-                            <FocusedContent>
-                                <SpectatorBoard>
-                                    <TetrisGrid
-                                        rows={rows}
-                                        cols={cols}
-                                        cellSize={focusedCellSize}
-                                        showGrid
-                                        grid={focusedBoard}
-                                    />
-                                </SpectatorBoard>
-                                {focusedStats.length > 0 && (
-                                    <FocusedStats>
-                                        {focusedStats.map(({ label, value }) => (
-                                            <StatRow key={label}>
-                                                <StatLabel>{label}</StatLabel>
-                                                <StatValue>{value}</StatValue>
-                                            </StatRow>
-                                        ))}
-                                    </FocusedStats>
-                                )}
-                            </FocusedContent>
-                        </FocusedPanel>
-                        <SpectatorList
-                            aria-label='Players to spectate'
-                            style={{ '--card-scale': spectatorScale }}
-                        >
+                <SpectatorColumn style={cardScaleStyle}>
+                    <SectionLabel>{`Opponents${opponents.length ? ` (${opponents.length})` : ''}`}</SectionLabel>
+                    {opponents.length ? (
+                        <SpectatorList aria-label='Players to spectate'>
                             {opponents.map((opponent, index) => {
                                 const miniBoard = Array.isArray(opponent?.specter) ? opponent.specter : [];
                                 const { rows: miniRows, cols: miniCols } = deriveBoardDimensions(miniBoard);
                                 const ordinal = index + 1;
+                                const isActive = opponent?.id === focusedPlayer?.id;
+
                                 return (
                                     <SpectatorCard
                                         key={opponent?.id || opponent?.username || `spectator-${index}`}
-                                        $active={opponent?.id === focusedPlayer?.id}
+                                        data-active={isActive}
+                                        $interactive
                                         role='button'
                                         tabIndex={0}
-                                        aria-pressed={opponent?.id === focusedPlayer?.id}
+                                        aria-pressed={isActive}
                                         onClick={() => setSelectedId(opponent?.id || null)}
                                         onKeyDown={(event) => {
                                             if (event.key === 'Enter' || event.key === ' ') {
@@ -186,10 +157,12 @@ const SpectatorArena = ({ onExit }) => {
                                             }
                                         }}
                                     >
-                                        <SpectatorLabel>{`Player ${ordinal}`}</SpectatorLabel>
-                                        <SpectatorName>
-                                            {opponent?.username || opponent?.name || `Opponent ${ordinal}`}
-                                        </SpectatorName>
+                                        <SpectatorCardHeader>
+                                            <SpectatorBadge>{`Player ${ordinal}`}</SpectatorBadge>
+                                            <SpectatorName>
+                                                {opponent?.username || opponent?.name || `Player ${ordinal}`}
+                                            </SpectatorName>
+                                        </SpectatorCardHeader>
                                         <SpectatorMiniBoard>
                                             <TetrisGrid
                                                 rows={miniRows}
@@ -203,15 +176,73 @@ const SpectatorArena = ({ onExit }) => {
                                 );
                             })}
                         </SpectatorList>
-                    </>
-                )}
+                    ) : (
+                        <EmptyNotice>No specters active yet.</EmptyNotice>
+                    )}
+                </SpectatorColumn>
+
+                <SpectatorMain>
+                    {!opponents.length ? (
+                        <FocusedPanel role='region' aria-label='Spectator focus panel'>
+                            <FocusedHeader>
+                                <FocusedBadge>Watching</FocusedBadge>
+                                <FocusedName>No active opponents</FocusedName>
+                            </FocusedHeader>
+                            <EmptyState>No boards to watch right now.</EmptyState>
+                            {typeof onLeaveGame === 'function' && (
+                                <SpectatorActions>
+                                    <ExitButton type='button' onClick={onLeaveGame}>
+                                        Leave Game
+                                    </ExitButton>
+                                </SpectatorActions>
+                            )}
+                        </FocusedPanel>
+                    ) : (
+                        <FocusedPanel role='region' aria-label='Spectator focus panel'>
+                            <FocusedHeader>
+                                <FocusedBadge>Watching</FocusedBadge>
+                                <FocusedName>
+                                    {focusedPlayer?.username || focusedPlayer?.name || 'Opponent'}
+                                </FocusedName>
+                            </FocusedHeader>
+                            <FocusedBody>
+                                <SpectatorBoardFrame>
+                                    <TetrisGrid
+                                        rows={rows}
+                                        cols={cols}
+                                        cellSize={focusedCellSize}
+                                        showGrid
+                                        grid={focusedBoard}
+                                    />
+                                </SpectatorBoardFrame>
+                                {focusedStats.length > 0 && (
+                                    <FocusedStats>
+                                        {focusedStats.map(({ label, value }) => (
+                                            <StatRow key={label}>
+                                                <StatLabel>{label}</StatLabel>
+                                                <StatValue>{value}</StatValue>
+                                            </StatRow>
+                                        ))}
+                                    </FocusedStats>
+                                )}
+                            </FocusedBody>
+                            {typeof onLeaveGame === 'function' && (
+                                <SpectatorActions>
+                                    <ExitButton type='button' onClick={onLeaveGame}>
+                                        Leave Game
+                                    </ExitButton>
+                                </SpectatorActions>
+                            )}
+                        </FocusedPanel>
+                    )}
+                </SpectatorMain>
             </SpectatorLayout>
         </SpectatorContainer>
     );
 };
 
 SpectatorArena.propTypes = {
-    onExit: PropTypes.func,
+    onLeaveGame: PropTypes.func,
 };
 
 export default SpectatorArena;

@@ -57,8 +57,11 @@ const GameResultModal = ({
         <Overlay role='presentation' $scope={placement}>
             <Dialog role='dialog' aria-modal='true' aria-labelledby='game-result-title'>
                 <OutcomeBadge $variant={variant}>{variant.badge}</OutcomeBadge>
-                <Title id='game-result-title'>{variant.title}</Title>
+                <Title id='game-result-title'>Game Over</Title>
                 <Message>{outcome?.message || 'Game Over'}</Message>
+                {!isOwner && isGameOver &&
+                    <Message>Waiting for host...</Message>
+                }
                 {isOwner && isGameOver &&
                     <ActionButton type='button' onClick={handleRestart}>
                         Restart Game
