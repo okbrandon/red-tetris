@@ -86,7 +86,7 @@ GameResultModal.propTypes = {
         message: PropTypes.string,
     }),
     onConfirm: PropTypes.func.isRequired,
-    isOwner: PropTypes.bool.isRequired,
+    isOwner: PropTypes.bool,
     placement: PropTypes.oneOf(['page', 'board']),
     canSpectate: PropTypes.bool,
     onSpectate: PropTypes.func,
