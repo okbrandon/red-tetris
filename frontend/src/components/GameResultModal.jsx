@@ -36,11 +36,15 @@ const VARIANTS = {
     },
 };
 
-const GameResultModal = ({ isOpen, outcome, onConfirm, isOwner }) => {
-    if (!isOpen) {
-        return null;
-    }
-
+const GameResultModal = ({
+    outcome,
+    onConfirm,
+    isOwner,
+    placement = 'page',
+    canSpectate = false,
+    isGameOver = false,
+    onSpectate,
+}) => {
     const variant = (outcome && Object.prototype.hasOwnProperty.call(VARIANTS, outcome.outcome))
         ? VARIANTS[outcome.outcome]
         : VARIANTS.info;
@@ -50,16 +54,24 @@ const GameResultModal = ({ isOpen, outcome, onConfirm, isOwner }) => {
     };
 
     return (
-        <Overlay role='presentation'>
+        <Overlay role='presentation' $scope={placement}>
             <Dialog role='dialog' aria-modal='true' aria-labelledby='game-result-title'>
                 <OutcomeBadge $variant={variant}>{variant.badge}</OutcomeBadge>
-                <Title id='game-result-title'>{variant.title}</Title>
+                <Title id='game-result-title'>Game Over</Title>
                 <Message>{outcome?.message || 'Game Over'}</Message>
-                {isOwner &&
+                {!isOwner && isGameOver &&
+                    <Message>Waiting for host...</Message>
+                }
+                {isOwner && isGameOver &&
                     <ActionButton type='button' onClick={handleRestart}>
                         Restart Game
                     </ActionButton>
                 }
+                {canSpectate && typeof onSpectate === 'function' && (
+                    <ActionButton type='button' onClick={onSpectate}>
+                        Spectate Match
+                    </ActionButton>
+                )}
                 <ActionButton type='button' onClick={onConfirm}>
                     Return to Menu
                 </ActionButton>
@@ -69,13 +81,15 @@ const GameResultModal = ({ isOpen, outcome, onConfirm, isOwner }) => {
 };
 
 GameResultModal.propTypes = {
-    isOpen: PropTypes.bool.isRequired,
     outcome: PropTypes.shape({
         outcome: PropTypes.string,
         message: PropTypes.string,
     }),
     onConfirm: PropTypes.func.isRequired,
-    isOwner: PropTypes.bool.isRequired,
+    isOwner: PropTypes.bool,
+    placement: PropTypes.oneOf(['page', 'board']),
+    canSpectate: PropTypes.bool,
+    onSpectate: PropTypes.func,
 };
 
 export default GameResultModal;

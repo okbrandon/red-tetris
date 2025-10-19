@@ -12,9 +12,8 @@ const LobbyPage = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const multiplayer = game.multiplayer;
-    const players = multiplayer?.players?.length
-        ? multiplayer.players.map((player) => player.username || player.id)
+    const players = game.players?.length
+        ? game.players.map((player) => player.username || player.id)
         : [username || 'You'];
     const ownerId = game?.owner?.id;
     const isOwner = id === ownerId;
@@ -26,8 +25,6 @@ const LobbyPage = () => {
             : game.roomName
                 ? `Joining lobby ${game.roomName}`
                 : 'Lobby ready to connect';
-
-    const maxSlots = game.maxPlayers || 4;
 
     const handleStartGame = () => {
         if (!isOwner) {
@@ -52,7 +49,7 @@ const LobbyPage = () => {
             <Card>
                 <Subtitle>Welcome, {username}</Subtitle>
                 <Subtitle>{lobbyLabel}</Subtitle>
-                <Subtitle>{`Slots: up to ${maxSlots} players`}</Subtitle>
+                <Subtitle>{`Slots: up to 4 players`}</Subtitle>
 
                 <PlayerList>
                     {players.map((player, index) => (
