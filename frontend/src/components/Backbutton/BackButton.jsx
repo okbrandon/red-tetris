@@ -1,7 +1,7 @@
 import {
   BackButtonContainer,
   BackButton as BackButtonButton,
-} from './BackButton.styled.js';
+} from './BackButton.styles.js';
 
 const BackButton = ({ onClick }) => {
   return (

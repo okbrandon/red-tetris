@@ -5,13 +5,13 @@ import {
   Route,
   useNavigate,
 } from 'react-router-dom';
-import HomePage from './pages/HomePage';
-import MenuPage from './pages/MenuPage';
-import GamePage from './pages/GamePage';
-import JoinPage from './pages/JoinPage';
-import AnimatedBackground from './components/AnimatedBackground';
-import Notification from './components/Notification';
-import { updateUsername } from './features/user/userThunks.js';
+import HomePage from '@/pages/HomePage/HomePage';
+import MenuPage from '@/pages/MenuPage/MenuPage';
+import GamePage from '@/pages/GamePage/GamePage';
+import JoinPage from '@/pages/JoinPage/JoinPage';
+import AnimatedBackground from './components/AnimatedBackground/AnimatedBackground';
+import Notification from './components/Notification/Notification';
+import { updateUsername } from '@/store/slices/userThunks.js';
 
 function RedirectOnRefresh() {
   const navigate = useNavigate();

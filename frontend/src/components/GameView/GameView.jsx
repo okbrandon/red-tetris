@@ -1,16 +1,16 @@
 import { useCallback, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import TetrisGrid from './TetrisGrid.jsx';
-import { Subtitle } from '../pages/HomePage.styled.js';
-import NextPiecePreview from './NextPiecePreview.jsx';
-import { requestPieceMove } from '../features/socket/socketThunks.js';
+import TetrisGrid from '../TetrisGrid/TetrisGrid.jsx';
+import { Subtitle } from '@/pages/HomePage/HomePage.styles.js';
+import NextPiecePreview from '../NextPiecePreview/NextPiecePreview.jsx';
+import { requestPieceMove } from '@/store/slices/socketThunks.js';
 import {
   extractMoveDirection,
   shouldIgnoreForGameControls,
-} from '../utils/keyboard.js';
-import useResponsiveValue from '../hooks/useResponsiveValue.js';
-import { deriveBoardDimensions } from '../utils/tetris.js';
-import GameResultModal from './GameResultModal.jsx';
+} from '@/utils/keyboard.js';
+import useResponsiveValue from '@/hooks/useResponsiveValue.js';
+import { deriveBoardDimensions } from '@/utils/tetris.js';
+import GameResultModal from '../GameResultModal/GameResultModal.jsx';
 import {
   Layout,
   BoardArea,
@@ -24,7 +24,7 @@ import {
   VerticalPreview,
   PreviewSlot,
   EmptyQueue,
-} from './GameView.styled.js';
+} from './GameView.styles.js';
 
 const computeCellSize = (rows = 20, cols = 10) => {
   if (typeof window === 'undefined') return 32;

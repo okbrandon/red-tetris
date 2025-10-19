@@ -1,15 +1,15 @@
 import { useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import TetrisGrid from './TetrisGrid';
+import TetrisGrid from '@/components/TetrisGrid/TetrisGrid.jsx';
 import { useSelector } from 'react-redux';
-import GameView from './GameView.jsx';
-import useResponsiveValue from '../hooks/useResponsiveValue.js';
-import { deriveBoardDimensions } from '../utils/tetris.js';
-import SpectatorArena from './SpectatorArena.jsx';
+import GameView from '@/components/GameView/GameView.jsx';
+import useResponsiveValue from '@/hooks/useResponsiveValue';
+import { deriveBoardDimensions } from '@/utils/tetris.js';
+import SpectatorArena from '@/components/SpectatorArena/SpectatorArena.jsx';
 import {
   deriveCardScale,
   estimateOpponentCellSize,
-} from '../utils/arenaSizing.js';
+} from '@/utils/arenaSizing.js';
 import {
   ArenaContainer,
   ArenaLayout,
@@ -23,7 +23,7 @@ import {
   MiniBoard,
   EmptyNotice,
   MainColumn,
-} from './MultiplayerArena.styled.js';
+} from './MultiplayerArena.styles.js';
 
 const OpponentBoard = ({ opponent, index, cellSize }) => {
   const board = opponent?.specter ?? [];

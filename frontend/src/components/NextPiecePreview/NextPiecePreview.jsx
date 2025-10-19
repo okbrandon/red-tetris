@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
-import { BASE_TETRIS_COLORS, extractPieceBlocks } from '../utils/tetris.js';
-import { Board, Cell } from './NextPiecePreview.styled.js';
+import { BASE_TETRIS_COLORS, extractPieceBlocks } from '@/utils/tetris.js';
+import { Board, Cell } from './NextPiecePreview.styles.js';
 
 const buildPreviewMatrix = (piece) => {
   const rows = 4;

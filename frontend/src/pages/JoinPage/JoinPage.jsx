@@ -8,11 +8,11 @@ import {
   StartButton,
   LogoTitle,
   Input,
-} from './HomePage.styled.js';
-import BackButton from '../components/BackButton.jsx';
-import { JoinForm, JoinHint } from './JoinPage.styled';
-import { showNotification } from '../features/notification/notificationSlice.js';
-import { requestRoomJoin } from '../features/socket/socketThunks.js';
+} from '../HomePage/HomePage.styles.js';
+import BackButton from '@/components/Backbutton/BackButton.jsx';
+import { JoinForm, JoinHint } from './JoinPage.styles.js';
+import { showNotification } from '@/store/slices/notificationSlice.js';
+import { requestRoomJoin } from '@/store/slices/socketThunks.js';
 
 const JoinPage = () => {
   const dispatch = useDispatch();

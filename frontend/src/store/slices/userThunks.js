@@ -1,6 +1,6 @@
 import { setUsername } from './userSlice.js';
-import { sendClientUpdate } from '../socket/socketThunks.js';
-import { store } from '../../store.js';
+import { sendClientUpdate } from './socketThunks.js';
+import { store } from '../store.js';
 
 export const updateUsername = (username) => {
   const trimmed = typeof username === 'string' ? username.trim() : '';

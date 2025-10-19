@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import BackButton from '../components/BackButton';
-import GameView from '../components/GameView.jsx';
-import { PageWrapper, SoloArena, GameLogoTitle } from './GamePage.styled';
-import MultiplayerArena from '../components/MultiplayerArena';
-import { requestRoomLeave } from '../features/socket/socketThunks.js';
-import LobbyPage from './LobbyPage.jsx';
-import { setSpectatorActive } from '../features/game/gameSlice.js';
+import BackButton from '@/components/Backbutton/BackButton';
+import GameView from '@/components/GameView/GameView.jsx';
+import { PageWrapper, SoloArena, GameLogoTitle } from './GamePage.styles';
+import MultiplayerArena from '@/components/MultiplayerArena/MultiplayerArena';
+import { requestRoomLeave } from '@/store/slices/socketThunks.js';
+import LobbyPage from '../LobbyPage/LobbyPage.jsx';
+import { setSpectatorActive } from '@/store/slices/gameSlice.js';
 
 const GamePage = () => {
   const { mode, gameStatus, grid, playerOutcome, isOwner, spectator } =

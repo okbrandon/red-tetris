@@ -1,9 +1,9 @@
-import socketClient from '../../services/socket/socketClient.js';
+import socketClient from '@/services/socket/socketClient.js';
 import {
   CLIENT_EVENTS,
   SERVER_EVENTS,
   SOCKET_EVENTS,
-} from '../../services/socket/events.js';
+} from '@/services/socket/events.js';
 import {
   connectRequested,
   connectSucceeded,
@@ -11,8 +11,8 @@ import {
   socketDisconnected,
   socketEventReceived,
 } from './socketSlice.js';
-import { showNotification } from '../notification/notificationSlice.js';
-import { setServerIdentity } from '../user/userSlice.js';
+import { showNotification } from './notificationSlice.js';
+import { setServerIdentity } from './userSlice.js';
 import {
   setGameState,
   setRoomName,
@@ -21,8 +21,8 @@ import {
   setLobbySettings,
   setGameMode,
   setPlayerOutcome,
-} from '../game/gameSlice.js';
-import { store } from '../../store.js';
+} from './gameSlice.js';
+import { store } from '../store.js';
 
 let listenersBound = false;
 

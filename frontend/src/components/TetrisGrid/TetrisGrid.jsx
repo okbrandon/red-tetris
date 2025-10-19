@@ -1,13 +1,13 @@
 import { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { BASE_TETRIS_COLORS, extractPieceBlocks } from '../utils/tetris.js';
+import { BASE_TETRIS_COLORS, extractPieceBlocks } from '@/utils/tetris.js';
 import {
   Board,
   Cell,
   Overlay,
   OverlayInner,
   Block,
-} from './TetrisGrid.styled.js';
+} from './TetrisGrid.styles.js';
 
 const setAlpha = (color, alpha) => {
   if (!color) return `rgba(0,0,0,${alpha})`;

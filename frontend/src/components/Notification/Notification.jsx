@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { hideNotification } from '../features/notification/notificationSlice';
+import { hideNotification } from '@/store/slices/notificationSlice';
 import {
   NotificationShell,
   Label,
@@ -9,7 +9,7 @@ import {
   DismissButton,
   accentByType,
   ANIMATION_MS,
-} from './Notification.styled.js';
+} from './Notification.styles.js';
 
 const Notification = () => {
   const dispatch = useDispatch();

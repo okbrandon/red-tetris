@@ -6,8 +6,8 @@ import {
   Title,
   Message,
   ActionButton,
-} from './GameResultModal.styled.js';
-import { requestRestartGame } from '../features/socket/socketThunks.js';
+} from './GameResultModal.styles.js';
+import { requestRestartGame } from '@/store/slices/socketThunks.js';
 
 const VARIANTS = {
   win: {

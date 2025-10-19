@@ -7,14 +7,14 @@ import {
   Card,
   Subtitle,
   StartButton,
-} from './HomePage.styled';
-import BackButton from '../components/BackButton';
-import { SOLO_ROOM_NAME } from '../features/game/gameSlice.js';
-import { showNotification } from '../features/notification/notificationSlice';
+} from '../HomePage/HomePage.styles';
+import BackButton from '@/components/Backbutton/BackButton';
+import { SOLO_ROOM_NAME } from '@/store/slices/gameSlice.js';
+import { showNotification } from '@/store/slices/notificationSlice';
 import {
   requestRoomJoin,
   requestStartGame,
-} from '../features/socket/socketThunks.js';
+} from '@/store/slices/socketThunks.js';
 
 const MenuPage = () => {
   const navigate = useNavigate();

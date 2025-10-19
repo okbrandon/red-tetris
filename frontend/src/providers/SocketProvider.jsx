@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { initializeSocket } from '../features/socket/socketThunks.js';
+import { initializeSocket } from '@/store/slices/socketThunks.js';
 
 const SocketProvider = ({ children }) => {
   useEffect(() => {

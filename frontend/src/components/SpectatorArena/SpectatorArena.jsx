@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
-import TetrisGrid from './TetrisGrid.jsx';
-import useResponsiveValue from '../hooks/useResponsiveValue.js';
-import { deriveBoardDimensions } from '../utils/tetris.js';
+import TetrisGrid from '@/components/TetrisGrid/TetrisGrid.jsx';
+import useResponsiveValue from '@/hooks/useResponsiveValue.js';
+import { deriveBoardDimensions } from '@/utils/tetris.js';
 import {
   deriveCardScale,
   estimateOpponentCellSize,
-} from '../utils/arenaSizing.js';
+} from '@/utils/arenaSizing.js';
 import {
   ArenaContainer as SpectatorContainer,
   ArenaLayout as SpectatorLayout,
@@ -34,7 +34,7 @@ import {
   EmptyState,
   SectionLabel,
   EmptyNotice,
-} from './SpectatorArena.styled.js';
+} from './SpectatorArena.styles.js';
 
 const computeFocusedCellSize = (rows = 20, cols = 10) => {
   if (typeof window === 'undefined') return 30;

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { updateUsername } from '../features/user/userThunks.js';
-import { showNotification } from '../features/notification/notificationSlice';
+import { updateUsername } from '@/store/slices/userThunks.js';
+import { showNotification } from '@/store/slices/notificationSlice.js';
 import {
   Wrapper,
   StartButton,
@@ -12,7 +12,7 @@ import {
   Subtitle,
   FormRow,
   HintText,
-} from './HomePage.styled';
+} from './HomePage.styles';
 
 const HomePage = () => {
   const navigate = useNavigate();

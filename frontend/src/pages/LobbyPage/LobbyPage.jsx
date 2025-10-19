@@ -6,14 +6,14 @@ import {
   Subtitle,
   StartButton,
   LogoTitle,
-} from './HomePage.styled';
-import BackButton from '../components/BackButton';
-import { PlayerList, Player } from './LobbyPage.styled';
-import { showNotification } from '../features/notification/notificationSlice';
+} from '../HomePage/HomePage.styles';
+import BackButton from '@/components/Backbutton/BackButton';
+import { PlayerList, Player } from './LobbyPage.styles';
+import { showNotification } from '@/store/slices/notificationSlice';
 import {
   requestRoomLeave,
   requestStartGame,
-} from '../features/socket/socketThunks.js';
+} from '@/store/slices/socketThunks.js';
 
 const LobbyPage = () => {
   const { username, id } = useSelector((state) => state.user);
