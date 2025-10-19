@@ -2,24 +2,26 @@ import { createSlice } from '@reduxjs/toolkit';
 
 export const SOLO_ROOM_NAME = 'solo-local';
 
-const createInitialMultiplayerState = () => ({
-    players: [],
-    maxPlayers: 4,
-});
-
 const createInitialState = () => ({
     mode: '',
     owner: null,
     isOwner: false,
     gameStatus: '',
-    playerOutcome: null,
+    playerOutcome: {
+        outcome: '',
+        message: '',
+    },
     score: 0,
     roomName: '',
     you: null,
     grid: [[]],
     nextPieces: [],
     currentPiece: null,
-    multiplayer: createInitialMultiplayerState(),
+    spectator: {
+        eligible: false,
+        active: false,
+    },
+    players: [],
 });
 
 export const gameSlice = createSlice({
@@ -31,8 +33,9 @@ export const gameSlice = createSlice({
 
             state.mode = action.payload;
             if (mode === 'solo') {
-                state.multiplayer = createInitialMultiplayerState();
+                state.players = [];
                 state.score = 0;
+                state.spectator = { eligible: false, active: false };
             }
         },
         setGameState: (state, action) => {
@@ -52,13 +55,19 @@ export const gameSlice = createSlice({
                 state.score = score;
             }
 
-            state.multiplayer = {
-                ...state.multiplayer,
-                players: clients,
-            };
+            state.players = Array.isArray(clients) ? clients : [];
         },
         setGameStatus: (state, action) => {
-            state.gameStatus = action.payload.status;
+            const status = action.payload.status;
+            state.gameStatus = status;
+
+            if (status === 'in-game' || status === 'waiting') {
+                if (status === 'in-game') {
+                    state.playerOutcome = { outcome: '', message: '' };
+                }
+            } else if (status === 'game-over') {
+                state.spectator = { eligible: false, active: false };
+            }
 
             if (action.payload?.winner) {
                 const winner = action.payload.winner;
@@ -69,6 +78,7 @@ export const gameSlice = createSlice({
         },
         setPlayerOutcome: (state, action) => {
             state.playerOutcome = action.payload;
+            state.spectator.eligible = Boolean(action.payload?.canSpectate);
         },
         setLobbySettings: (state, action) => { // room_broadcast
             const { room, owner, you, clients } = action.payload;
@@ -77,22 +87,25 @@ export const gameSlice = createSlice({
             state.you = you || null;
             state.isOwner = you && owner && you.id === owner.id;
             if (Array.isArray(clients) && clients.length > 0) {
-                if (state.gameStatus === 'in-game') {
+                if (state.gameStatus && state.gameStatus !== 'waiting') {
                     // Build a Map for O(1) client lookup by id
                     const clientMap = new Map(clients.map(client => [client.id, client]));
-                    state.multiplayer.players = state.multiplayer.players
+                    state.players = state.players
                         .filter(player => clientMap.has(player.id))
                         .map(player => ({
                             ...player,
                             ...clientMap.get(player.id)
                         }));
                 } else {
-                    state.multiplayer.players = clients;
+                    state.players = clients;
                 }
             }
         },
         setRoomName: (state, action) => { // room_created / room_joined
             state.roomName = action.payload.roomName ?? '';
+        },
+        setSpectatorActive: (state, action) => {
+            state.spectator.active = Boolean(action.payload);
         },
         resetGameState: () => createInitialState() // room_left
     },
@@ -106,5 +119,6 @@ export const {
     setRoomName,
     setGameStatus,
     setPlayerOutcome,
+    setSpectatorActive,
 } = gameSlice.actions;
 export default gameSlice.reducer;

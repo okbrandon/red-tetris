@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 export const Layout = styled.div`
-    width: fit-content;
+    width: 100%;
     height: 100%;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -13,11 +13,11 @@ export const Layout = styled.div`
     border: 1px solid rgba(142, 107, 225, 0.26);
     background: linear-gradient(160deg, rgba(26, 22, 45, 0.88), rgba(13, 11, 24, 0.96));
     box-shadow: 0 24px 46px rgba(8, 5, 18, 0.52);
-    padding: clamp(1.1rem, 3vw, 2rem) 100px;
+    padding: clamp(1rem, 2.6vw, 1.8rem) clamp(1.2rem, 3.8vw, 3rem);
     box-sizing: border-box;
 
     @media (min-width: 920px) {
-        grid-template-columns: minmax(0, 1fr) clamp(220px, 24vw, 280px);
+        grid-template-columns: minmax(0, 1fr) clamp(220px, 24vw, 320px);
         grid-template-areas: 'board panel';
         align-items: stretch;
     }
@@ -31,11 +31,13 @@ export const BoardArea = styled.section`
 `;
 
 export const BoardFrame = styled.div`
+    position: relative;
     padding: clamp(0.6rem, 1.4vw, 1rem);
     border-radius: 18px;
     border: 1px solid rgba(162, 130, 235, 0.25);
     background: rgba(18, 15, 32, 0.84);
     box-shadow: inset 0 1px 0 rgba(217, 206, 255, 0.12);
+    overflow: hidden;
 `;
 
 export const PanelArea = styled.section`
