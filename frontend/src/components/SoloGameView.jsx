@@ -5,7 +5,10 @@ import TetrisGrid from './TetrisGrid';
 import { Subtitle } from '../pages/HomePage.styled';
 import NextPiecePreview from './NextPiecePreview';
 import { requestPieceMove } from '../features/socket/socketThunks.js';
-import { extractMoveDirection, shouldIgnoreForGameControls } from '../utils/keyboard.js';
+import {
+  extractMoveDirection,
+  shouldIgnoreForGameControls,
+} from '../utils/keyboard.js';
 
 const computeCellSize = (rows = 20, cols = 10) => {
   if (typeof window === 'undefined') return 32;
@@ -22,7 +25,8 @@ const computeCellSize = (rows = 20, cols = 10) => {
 };
 
 const normalizePiece = (piece) => {
-  if (!piece || typeof piece !== 'object' || !Array.isArray(piece.shape)) return null;
+  if (!piece || typeof piece !== 'object' || !Array.isArray(piece.shape))
+    return null;
   return {
     ...piece,
     position: piece.position ?? { x: 0, y: 0 },
@@ -30,12 +34,17 @@ const normalizePiece = (piece) => {
 };
 
 const SoloGameView = () => {
-  const { grid, currentPiece, nextPieces, score } = useSelector((state) => state.game);
+  const { grid, currentPiece, nextPieces, score } = useSelector(
+    (state) => state.game
+  );
 
   const board = useMemo(() => (Array.isArray(grid) ? grid : []), [grid]);
   const rows = board.length || 20;
   const cols = board[0]?.length || 10;
-  const normalizedPiece = useMemo(() => normalizePiece(currentPiece), [currentPiece]);
+  const normalizedPiece = useMemo(
+    () => normalizePiece(currentPiece),
+    [currentPiece]
+  );
   const queue = useMemo(
     () => (Array.isArray(nextPieces) && nextPieces.length ? nextPieces : []),
     [nextPieces]
@@ -76,8 +85,14 @@ const SoloGameView = () => {
     };
   }, []);
 
-  const primaryPreviewSize = useMemo(() => Math.max(16, Math.floor(cellSize * 0.6)), [cellSize]);
-  const queuePreviewSize = useMemo(() => Math.max(14, Math.floor(cellSize * 0.48)), [cellSize]);
+  const primaryPreviewSize = useMemo(
+    () => Math.max(16, Math.floor(cellSize * 0.6)),
+    [cellSize]
+  );
+  const queuePreviewSize = useMemo(
+    () => Math.max(14, Math.floor(cellSize * 0.48)),
+    [cellSize]
+  );
 
   return (
     <SoloArena>
@@ -112,10 +127,14 @@ const SoloGameView = () => {
             {queue.length ? (
               <VerticalPreview>
                 {queue.slice(0, 3).map((piece, index) => (
-                  <PreviewSlot key={piece?.id ?? piece?.name ?? `next-${index}`}>
+                  <PreviewSlot
+                    key={piece?.id ?? piece?.name ?? `next-${index}`}
+                  >
                     <NextPiecePreview
                       piece={piece}
-                      cellSize={index === 0 ? primaryPreviewSize : queuePreviewSize}
+                      cellSize={
+                        index === 0 ? primaryPreviewSize : queuePreviewSize
+                      }
                     />
                   </PreviewSlot>
                 ))}
@@ -154,7 +173,11 @@ const SoloLayout = styled.div`
   gap: clamp(0.9rem, 2.4vw, 1.6rem);
   border-radius: 20px;
   border: 1px solid rgba(142, 107, 225, 0.26);
-  background: linear-gradient(160deg, rgba(26, 22, 45, 0.88), rgba(13, 11, 24, 0.96));
+  background: linear-gradient(
+    160deg,
+    rgba(26, 22, 45, 0.88),
+    rgba(13, 11, 24, 0.96)
+  );
   box-shadow: 0 24px 46px rgba(8, 5, 18, 0.52);
   padding: clamp(1.1rem, 3vw, 2rem);
   box-sizing: border-box;

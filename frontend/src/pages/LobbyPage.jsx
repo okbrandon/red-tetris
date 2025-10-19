@@ -1,10 +1,19 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Wrapper, Card, Subtitle, StartButton, LogoTitle } from './HomePage.styled';
+import {
+  Wrapper,
+  Card,
+  Subtitle,
+  StartButton,
+  LogoTitle,
+} from './HomePage.styled';
 import BackButton from '../components/BackButton';
 import { PlayerList, Player } from './LobbyPage.styled';
 import { showNotification } from '../features/notification/notificationSlice';
-import { requestRoomLeave, requestStartGame } from '../features/socket/socketThunks.js';
+import {
+  requestRoomLeave,
+  requestStartGame,
+} from '../features/socket/socketThunks.js';
 
 const LobbyPage = () => {
   const { username, id } = useSelector((state) => state.user);
@@ -21,15 +30,18 @@ const LobbyPage = () => {
   const lobbyLabel = game?.roomName
     ? `Lobby name: ${game.roomName}`
     : isOwner
-    ? `Hosting ${game.roomName ? `"${game.roomName}"` : 'a new lobby'}`
-    : game.roomName
-    ? `Joining lobby ${game.roomName}`
-    : 'Lobby ready to connect';
+      ? `Hosting ${game.roomName ? `"${game.roomName}"` : 'a new lobby'}`
+      : game.roomName
+        ? `Joining lobby ${game.roomName}`
+        : 'Lobby ready to connect';
 
   const handleStartGame = () => {
     if (!isOwner) {
       dispatch(
-        showNotification({ type: 'error', message: 'Only the lobby owner can start the game.' })
+        showNotification({
+          type: 'error',
+          message: 'Only the lobby owner can start the game.',
+        })
       );
       return;
     }

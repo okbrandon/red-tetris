@@ -1,5 +1,9 @@
 import socketClient from '../../services/socket/socketClient.js';
-import { CLIENT_EVENTS, SERVER_EVENTS, SOCKET_EVENTS } from '../../services/socket/events.js';
+import {
+  CLIENT_EVENTS,
+  SERVER_EVENTS,
+  SOCKET_EVENTS,
+} from '../../services/socket/events.js';
 import {
   connectRequested,
   connectSucceeded,
@@ -61,7 +65,10 @@ export const initializeSocket = () => {
   // };
 
   const logListener = (event, direction, payload) => {
-    console.log(`[Socket Event] ${direction.toUpperCase()} - ${event}:`, payload);
+    console.log(
+      `[Socket Event] ${direction.toUpperCase()} - ${event}:`,
+      payload
+    );
   };
 
   const addListenerWithLogging = (event, handler, { raw = false } = {}) => {
@@ -84,7 +91,12 @@ export const initializeSocket = () => {
     SOCKET_EVENTS.CONNECT,
     () => {
       dispatch(connectSucceeded(socketClient.getId()));
-      dispatch(socketEventReceived({ direction: 'lifecycle', type: SOCKET_EVENTS.CONNECT }));
+      dispatch(
+        socketEventReceived({
+          direction: 'lifecycle',
+          type: SOCKET_EVENTS.CONNECT,
+        })
+      );
     },
     { raw: true }
   );
@@ -108,7 +120,9 @@ export const initializeSocket = () => {
     SOCKET_EVENTS.CONNECT_ERROR,
     (error) => {
       const message =
-        typeof error === 'string' ? error : error?.message ?? 'Unable to reach server';
+        typeof error === 'string'
+          ? error
+          : (error?.message ?? 'Unable to reach server');
       dispatch(connectFailed(message));
       dispatch(showNotification({ type: 'error', message }));
     },
@@ -117,13 +131,23 @@ export const initializeSocket = () => {
 
   addListener(SERVER_EVENTS.ERROR, (payload) => {
     const message = payload?.message ?? 'Unknown server error';
-    dispatch(socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.ERROR, payload }));
+    dispatch(
+      socketEventReceived({
+        direction: 'incoming',
+        type: SERVER_EVENTS.ERROR,
+        payload,
+      })
+    );
     dispatch(showNotification({ type: 'error', message }));
   });
 
   addListener(SERVER_EVENTS.CLIENT_UPDATED, (payload) => {
     dispatch(
-      socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.CLIENT_UPDATED, payload })
+      socketEventReceived({
+        direction: 'incoming',
+        type: SERVER_EVENTS.CLIENT_UPDATED,
+        payload,
+      })
     );
     if (payload) {
       dispatch(setServerIdentity(payload));
@@ -132,14 +156,22 @@ export const initializeSocket = () => {
 
   addListener(SERVER_EVENTS.ROOM_BROADCAST, (payload) => {
     dispatch(
-      socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.ROOM_BROADCAST, payload })
+      socketEventReceived({
+        direction: 'incoming',
+        type: SERVER_EVENTS.ROOM_BROADCAST,
+        payload,
+      })
     );
     dispatch(setLobbySettings(payload));
   });
 
   addListener(SERVER_EVENTS.ROOM_CREATED, (payload) => {
     dispatch(
-      socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.ROOM_CREATED, payload })
+      socketEventReceived({
+        direction: 'incoming',
+        type: SERVER_EVENTS.ROOM_CREATED,
+        payload,
+      })
     );
     dispatch(setRoomName(payload.roomName));
     dispatch(setGameMode(payload.soloJourney ? 'solo' : 'multiplayer'));
@@ -150,7 +182,11 @@ export const initializeSocket = () => {
 
   addListener(SERVER_EVENTS.ROOM_JOINED, (payload) => {
     dispatch(
-      socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.ROOM_JOINED, payload })
+      socketEventReceived({
+        direction: 'incoming',
+        type: SERVER_EVENTS.ROOM_JOINED,
+        payload,
+      })
     );
     dispatch(setRoomName(payload.roomName));
     dispatch(setGameMode(payload.soloJourney ? 'solo' : 'multiplayer'));
@@ -161,41 +197,65 @@ export const initializeSocket = () => {
 
   addListener(SERVER_EVENTS.ROOM_LEFT, (payload) => {
     dispatch(
-      socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.ROOM_LEFT, payload })
+      socketEventReceived({
+        direction: 'incoming',
+        type: SERVER_EVENTS.ROOM_LEFT,
+        payload,
+      })
     );
     dispatch(resetGameState());
   });
 
   addListener(SERVER_EVENTS.GAME_STARTED, (payload) => {
     dispatch(
-      socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.GAME_STARTED, payload })
+      socketEventReceived({
+        direction: 'incoming',
+        type: SERVER_EVENTS.GAME_STARTED,
+        payload,
+      })
     );
     dispatch(setGameStatus({ status: 'in-game' }));
   });
 
   addListener(SERVER_EVENTS.GAME_STATE, (payload) => {
     dispatch(
-      socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.GAME_STATE, payload })
+      socketEventReceived({
+        direction: 'incoming',
+        type: SERVER_EVENTS.GAME_STATE,
+        payload,
+      })
     );
     dispatch(setGameState(payload));
   });
 
   addListener(SERVER_EVENTS.GAME_OVER, (payload) => {
     dispatch(
-      socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.GAME_OVER, payload })
+      socketEventReceived({
+        direction: 'incoming',
+        type: SERVER_EVENTS.GAME_OVER,
+        payload,
+      })
     );
-    dispatch(setGameStatus({ status: 'game-over', winner: payload?.winner || null }));
+    dispatch(
+      setGameStatus({ status: 'game-over', winner: payload?.winner || null })
+    );
   });
 
   addListener(SERVER_EVENTS.GAME_LOST, (payload) => {
     dispatch(
-      socketEventReceived({ direction: 'incoming', type: SERVER_EVENTS.GAME_LOST, payload })
+      socketEventReceived({
+        direction: 'incoming',
+        type: SERVER_EVENTS.GAME_LOST,
+        payload,
+      })
     );
     const state = getState();
     const gameState = state?.game ?? {};
     const players = Array.isArray(gameState.players) ? gameState.players : [];
     const canSpectate =
-      gameState.mode === 'multiplayer' && players.length >= 2 && gameState.gameStatus === 'in-game';
+      gameState.mode === 'multiplayer' &&
+      players.length >= 2 &&
+      gameState.gameStatus === 'in-game';
 
     dispatch(
       setPlayerOutcome({

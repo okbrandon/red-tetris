@@ -28,7 +28,8 @@ export const Background = styled.div`
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background: radial-gradient(
+  background:
+    radial-gradient(
       120% 80% at 50% 0%,
       rgba(255, 255, 255, 0.04),
       rgba(14, 14, 14, 0) 60%
@@ -50,14 +51,22 @@ export const Background = styled.div`
   &::before {
     top: -10vh;
     left: -10vw;
-    background: radial-gradient(closest-side, rgba(162, 89, 255, 0.65), rgba(162, 89, 255, 0) 70%);
+    background: radial-gradient(
+      closest-side,
+      rgba(162, 89, 255, 0.65),
+      rgba(162, 89, 255, 0) 70%
+    );
     animation: ${floatA} 28s ease-in-out infinite alternate;
   }
 
   &::after {
     bottom: -15vh;
     right: -10vw;
-    background: radial-gradient(closest-side, rgba(111, 66, 193, 0.6), rgba(111, 66, 193, 0) 70%);
+    background: radial-gradient(
+      closest-side,
+      rgba(111, 66, 193, 0.6),
+      rgba(111, 66, 193, 0) 70%
+    );
     animation: ${floatB} 36s ease-in-out infinite alternate;
   }
 `;
@@ -67,7 +76,8 @@ export const Grid = styled.div`
   inset: 0;
   opacity: 0.14;
   filter: saturate(110%);
-  background-image: repeating-linear-gradient(
+  background-image:
+    repeating-linear-gradient(
       to bottom,
       rgba(199, 168, 255, 0.12) 0px,
       rgba(199, 168, 255, 0.12) 1px,
@@ -109,7 +119,9 @@ export const Tile = styled.div`
   height: 14px;
   border-radius: 4px;
   background: ${({ $color }) => `${$color}`};
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), inset 0 -1px 0 rgba(0, 0, 0, 0.45),
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.45),
     0 0 10px rgba(162, 89, 255, 0.25);
   outline: 1px solid rgba(255, 255, 255, 0.06);
 
@@ -118,7 +130,8 @@ export const Tile = styled.div`
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    background: radial-gradient(
+    background:
+      radial-gradient(
         120% 80% at 25% 20%,
         rgba(255, 255, 255, 0.35),
         rgba(255, 255, 255, 0) 55%

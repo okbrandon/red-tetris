@@ -10,9 +10,8 @@ import LobbyPage from './LobbyPage.jsx';
 import { setSpectatorActive } from '../features/game/gameSlice.js';
 
 const GamePage = () => {
-  const { mode, gameStatus, grid, playerOutcome, isOwner, spectator } = useSelector(
-    (state) => state.game
-  );
+  const { mode, gameStatus, grid, playerOutcome, isOwner, spectator } =
+    useSelector((state) => state.game);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isResultModalOpen, setResultModalOpen] = useState(false);
@@ -22,7 +21,10 @@ const GamePage = () => {
   const hasOutcome = Boolean(playerOutcome && playerOutcome.outcome);
 
   useEffect(() => {
-    if (gameStatus === 'game-over' || (gameStatus === 'in-game' && hasOutcome)) {
+    if (
+      gameStatus === 'game-over' ||
+      (gameStatus === 'in-game' && hasOutcome)
+    ) {
       setResultModalOpen(true);
     }
   }, [gameStatus, hasOutcome]);
@@ -66,7 +68,14 @@ const GamePage = () => {
       onSpectate: handleSpectate,
       isGameOver: gameStatus === 'game-over',
     }),
-    [isResultModalOpen, playerOutcome, handleReturnMenu, isOwner, spectator, gameStatus]
+    [
+      isResultModalOpen,
+      playerOutcome,
+      handleReturnMenu,
+      isOwner,
+      spectator,
+      gameStatus,
+    ]
   );
 
   return gameStatus === 'waiting' || !grid[0].length ? (

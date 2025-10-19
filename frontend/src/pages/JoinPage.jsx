@@ -1,7 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Wrapper, Card, Subtitle, StartButton, LogoTitle, Input } from './HomePage.styled.js';
+import {
+  Wrapper,
+  Card,
+  Subtitle,
+  StartButton,
+  LogoTitle,
+  Input,
+} from './HomePage.styled.js';
 import BackButton from '../components/BackButton.jsx';
 import { JoinForm, JoinHint } from './JoinPage.styled';
 import { showNotification } from '../features/notification/notificationSlice.js';
@@ -16,18 +23,33 @@ const JoinPage = () => {
   const handleJoin = () => {
     const trimmed = roomName.trim();
     if (!trimmed) {
-      dispatch(showNotification({ type: 'error', message: 'Enter a room name to join a lobby.' }));
+      dispatch(
+        showNotification({
+          type: 'error',
+          message: 'Enter a room name to join a lobby.',
+        })
+      );
       return;
     }
     requestRoomJoin({ roomName: trimmed, soloJourney: false });
-    dispatch(showNotification({ type: 'success', message: `Joining lobby ${trimmed}…` }));
+    dispatch(
+      showNotification({
+        type: 'success',
+        message: `Joining lobby ${trimmed}…`,
+      })
+    );
   };
 
   useEffect(() => {
     if (lobbySettings.mode === 'multiplayer' && lobbySettings.roomName) {
       navigate(`/${lobbySettings.roomName}/${lobbySettings.owner?.username}`);
     }
-  }, [lobbySettings.mode, lobbySettings.roomName, lobbySettings.owner, navigate]);
+  }, [
+    lobbySettings.mode,
+    lobbySettings.roomName,
+    lobbySettings.owner,
+    navigate,
+  ]);
 
   return (
     <Wrapper>

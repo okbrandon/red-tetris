@@ -24,11 +24,13 @@ export const NotificationShell = styled.div`
   gap: 0.8rem;
   min-width: 240px;
   max-width: min(90vw, 360px);
-  border-left: 4px solid ${({ $variant }) => accentByType[$variant] || accentByType.info};
+  border-left: 4px solid
+    ${({ $variant }) => accentByType[$variant] || accentByType.info};
   color: #f5f5ff;
   transform: translateX(${({ $open }) => ($open ? '0' : '120%')});
   opacity: ${({ $open }) => ($open ? 1 : 0)};
-  transition: transform ${ANIMATION_MS}ms cubic-bezier(0.24, 0.82, 0.25, 1),
+  transition:
+    transform ${ANIMATION_MS}ms cubic-bezier(0.24, 0.82, 0.25, 1),
     opacity ${ANIMATION_MS}ms ease;
   will-change: transform, opacity;
 `;

@@ -4,7 +4,10 @@ import { useSelector } from 'react-redux';
 import TetrisGrid from './TetrisGrid.jsx';
 import useResponsiveValue from '../hooks/useResponsiveValue.js';
 import { deriveBoardDimensions } from '../utils/tetris.js';
-import { deriveCardScale, estimateOpponentCellSize } from '../utils/arenaSizing.js';
+import {
+  deriveCardScale,
+  estimateOpponentCellSize,
+} from '../utils/arenaSizing.js';
 import {
   ArenaContainer as SpectatorContainer,
   ArenaLayout as SpectatorLayout,
@@ -85,23 +88,35 @@ const SpectatorArena = ({ onLeaveGame }) => {
       return;
     }
     const firstId = opponents[0]?.id ?? null;
-    const hasSelected = selectedId && opponents.some((player) => player?.id === selectedId);
+    const hasSelected =
+      selectedId && opponents.some((player) => player?.id === selectedId);
     if (!hasSelected && selectedId !== firstId) {
       setSelectedId(firstId);
     }
   }, [opponents, selectedId]);
 
   const focusedPlayer = useMemo(
-    () => opponents.find((player) => player?.id === selectedId) ?? opponents[0] ?? null,
+    () =>
+      opponents.find((player) => player?.id === selectedId) ??
+      opponents[0] ??
+      null,
     [opponents, selectedId]
   );
 
-  const focusedBoard = Array.isArray(focusedPlayer?.specter) ? focusedPlayer.specter : [];
-  const { rows, cols } = useMemo(() => deriveBoardDimensions(focusedBoard), [focusedBoard]);
+  const focusedBoard = Array.isArray(focusedPlayer?.specter)
+    ? focusedPlayer.specter
+    : [];
+  const { rows, cols } = useMemo(
+    () => deriveBoardDimensions(focusedBoard),
+    [focusedBoard]
+  );
   const safeRows = rows || 20;
   const safeCols = cols || 10;
   const focusedCellSize = useResponsiveValue(
-    useCallback(() => computeFocusedCellSize(safeRows, safeCols), [safeRows, safeCols])
+    useCallback(
+      () => computeFocusedCellSize(safeRows, safeCols),
+      [safeRows, safeCols]
+    )
   );
   const tallestSpecterRows = useMemo(() => {
     if (!opponents.length) return 20;
@@ -113,13 +128,27 @@ const SpectatorArena = ({ onLeaveGame }) => {
       }, 0) || 20
     );
   }, [opponents]);
-  const spectatorScale = useMemo(() => deriveCardScale(opponents.length), [opponents.length]);
+  const spectatorScale = useMemo(
+    () => deriveCardScale(opponents.length),
+    [opponents.length]
+  );
   const previewCellSize = useMemo(
-    () => estimateOpponentCellSize(focusedCellSize || 20, opponents.length, tallestSpecterRows),
+    () =>
+      estimateOpponentCellSize(
+        focusedCellSize || 20,
+        opponents.length,
+        tallestSpecterRows
+      ),
     [focusedCellSize, opponents.length, tallestSpecterRows]
   );
-  const focusedStats = useMemo(() => computeStats(focusedPlayer), [focusedPlayer]);
-  const cardScaleStyle = useMemo(() => ({ '--card-scale': spectatorScale }), [spectatorScale]);
+  const focusedStats = useMemo(
+    () => computeStats(focusedPlayer),
+    [focusedPlayer]
+  );
+  const cardScaleStyle = useMemo(
+    () => ({ '--card-scale': spectatorScale }),
+    [spectatorScale]
+  );
 
   return (
     <SpectatorContainer>
@@ -131,14 +160,19 @@ const SpectatorArena = ({ onLeaveGame }) => {
           {opponents.length ? (
             <SpectatorList aria-label="Players to spectate">
               {opponents.map((opponent, index) => {
-                const miniBoard = Array.isArray(opponent?.specter) ? opponent.specter : [];
-                const { rows: miniRows, cols: miniCols } = deriveBoardDimensions(miniBoard);
+                const miniBoard = Array.isArray(opponent?.specter)
+                  ? opponent.specter
+                  : [];
+                const { rows: miniRows, cols: miniCols } =
+                  deriveBoardDimensions(miniBoard);
                 const ordinal = index + 1;
                 const isActive = opponent?.id === focusedPlayer?.id;
 
                 return (
                   <SpectatorCard
-                    key={opponent?.id || opponent?.username || `spectator-${index}`}
+                    key={
+                      opponent?.id || opponent?.username || `spectator-${index}`
+                    }
                     data-active={isActive}
                     $interactive
                     role="button"
@@ -155,7 +189,9 @@ const SpectatorArena = ({ onLeaveGame }) => {
                     <SpectatorCardHeader>
                       <SpectatorBadge>{`Player ${ordinal}`}</SpectatorBadge>
                       <SpectatorName>
-                        {opponent?.username || opponent?.name || `Player ${ordinal}`}
+                        {opponent?.username ||
+                          opponent?.name ||
+                          `Player ${ordinal}`}
                       </SpectatorName>
                     </SpectatorCardHeader>
                     <SpectatorMiniBoard>

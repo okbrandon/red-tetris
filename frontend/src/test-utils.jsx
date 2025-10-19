@@ -29,7 +29,11 @@ export function renderWithProviders(
 
   const Wrapped = (
     <Provider store={testStore}>
-      {withRouter ? <MemoryRouter initialEntries={[route]}>{ui}</MemoryRouter> : ui}
+      {withRouter ? (
+        <MemoryRouter initialEntries={[route]}>{ui}</MemoryRouter>
+      ) : (
+        ui
+      )}
     </Provider>
   );
 

@@ -4,7 +4,10 @@ import TetrisGrid from './TetrisGrid.jsx';
 import { Subtitle } from '../pages/HomePage.styled.js';
 import NextPiecePreview from './NextPiecePreview.jsx';
 import { requestPieceMove } from '../features/socket/socketThunks.js';
-import { extractMoveDirection, shouldIgnoreForGameControls } from '../utils/keyboard.js';
+import {
+  extractMoveDirection,
+  shouldIgnoreForGameControls,
+} from '../utils/keyboard.js';
 import useResponsiveValue from '../hooks/useResponsiveValue.js';
 import { deriveBoardDimensions } from '../utils/tetris.js';
 import GameResultModal from './GameResultModal.jsx';
@@ -38,13 +41,17 @@ const computeCellSize = (rows = 20, cols = 10) => {
 };
 
 const GameView = ({ grid, resultModal }) => {
-  const { currentPiece, nextPieces, score } = useSelector((state) => state.game);
+  const { currentPiece, nextPieces, score } = useSelector(
+    (state) => state.game
+  );
 
   const board = Array.isArray(grid) ? grid : [];
   const { rows, cols } = deriveBoardDimensions(board);
   const queue = Array.isArray(nextPieces) ? nextPieces : [];
 
-  const cellSize = useResponsiveValue(useCallback(() => computeCellSize(rows, cols), [rows, cols]));
+  const cellSize = useResponsiveValue(
+    useCallback(() => computeCellSize(rows, cols), [rows, cols])
+  );
 
   useEffect(() => {
     if (typeof window === 'undefined') return () => {};
@@ -119,7 +126,9 @@ const GameView = ({ grid, resultModal }) => {
                 <PreviewSlot key={piece?.id ?? piece?.name ?? `next-${index}`}>
                   <NextPiecePreview
                     piece={piece}
-                    cellSize={index === 0 ? primaryPreviewSize : queuePreviewSize}
+                    cellSize={
+                      index === 0 ? primaryPreviewSize : queuePreviewSize
+                    }
                   />
                 </PreviewSlot>
               ))}

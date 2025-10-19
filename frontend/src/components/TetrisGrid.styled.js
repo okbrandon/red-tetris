@@ -5,7 +5,9 @@ export const Board = styled.div`
   place-content: center;
   background: rgba(15, 15, 20, 0.45);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04), 0 20px 60px rgba(0, 0, 0, 0.45);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 20px 60px rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(10px) saturate(120%);
   border-radius: 12px;
   overflow: hidden;
@@ -27,7 +29,9 @@ export const Cell = styled.div`
   }};
   border: ${({ $showGrid, $ghost }) => {
     if ($ghost) return '1px dashed rgba(210,198,255,0.28)';
-    return $showGrid ? '1px solid rgba(199,168,255,0.08)' : '1px solid transparent';
+    return $showGrid
+      ? '1px solid rgba(199,168,255,0.08)'
+      : '1px solid transparent';
   }};
   border-radius: ${({ $filled, $ghost }) => ($ghost ? 2 : $filled ? 3 : 0)}px;
   box-shadow: ${({ $filled, $ghost }) => {
@@ -58,6 +62,7 @@ export const Block = styled.div`
     var(--block-color, rgba(191, 90, 242, 1)) 0%,
     rgba(255, 255, 255, 0.9) 140%
   );
-  box-shadow: 0 0 12px var(--block-shadow, rgba(0, 0, 0, 0.45)),
+  box-shadow:
+    0 0 12px var(--block-shadow, rgba(0, 0, 0, 0.45)),
     inset 0 0 1px rgba(255, 255, 255, 0.25);
 `;

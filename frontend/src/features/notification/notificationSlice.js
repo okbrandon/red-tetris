@@ -17,7 +17,10 @@ const notificationSlice = createSlice({
       state.isVisible = true;
       state.message = message;
       state.type = type;
-      state.duration = Number.isFinite(duration) && duration > 0 ? duration : initialState.duration;
+      state.duration =
+        Number.isFinite(duration) && duration > 0
+          ? duration
+          : initialState.duration;
       state.id = Date.now();
     },
     hideNotification: (state) => {

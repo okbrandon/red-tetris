@@ -13,7 +13,9 @@ import {
 
 const Notification = () => {
   const dispatch = useDispatch();
-  const { isVisible, message, type, duration, id } = useSelector((state) => state.notification);
+  const { isVisible, message, type, duration, id } = useSelector(
+    (state) => state.notification
+  );
   const [shouldRender, setShouldRender] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -47,12 +49,20 @@ const Notification = () => {
   const role = variant === 'error' ? 'alert' : 'status';
 
   return (
-    <NotificationShell role={role} aria-live="assertive" $variant={variant} $open={isOpen}>
+    <NotificationShell
+      role={role}
+      aria-live="assertive"
+      $variant={variant}
+      $open={isOpen}
+    >
       <Content>
         <Label $variant={variant}>{variant}</Label>
         <Message>{message}</Message>
       </Content>
-      <DismissButton onClick={() => dispatch(hideNotification())} aria-label="Dismiss notification">
+      <DismissButton
+        onClick={() => dispatch(hideNotification())}
+        aria-label="Dismiss notification"
+      >
         ×
       </DismissButton>
     </NotificationShell>

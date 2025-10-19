@@ -24,10 +24,17 @@ const HomePage = () => {
 
     if (trimmed) {
       updateUsername(trimmed);
-      dispatch(showNotification({ type: 'success', message: `Welcome ${trimmed}!` }));
+      dispatch(
+        showNotification({ type: 'success', message: `Welcome ${trimmed}!` })
+      );
       navigate('/menu');
     } else {
-      dispatch(showNotification({ type: 'error', message: 'Please enter a name to continue.' }));
+      dispatch(
+        showNotification({
+          type: 'error',
+          message: 'Please enter a name to continue.',
+        })
+      );
     }
   };
 

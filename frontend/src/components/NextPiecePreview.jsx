@@ -53,7 +53,12 @@ const NextPiecePreview = ({ piece, cellSize = 18 }) => {
     >
       {data.map((r, y) =>
         r.map((v, x) => (
-          <Cell key={`${y}-${x}`} $size={cellSize} $filled={v > 0} $color={paletteColor} />
+          <Cell
+            key={`${y}-${x}`}
+            $size={cellSize}
+            $filled={v > 0}
+            $color={paletteColor}
+          />
         ))
       )}
     </Board>

@@ -1,7 +1,13 @@
 import { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { BASE_TETRIS_COLORS, extractPieceBlocks } from '../utils/tetris.js';
-import { Board, Cell, Overlay, OverlayInner, Block } from './TetrisGrid.styled.js';
+import {
+  Board,
+  Cell,
+  Overlay,
+  OverlayInner,
+  Block,
+} from './TetrisGrid.styled.js';
 
 const setAlpha = (color, alpha) => {
   if (!color) return `rgba(0,0,0,${alpha})`;
@@ -52,8 +58,14 @@ const normalizeCell = (value, palette) => {
   const ghost = Boolean(value.ghost);
   const indestructible = Boolean(value.indestructible);
   const baseColor = palette[value.color];
-  const color = ghost ? palette.ghost : indestructible ? palette.indestructible : baseColor;
-  const shadowColor = ghost ? setAlpha(color, 0.25) : setAlpha(color, filled ? 0.45 : 0.12);
+  const color = ghost
+    ? palette.ghost
+    : indestructible
+      ? palette.indestructible
+      : baseColor;
+  const shadowColor = ghost
+    ? setAlpha(color, 0.25)
+    : setAlpha(color, filled ? 0.45 : 0.12);
 
   return {
     filled: ghost ? false : filled,
@@ -69,7 +81,8 @@ const normalizeGrid = (grid, rows, cols, palette) => {
   for (let y = 0; y < rows; y += 1) {
     const row = [];
     for (let x = 0; x < cols; x += 1) {
-      const value = Array.isArray(grid) && Array.isArray(grid[y]) ? grid[y][x] : undefined;
+      const value =
+        Array.isArray(grid) && Array.isArray(grid[y]) ? grid[y][x] : undefined;
       row.push(normalizeCell(value, palette));
     }
     normalized.push(row);

@@ -1,4 +1,8 @@
-import gameReducer, { incrementScore, setGameMode, setGameState } from '../features/game/gameSlice';
+import gameReducer, {
+  incrementScore,
+  setGameMode,
+  setGameState,
+} from '../features/game/gameSlice';
 
 describe('gameSlice', () => {
   it('increments score by 10', () => {

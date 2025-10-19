@@ -6,9 +6,9 @@ import App from './App.jsx';
 import SocketProvider from './providers/SocketProvider.jsx';
 
 createRoot(document.getElementById('root')).render(
-    <Provider store={store}>
-        <SocketProvider>
-            <App />
-        </SocketProvider>
-    </Provider>,
+  <Provider store={store}>
+    <SocketProvider>
+      <App />
+    </SocketProvider>
+  </Provider>
 );

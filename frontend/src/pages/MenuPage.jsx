@@ -1,20 +1,33 @@
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
-import { Wrapper, LogoTitle, Card, Subtitle, StartButton } from './HomePage.styled';
+import {
+  Wrapper,
+  LogoTitle,
+  Card,
+  Subtitle,
+  StartButton,
+} from './HomePage.styled';
 import BackButton from '../components/BackButton';
 import { SOLO_ROOM_NAME } from '../features/game/gameSlice.js';
 import { showNotification } from '../features/notification/notificationSlice';
-import { requestRoomJoin, requestStartGame } from '../features/socket/socketThunks.js';
+import {
+  requestRoomJoin,
+  requestStartGame,
+} from '../features/socket/socketThunks.js';
 
 const MenuPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { mode, gameStatus, roomName, owner } = useSelector((state) => state.game);
+  const { mode, gameStatus, roomName, owner } = useSelector(
+    (state) => state.game
+  );
 
   const handleSoloJourney = () => {
     requestRoomJoin({ roomName: SOLO_ROOM_NAME, soloJourney: true });
-    dispatch(showNotification({ type: 'info', message: 'Starting solo journey...' }));
+    dispatch(
+      showNotification({ type: 'info', message: 'Starting solo journey...' })
+    );
   };
 
   useEffect(() => {

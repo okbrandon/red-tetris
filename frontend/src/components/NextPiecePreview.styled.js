@@ -14,7 +14,9 @@ export const Cell = styled.div`
   height: ${({ $size }) => $size}px;
   box-sizing: border-box;
   background: ${({ $filled, $color }) =>
-    $filled ? `linear-gradient(145deg, ${$color} 0%, rgba(255,255,255,0.9) 140%)` : 'transparent'};
+    $filled
+      ? `linear-gradient(145deg, ${$color} 0%, rgba(255,255,255,0.9) 140%)`
+      : 'transparent'};
   border: ${({ $filled }) =>
     $filled ? '1px solid rgba(255,255,255,0.1)' : '1px solid transparent'};
   border-radius: ${({ $filled }) => ($filled ? 3 : 0)}px;

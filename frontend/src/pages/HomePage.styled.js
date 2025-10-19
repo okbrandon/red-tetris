@@ -25,7 +25,12 @@ export const LogoTitle = styled.h1`
   font-family: 'Press Start 2P', monospace;
   font-size: 2.5rem;
   color: transparent;
-  background-image: linear-gradient(90deg, #ffffff 0%, #e9e1ff 50%, #ffffff 100%);
+  background-image: linear-gradient(
+    90deg,
+    #ffffff 0%,
+    #e9e1ff 50%,
+    #ffffff 100%
+  );
   -webkit-background-clip: text;
   background-clip: text;
   text-align: center;
@@ -50,10 +55,15 @@ export const StartButton = styled.button`
   font-size: 1.05rem;
   border-radius: 12px;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.25s ease, filter 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.25s ease,
+    filter 0.2s ease;
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
   z-index: 2;
-  box-shadow: 0 6px 20px rgba(162, 89, 255, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+  box-shadow:
+    0 6px 20px rgba(162, 89, 255, 0.35),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.15);
   white-space: nowrap;
   min-width: 120px;
 
@@ -66,7 +76,9 @@ export const StartButton = styled.button`
   &:hover {
     transform: translateY(-1px);
     filter: brightness(1.05);
-    box-shadow: 0 10px 26px rgba(162, 89, 255, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+    box-shadow:
+      0 10px 26px rgba(162, 89, 255, 0.45),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.2);
   }
 
   &:active {
@@ -94,7 +106,9 @@ export const Input = styled.input`
   /* Allow shrinking inside CSS grid to avoid overflow */
   min-width: 0;
   text-align: left;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), 0 8px 20px rgba(0, 0, 0, 0.3);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 8px 20px rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(6px);
 
   &::placeholder {
@@ -102,7 +116,9 @@ export const Input = styled.input`
   }
 
   &:focus {
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 0 0 3px rgba(162, 89, 255, 0.35);
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+      0 0 0 3px rgba(162, 89, 255, 0.35);
     border-color: #a259ff;
   }
 `;
@@ -114,14 +130,17 @@ export const Card = styled.div`
   padding: 2rem 1.25rem;
   border-radius: 18px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  background: radial-gradient(
+  background:
+    radial-gradient(
       120% 140% at 0% 0%,
       rgba(111, 66, 193, 0.18) 0%,
       rgba(162, 89, 255, 0.08) 35%,
       rgba(10, 10, 10, 0.6) 70%
     ),
     rgba(15, 15, 15, 0.5);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(12px) saturate(120%);
   display: flex;
   flex-direction: column;

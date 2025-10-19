@@ -30,7 +30,11 @@ export const Dialog = styled.div`
   width: min(360px, 100%);
   border-radius: 20px;
   border: 1px solid rgba(162, 130, 235, 0.28);
-  background: linear-gradient(160deg, rgba(30, 26, 54, 0.95), rgba(16, 13, 30, 0.96));
+  background: linear-gradient(
+    160deg,
+    rgba(30, 26, 54, 0.95),
+    rgba(16, 13, 30, 0.96)
+  );
   box-shadow: 0 28px 60px rgba(8, 5, 20, 0.6);
   padding: clamp(1.2rem, 3vw, 1.8rem);
   display: grid;
@@ -51,8 +55,10 @@ export const OutcomeBadge = styled.span`
   letter-spacing: 0.24em;
   text-transform: uppercase;
   color: ${({ $variant }) => $variant?.color || '#f5efff'};
-  background: ${({ $variant }) => $variant?.background || 'rgba(255,255,255,0.08)'};
-  box-shadow: ${({ $variant }) => $variant?.shadow || '0 12px 20px rgba(0, 0, 0, 0.25)'};
+  background: ${({ $variant }) =>
+    $variant?.background || 'rgba(255,255,255,0.08)'};
+  box-shadow: ${({ $variant }) =>
+    $variant?.shadow || '0 12px 20px rgba(0, 0, 0, 0.25)'};
 `;
 
 export const Title = styled.h2`
@@ -81,7 +87,9 @@ export const ActionButton = styled.button`
   color: #190f32;
   background: linear-gradient(135deg, #f9d8ff 0%, #c9a9ff 100%);
   box-shadow: 0 18px 34px rgba(94, 66, 188, 0.35);
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
 
   &:hover {
     transform: translateY(-1px);

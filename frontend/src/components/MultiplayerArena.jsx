@@ -6,7 +6,10 @@ import GameView from './GameView.jsx';
 import useResponsiveValue from '../hooks/useResponsiveValue.js';
 import { deriveBoardDimensions } from '../utils/tetris.js';
 import SpectatorArena from './SpectatorArena.jsx';
-import { deriveCardScale, estimateOpponentCellSize } from '../utils/arenaSizing.js';
+import {
+  deriveCardScale,
+  estimateOpponentCellSize,
+} from '../utils/arenaSizing.js';
 import {
   ArenaContainer,
   ArenaLayout,
@@ -34,7 +37,13 @@ const OpponentBoard = ({ opponent, index, cellSize }) => {
         <OpponentName>{name}</OpponentName>
       </OpponentHeader>
       <MiniBoard>
-        <TetrisGrid rows={rows} cols={cols} cellSize={cellSize} showGrid={false} grid={board} />
+        <TetrisGrid
+          rows={rows}
+          cols={cols}
+          cellSize={cellSize}
+          showGrid={false}
+          grid={board}
+        />
       </MiniBoard>
     </OpponentCard>
   );
@@ -68,7 +77,12 @@ const computePrimaryCellSize = () => {
   return Math.max(20, Math.min(raw, 42));
 };
 
-const MultiplayerArena = ({ grid, resultModal, showSpectators = false, onLeaveGame }) => {
+const MultiplayerArena = ({
+  grid,
+  resultModal,
+  showSpectators = false,
+  onLeaveGame,
+}) => {
   const cellSize = useResponsiveValue(useCallback(computePrimaryCellSize, []));
 
   const { you, players } = useSelector((state) => state.game);
@@ -91,13 +105,20 @@ const MultiplayerArena = ({ grid, resultModal, showSpectators = false, onLeaveGa
   }, [opponents]);
 
   const opponentCellSize = useMemo(
-    () => estimateOpponentCellSize(cellSize, opponents.length, tallestOpponentRows),
+    () =>
+      estimateOpponentCellSize(cellSize, opponents.length, tallestOpponentRows),
     [cellSize, opponents.length, tallestOpponentRows]
   );
 
-  const cardScale = useMemo(() => deriveCardScale(opponents.length), [opponents.length]);
+  const cardScale = useMemo(
+    () => deriveCardScale(opponents.length),
+    [opponents.length]
+  );
 
-  const cardScaleStyle = useMemo(() => ({ '--card-scale': cardScale }), [cardScale]);
+  const cardScaleStyle = useMemo(
+    () => ({ '--card-scale': cardScale }),
+    [cardScale]
+  );
 
   if (showSpectators) {
     return <SpectatorArena onLeaveGame={onLeaveGame} />;
@@ -114,7 +135,12 @@ const MultiplayerArena = ({ grid, resultModal, showSpectators = false, onLeaveGa
             <OpponentGrid aria-label="Opponent boards">
               {opponents.map((opponent, index) => (
                 <OpponentBoard
-                  key={opponent?.id || opponent?.username || opponent?.name || `opponent-${index}`}
+                  key={
+                    opponent?.id ||
+                    opponent?.username ||
+                    opponent?.name ||
+                    `opponent-${index}`
+                  }
                   opponent={opponent}
                   index={index}
                   cellSize={opponentCellSize}

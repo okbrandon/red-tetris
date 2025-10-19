@@ -11,7 +11,11 @@ export const Layout = styled.div`
   gap: clamp(0.9rem, 2.4vw, 1.6rem);
   border-radius: 20px;
   border: 1px solid rgba(142, 107, 225, 0.26);
-  background: linear-gradient(160deg, rgba(26, 22, 45, 0.88), rgba(13, 11, 24, 0.96));
+  background: linear-gradient(
+    160deg,
+    rgba(26, 22, 45, 0.88),
+    rgba(13, 11, 24, 0.96)
+  );
   box-shadow: 0 24px 46px rgba(8, 5, 18, 0.52);
   padding: clamp(1rem, 2.6vw, 1.8rem) clamp(1.2rem, 3.8vw, 3rem);
   box-sizing: border-box;

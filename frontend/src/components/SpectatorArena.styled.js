@@ -39,7 +39,11 @@ export const ExitButton = styled.button`
   color: rgba(255, 182, 194, 0.86);
   background: rgba(44, 22, 36, 0.72);
   cursor: pointer;
-  transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease;
 
   &:hover,
   &:focus-visible {
@@ -62,7 +66,11 @@ export const FocusedPanel = styled.div`
   gap: clamp(0.9rem, 2vw, 1.5rem);
   border-radius: 20px;
   border: 1px solid rgba(142, 107, 225, 0.26);
-  background: linear-gradient(160deg, rgba(26, 22, 45, 0.9), rgba(13, 11, 24, 0.96));
+  background: linear-gradient(
+    160deg,
+    rgba(26, 22, 45, 0.9),
+    rgba(13, 11, 24, 0.96)
+  );
   box-shadow: 0 24px 46px rgba(8, 5, 18, 0.52);
   padding: 1rem 2rem;
   box-sizing: border-box;

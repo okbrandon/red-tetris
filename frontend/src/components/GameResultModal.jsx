@@ -56,7 +56,11 @@ const GameResultModal = ({
 
   return (
     <Overlay role="presentation" $scope={placement}>
-      <Dialog role="dialog" aria-modal="true" aria-labelledby="game-result-title">
+      <Dialog
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="game-result-title"
+      >
         <OutcomeBadge $variant={variant}>{variant.badge}</OutcomeBadge>
         <Title id="game-result-title">Game Over</Title>
         <Message>{outcome?.message || 'Game Over'}</Message>

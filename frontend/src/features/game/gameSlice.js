@@ -39,7 +39,8 @@ export const gameSlice = createSlice({
       }
     },
     setGameState: (state, action) => {
-      const { room, you, grid, currentPiece, nextPieces, clients, score } = action.payload ?? {};
+      const { room, you, grid, currentPiece, nextPieces, clients, score } =
+        action.payload ?? {};
 
       if (room) {
         state.mode = room.soloJourney ? 'solo' : 'multiplayer';
@@ -74,7 +75,10 @@ export const gameSlice = createSlice({
         state.playerOutcome =
           winner.id === state.you?.id
             ? { outcome: 'win', message: 'You are the last player standing!' }
-            : { outcome: 'lose', message: `${winner.username} has won the game.` };
+            : {
+                outcome: 'lose',
+                message: `${winner.username} has won the game.`,
+              };
       }
     },
     setPlayerOutcome: (state, action) => {
@@ -91,7 +95,9 @@ export const gameSlice = createSlice({
       if (Array.isArray(clients) && clients.length > 0) {
         if (state.gameStatus && state.gameStatus !== 'waiting') {
           // Build a Map for O(1) client lookup by id
-          const clientMap = new Map(clients.map((client) => [client.id, client]));
+          const clientMap = new Map(
+            clients.map((client) => [client.id, client])
+          );
           state.players = state.players
             .filter((player) => clientMap.has(player.id))
             .map((player) => ({

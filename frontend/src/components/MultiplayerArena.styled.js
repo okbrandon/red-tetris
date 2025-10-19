@@ -71,11 +71,18 @@ export const OpponentCard = styled.div`
   justify-items: center;
   box-sizing: border-box;
   cursor: ${({ $interactive }) => ($interactive ? 'pointer' : 'default')};
-  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
 
   &[data-active='true'] {
     border-color: rgba(198, 160, 255, 0.55);
-    background: linear-gradient(160deg, rgba(42, 33, 72, 0.95), rgba(24, 20, 46, 0.96));
+    background: linear-gradient(
+      160deg,
+      rgba(42, 33, 72, 0.95),
+      rgba(24, 20, 46, 0.96)
+    );
     box-shadow: 0 24px 38px rgba(14, 9, 30, 0.46);
   }
 
@@ -93,7 +100,8 @@ export const OpponentCard = styled.div`
 `;
 
 export const OpponentBadge = styled.span`
-  padding: calc(0.18rem * var(--card-scale, 1)) calc(0.55rem * var(--card-scale, 1));
+  padding: calc(0.18rem * var(--card-scale, 1))
+    calc(0.55rem * var(--card-scale, 1));
   border-radius: 999px;
   border: 1px solid rgba(162, 130, 235, 0.28);
   background: rgba(28, 24, 46, 0.5);

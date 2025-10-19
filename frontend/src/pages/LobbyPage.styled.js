@@ -19,6 +19,8 @@ export const Player = styled.li`
   font-size: 0.95rem;
   border-radius: 10px;
   text-align: left;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05), 0 8px 20px rgba(0, 0, 0, 0.3);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 8px 20px rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(6px);
 `;

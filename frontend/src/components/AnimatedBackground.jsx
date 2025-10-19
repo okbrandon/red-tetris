@@ -1,4 +1,10 @@
-import { Background, Grid, Pieces, Piece, Tile } from './AnimatedBackground.styled.js';
+import {
+  Background,
+  Grid,
+  Pieces,
+  Piece,
+  Tile,
+} from './AnimatedBackground.styled.js';
 
 const SHAPES = {
   I: [

@@ -11,10 +11,15 @@ const isTextInputElement = (element) => {
   const tagName = element.tagName;
   if (!tagName) return false;
   const normalized = tagName.toUpperCase();
-  return normalized === 'INPUT' || normalized === 'TEXTAREA' || normalized === 'SELECT';
+  return (
+    normalized === 'INPUT' ||
+    normalized === 'TEXTAREA' ||
+    normalized === 'SELECT'
+  );
 };
 
-export const shouldIgnoreForGameControls = (element) => isTextInputElement(element);
+export const shouldIgnoreForGameControls = (element) =>
+  isTextInputElement(element);
 
 export const extractMoveDirection = (event) => {
   if (!event) return null;

@@ -27,4 +27,5 @@ export const SOCKET_EVENTS = Object.freeze({
   RECONNECT: 'reconnect',
 });
 
-export const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3000';
+export const SOCKET_URL =
+  import.meta.env.VITE_SOCKET_URL || 'http://localhost:3000';

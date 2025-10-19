@@ -33,7 +33,9 @@ describe('TetrisGrid', () => {
       [{ filled: false, color: 'transparent' }, { indestructible: true }],
     ];
 
-    renderWithProviders(<TetrisGrid grid={serverGrid} rows={2} cols={2} cellSize={8} />);
+    renderWithProviders(
+      <TetrisGrid grid={serverGrid} rows={2} cols={2} cellSize={8} />
+    );
 
     const cells = screen.getAllByTestId('cell');
     const filled = cells.filter((el) => el.dataset.filled === 'true');
