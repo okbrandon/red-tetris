@@ -5,12 +5,12 @@ import {
   Route,
   useNavigate,
 } from 'react-router-dom';
-import HomePage from '@/pages/HomePage/HomePage';
-import MenuPage from '@/pages/MenuPage/MenuPage';
-import GamePage from '@/pages/GamePage/GamePage';
-import JoinPage from '@/pages/JoinPage/JoinPage';
+import UsernameSetupPage from '@/pages/UsernameSetupPage/UsernameSetupPage';
+import ModeSelectPage from '@/pages/ModeSelectPage/ModeSelectPage';
+import GamePlayPage from '@/pages/GamePlayPage/GamePlayPage';
+import RoomAccessPage from '@/pages/RoomAccessPage/RoomAccessPage';
 import AnimatedBackground from './components/AnimatedBackground/AnimatedBackground';
-import Notification from './components/Notification/Notification';
+import Notification from '@/components/Notification/Notification';
 import { updateUsername } from '@/store/slices/userThunks.js';
 
 function RedirectOnRefresh() {
@@ -63,10 +63,10 @@ function App() {
       <AnimatedBackground />
       <Notification />
       <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/menu" element={<MenuPage />} />
-        <Route path="/join" element={<JoinPage />} />
-        <Route path="/:room/:player_name" element={<GamePage />} />
+        <Route path="/" element={<UsernameSetupPage />} />
+        <Route path="/menu" element={<ModeSelectPage />} />
+        <Route path="/join" element={<RoomAccessPage />} />
+        <Route path="/:room/:player_name" element={<GamePlayPage />} />
       </Routes>
     </Router>
   );

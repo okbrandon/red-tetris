@@ -1,5 +1,5 @@
 import { styled } from 'styled-components';
-import { StartButton } from '@/pages/HomePage/HomePage.styles.js';
+import { StartButton } from '@/pages/UsernameSetupPage/UsernameSetupPage.styles.js';
 
 export const BackButtonContainer = styled.div`
   position: absolute;

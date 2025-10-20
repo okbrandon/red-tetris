@@ -8,9 +8,9 @@ import {
   StartButton,
   LogoTitle,
   Input,
-} from '../HomePage/HomePage.styles.js';
+} from '../UsernameSetupPage/UsernameSetupPage.styles.js';
 import BackButton from '@/components/Backbutton/BackButton.jsx';
-import { JoinForm, JoinHint } from './JoinPage.styles.js';
+import { JoinForm, JoinHint } from './RoomAccessPage.styles.js';
 import { showNotification } from '@/store/slices/notificationSlice.js';
 import { requestRoomJoin } from '@/store/slices/socketThunks.js';
 

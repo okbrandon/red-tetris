@@ -7,7 +7,7 @@ import {
   Card,
   Subtitle,
   StartButton,
-} from '../HomePage/HomePage.styles';
+} from '../UsernameSetupPage/UsernameSetupPage.styles';
 import BackButton from '@/components/Backbutton/BackButton';
 import { SOLO_ROOM_NAME } from '@/store/slices/gameSlice.js';
 import { showNotification } from '@/store/slices/notificationSlice';
@@ -15,7 +15,7 @@ import {
   requestRoomJoin,
   requestStartGame,
 } from '@/store/slices/socketThunks.js';
-import { ButtonGrid } from './MenuPage.styles';
+import { ButtonGrid } from './ModeSelectPage.styles';
 
 const MenuPage = () => {
   const navigate = useNavigate();

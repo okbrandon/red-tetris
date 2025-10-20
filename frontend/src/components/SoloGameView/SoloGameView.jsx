@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import TetrisGrid from '@/components/TetrisGrid/TetrisGrid.jsx';
-import { Subtitle } from '@/pages/HomePage/HomePage.styles';
+import { Subtitle } from '@/pages/UsernameSetupPage/UsernameSetupPage.styles';
 import NextPiecePreview from '@/components/NextPiecePreview/NextPiecePreview.jsx';
 import { requestPieceMove } from '@/store/slices/socketThunks.js';
 import {

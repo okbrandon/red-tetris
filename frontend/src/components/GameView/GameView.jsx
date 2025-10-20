@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import TetrisGrid from '../TetrisGrid/TetrisGrid.jsx';
-import { Subtitle } from '@/pages/HomePage/HomePage.styles.js';
+import { Subtitle } from '@/pages/UsernameSetupPage/UsernameSetupPage.styles.js';
 import NextPiecePreview from '../NextPiecePreview/NextPiecePreview.jsx';
 import { requestPieceMove } from '@/store/slices/socketThunks.js';
 import {

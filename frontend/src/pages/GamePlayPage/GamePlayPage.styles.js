@@ -1,5 +1,8 @@
 import styled from 'styled-components';
-import { Wrapper, LogoTitle } from '../HomePage/HomePage.styles';
+import {
+  Wrapper,
+  LogoTitle,
+} from '../UsernameSetupPage/UsernameSetupPage.styles';
 
 export const PageWrapper = styled(Wrapper)`
   justify-content: flex-start;

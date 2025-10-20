@@ -12,9 +12,9 @@ import {
   Subtitle,
   FormRow,
   HintText,
-} from './HomePage.styles';
+} from './UsernameSetupPage.styles';
 
-const HomePage = () => {
+const UsernameSetupPage = () => {
   const navigate = useNavigate();
   const [name, setName] = useState('');
   const dispatch = useDispatch();
@@ -68,4 +68,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default UsernameSetupPage;

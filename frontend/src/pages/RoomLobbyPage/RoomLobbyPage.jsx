@@ -6,9 +6,9 @@ import {
   Subtitle,
   StartButton,
   LogoTitle,
-} from '../HomePage/HomePage.styles';
+} from '../UsernameSetupPage/UsernameSetupPage.styles';
 import BackButton from '@/components/Backbutton/BackButton';
-import { PlayerList, Player } from './LobbyPage.styles';
+import { PlayerList, Player } from './RoomLobbyPage.styles';
 import { showNotification } from '@/store/slices/notificationSlice';
 import {
   requestRoomLeave,
