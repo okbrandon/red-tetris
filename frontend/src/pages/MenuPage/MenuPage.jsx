@@ -15,6 +15,7 @@ import {
   requestRoomJoin,
   requestStartGame,
 } from '@/store/slices/socketThunks.js';
+import { ButtonGrid } from './MenuPage.styles';
 
 const MenuPage = () => {
   const navigate = useNavigate();
@@ -46,15 +47,7 @@ const MenuPage = () => {
       <LogoTitle>Menu</LogoTitle>
       <Card>
         <Subtitle>Choose how you want to play</Subtitle>
-        <div
-          style={{
-            display: 'grid',
-            gap: '0.75rem',
-            gridTemplateColumns: '1fr',
-            width: 'min(380px, 80vw)',
-            margin: '0 auto',
-          }}
-        >
+        <ButtonGrid>
           <StartButton onClick={handleSoloJourney} aria-label="Play solo">
             Solo Journey
           </StartButton>
@@ -64,7 +57,7 @@ const MenuPage = () => {
           >
             Multiplayer Journey
           </StartButton>
-        </div>
+        </ButtonGrid>
       </Card>
     </Wrapper>
   );
