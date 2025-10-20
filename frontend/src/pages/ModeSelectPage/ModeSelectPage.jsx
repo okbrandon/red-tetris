@@ -20,9 +20,10 @@ import { ButtonGrid } from './ModeSelectPage.styles';
 const MenuPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { mode, gameStatus, roomName, owner } = useSelector(
+  const { mode, gameStatus, roomName } = useSelector(
     (state) => state.game
   );
+  const username = useSelector((state) => state.user.username);
 
   const handleSoloJourney = () => {
     requestRoomJoin({ roomName: SOLO_ROOM_NAME, soloJourney: true });
@@ -32,14 +33,16 @@ const MenuPage = () => {
   };
 
   useEffect(() => {
-    if (mode === 'solo' && roomName) {
-      if (gameStatus !== 'in-game') {
-        requestStartGame();
-      } else if (gameStatus === 'in-game') {
-        navigate(`/${roomName}/${owner.username}`);
-      }
+    if (mode === 'solo' && roomName && gameStatus === 'in-game') {
+      requestStartGame();
     }
-  }, [mode, roomName, gameStatus, navigate, owner?.username]);
+  }, [mode, roomName, gameStatus]);
+
+  useEffect(() => {
+    if (mode === 'solo' && roomName && gameStatus === 'in-game') {
+      navigate(`/${roomName}/${username}`);
+    }
+  }, [mode, roomName, gameStatus, navigate, username]);
 
   return (
     <Wrapper>

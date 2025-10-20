@@ -103,7 +103,6 @@ export const Input = styled.input`
   border-radius: 10px;
   outline: none;
   z-index: 2;
-  /* Allow shrinking inside CSS grid to avoid overflow */
   min-width: 0;
   text-align: left;
   box-shadow:
