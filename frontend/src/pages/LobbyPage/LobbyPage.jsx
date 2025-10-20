@@ -16,24 +16,10 @@ import {
 } from '@/store/slices/socketThunks.js';
 
 const LobbyPage = () => {
-  const { username, id } = useSelector((state) => state.user);
-  const game = useSelector((state) => state.game);
+  const { username } = useSelector((state) => state.user);
+  const { players, roomName, isOwner } = useSelector((state) => state.game);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  const players = game.players?.length
-    ? game.players.map((player) => player.username || player.id)
-    : [username || 'You'];
-  const ownerId = game?.owner?.id;
-  const isOwner = id === ownerId;
-
-  const lobbyLabel = game?.roomName
-    ? `Lobby name: ${game.roomName}`
-    : isOwner
-      ? `Hosting ${game.roomName ? `"${game.roomName}"` : 'a new lobby'}`
-      : game.roomName
-        ? `Joining lobby ${game.roomName}`
-        : 'Lobby ready to connect';
 
   const handleStartGame = () => {
     if (!isOwner) {
@@ -62,12 +48,12 @@ const LobbyPage = () => {
 
       <Card>
         <Subtitle>Welcome, {username}</Subtitle>
-        <Subtitle>{lobbyLabel}</Subtitle>
+        <Subtitle>{`Lobby name: ${roomName}`}</Subtitle>
         <Subtitle>{`Slots: up to 4 players`}</Subtitle>
 
         <PlayerList>
           {players.map((player, index) => (
-            <Player key={index}>{player}</Player>
+            <Player key={index}>{player.username}</Player>
           ))}
         </PlayerList>
 
