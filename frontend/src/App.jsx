@@ -11,7 +11,7 @@ import RoomAccessPage from '@/pages/RoomAccessPage/RoomAccessPage';
 import AnimatedBackground from './components/AnimatedBackground/AnimatedBackground';
 import Notification from '@/components/Notification/Notification';
 import { updateUsername } from '@/store/slices/userThunks.js';
-import ArenaRouter from './pages/Arena/ArenaRouterPage/ArenaRouter';
+import ArenaRouter from './pages/Arena/ArenaRouter/ArenaRouter';
 
 function RedirectOnRefresh() {
   const navigate = useNavigate();

@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import TetrisGrid from '../TetrisGrid/TetrisGrid.jsx';
 import { Subtitle } from '@/pages/UsernameSetupPage/UsernameSetupPage.styles.js';
@@ -8,8 +8,7 @@ import {
   extractMoveDirection,
   shouldIgnoreForGameControls,
 } from '@/utils/keyboard.js';
-import useResponsiveValue from '@/hooks/useResponsiveValue.js';
-import { deriveBoardDimensions } from '@/utils/tetris.js';
+import { CELL_SIZE } from '@/utils/tetris.js';
 import GameResultModal from '../GameResultModal/GameResultModal.jsx';
 import {
   Layout,
@@ -26,32 +25,11 @@ import {
   EmptyQueue,
 } from './GameView.styles.js';
 
-const computeCellSize = (rows = 20, cols = 10) => {
-  if (typeof window === 'undefined') return 32;
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-  const panelWidth = w >= 920 ? Math.min(Math.max(w * 0.26, 220), 320) : 0;
-  const padding = w >= 920 ? 120 : 80;
-  const availableWidth = Math.max(w - panelWidth - padding, 240);
-  const maxCellByWidth = availableWidth / cols;
-  const availableHeight = Math.max(h - 260, 360);
-  const maxCellByHeight = availableHeight / rows;
-  const raw = Math.floor(Math.min(maxCellByWidth, maxCellByHeight));
-  return Math.max(22, Math.min(raw, 44));
-};
-
 const GameView = ({ grid, resultModal }) => {
   const { currentPiece, nextPieces, score } = useSelector(
     (state) => state.game
   );
-
-  const board = Array.isArray(grid) ? grid : [];
-  const { rows, cols } = deriveBoardDimensions(board);
-  const queue = Array.isArray(nextPieces) ? nextPieces : [];
-
-  const cellSize = useResponsiveValue(
-    useCallback(() => computeCellSize(rows, cols), [rows, cols])
-  );
+  const queue = nextPieces;
 
   useEffect(() => {
     if (typeof window === 'undefined') return () => {};
@@ -73,33 +51,27 @@ const GameView = ({ grid, resultModal }) => {
     };
   }, []);
 
-  const primaryPreviewSize = Math.max(16, Math.floor(cellSize * 0.6));
-  const queuePreviewSize = Math.max(14, Math.floor(cellSize * 0.48));
-  const modalConfig = resultModal ?? {};
-  const shouldShowResult = Boolean(
-    modalConfig.isOpen && typeof modalConfig.onConfirm === 'function'
-  );
+  const primaryPreviewSize = Math.max(16, Math.floor(CELL_SIZE * 0.6));
+  const queuePreviewSize = Math.max(14, Math.floor(CELL_SIZE * 0.48));
 
   return (
     <Layout>
       <BoardArea>
         <BoardFrame>
           <TetrisGrid
-            rows={rows}
-            cols={cols}
-            cellSize={cellSize}
+            cellSize={CELL_SIZE}
             showGrid
-            grid={board}
+            grid={grid}
             currentPiece={currentPiece}
           />
-          {shouldShowResult && (
+          {resultModal.isOpen && (
             <GameResultModal
-              outcome={modalConfig.outcome}
-              onConfirm={modalConfig.onConfirm}
-              isOwner={Boolean(modalConfig.isOwner)}
-              canSpectate={Boolean(modalConfig.canSpectate)}
-              onSpectate={modalConfig.onSpectate}
-              isGameOver={Boolean(modalConfig.isGameOver)}
+              outcome={resultModal.outcome}
+              onConfirm={resultModal.onConfirm}
+              isOwner={Boolean(resultModal.isOwner)}
+              canSpectate={Boolean(resultModal.canSpectate)}
+              onSpectate={resultModal.onSpectate}
+              isGameOver={Boolean(resultModal.isGameOver)}
               placement="board"
             />
           )}

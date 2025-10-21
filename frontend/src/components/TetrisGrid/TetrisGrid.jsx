@@ -1,6 +1,12 @@
 import { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { BASE_TETRIS_COLORS, extractPieceBlocks } from '@/utils/tetris.js';
+import {
+  BASE_TETRIS_COLORS,
+  CELL_SIZE,
+  DEFAULT_BOARD_COLS,
+  DEFAULT_BOARD_ROWS,
+  extractPieceBlocks,
+} from '@/utils/tetris.js';
 import {
   Board,
   Cell,
@@ -108,20 +114,19 @@ const normalizeActivePiece = (piece, palette) => {
   };
 };
 
-const TetrisGrid = ({
-  rows = 20,
-  cols = 10,
-  cellSize = 24,
-  grid,
-  showGrid = true,
-  currentPiece,
-}) => {
+const TetrisGrid = ({ grid, showGrid = true, currentPiece }) => {
   const palette = useMemo(() => ({ ...BASE_TETRIS_COLORS }), []);
   const sourceGrid = useMemo(() => (Array.isArray(grid) ? grid : []), [grid]);
 
   const normalizedGrid = useMemo(
-    () => normalizeGrid(sourceGrid, rows, cols, palette),
-    [sourceGrid, rows, cols, palette]
+    () =>
+      normalizeGrid(
+        sourceGrid,
+        DEFAULT_BOARD_ROWS,
+        DEFAULT_BOARD_COLS,
+        palette
+      ),
+    [sourceGrid, palette]
   );
 
   const normalizedCurrentPiece = useMemo(
@@ -134,18 +139,18 @@ const TetrisGrid = ({
       <Overlay aria-hidden>
         <OverlayInner
           style={{
-            transform: `translate3d(${normalizedCurrentPiece.position.x * cellSize}px, ${
-              normalizedCurrentPiece.position.y * cellSize
+            transform: `translate3d(${normalizedCurrentPiece.position.x * CELL_SIZE}px, ${
+              normalizedCurrentPiece.position.y * CELL_SIZE
             }px, 0)`,
           }}
         >
           {normalizedCurrentPiece.blocks.map(([bx, by], index) => (
             <Block
               key={index}
-              $size={cellSize}
+              $size={CELL_SIZE}
               style={{
-                left: bx * cellSize,
-                top: by * cellSize,
+                left: bx * CELL_SIZE,
+                top: by * CELL_SIZE,
                 '--block-color': normalizedCurrentPiece.color,
                 '--block-shadow': normalizedCurrentPiece.shadowColor,
               }}
@@ -158,11 +163,11 @@ const TetrisGrid = ({
   return (
     <Board
       role="grid"
-      aria-rowcount={rows}
-      aria-colcount={cols}
+      aria-rowcount={DEFAULT_BOARD_ROWS}
+      aria-colcount={DEFAULT_BOARD_COLS}
       style={{
-        gridTemplateColumns: `repeat(${cols}, ${cellSize}px)`,
-        gridTemplateRows: `repeat(${rows}, ${cellSize}px)`,
+        gridTemplateColumns: `repeat(${DEFAULT_BOARD_COLS}, ${CELL_SIZE}px)`,
+        gridTemplateRows: `repeat(${DEFAULT_BOARD_ROWS}, ${CELL_SIZE}px)`,
       }}
     >
       {normalizedGrid.map((row, y) =>
@@ -174,7 +179,7 @@ const TetrisGrid = ({
             data-filled={cell.filled ? 'true' : 'false'}
             data-ghost={cell.ghost ? 'true' : 'false'}
             data-indestructible={cell.indestructible ? 'true' : 'false'}
-            $size={cellSize}
+            $size={CELL_SIZE}
             $filled={cell.filled}
             $ghost={cell.ghost}
             $showGrid={showGrid}
@@ -193,7 +198,6 @@ const TetrisGrid = ({
 TetrisGrid.propTypes = {
   rows: PropTypes.number,
   cols: PropTypes.number,
-  cellSize: PropTypes.number,
   grid: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.object)),
   showGrid: PropTypes.bool,
   colors: PropTypes.object,
