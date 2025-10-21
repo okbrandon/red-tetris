@@ -22,6 +22,7 @@ const createInitialState = () => ({
     active: false,
   },
   players: [],
+  isResultModalOpen: false,
 });
 
 export const gameSlice = createSlice({
@@ -116,6 +117,9 @@ export const gameSlice = createSlice({
     setSpectatorActive: (state, action) => {
       state.spectator.active = Boolean(action.payload);
     },
+    setIsResultModalOpen: (state, action) => {
+      state.isResultModalOpen = Boolean(action.payload);
+    },
     resetGameState: () => createInitialState(), // room_left
   },
 });
@@ -129,5 +133,6 @@ export const {
   setGameStatus,
   setPlayerOutcome,
   setSpectatorActive,
+  setIsResultModalOpen,
 } = gameSlice.actions;
 export default gameSlice.reducer;

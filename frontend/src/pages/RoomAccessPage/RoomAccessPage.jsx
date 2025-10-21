@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import {
   Wrapper,
   Card,
@@ -11,45 +11,14 @@ import {
 } from '../UsernameSetupPage/UsernameSetupPage.styles.js';
 import BackButton from '@/components/Backbutton/BackButton.jsx';
 import { JoinForm, JoinHint } from './RoomAccessPage.styles.js';
-import { showNotification } from '@/store/slices/notificationSlice.js';
-import { requestRoomJoin } from '@/store/slices/socketThunks.js';
+import useGameFlow from '@/hooks/useGameFlow.js';
 
-const JoinPage = () => {
-  const dispatch = useDispatch();
-  const lobbySettings = useSelector((state) => state.game);
-  const [roomName, setRoomName] = useState(() => lobbySettings.roomName || '');
+const RoomAccessPage = () => {
   const navigate = useNavigate();
+  const { roomName: originalRoomName } = useSelector((state) => state.game);
+  const [roomName, setRoomName] = useState(originalRoomName);
 
-  const handleJoin = () => {
-    const trimmed = roomName.trim();
-    if (!trimmed) {
-      dispatch(
-        showNotification({
-          type: 'error',
-          message: 'Enter a room name to join a lobby.',
-        })
-      );
-      return;
-    }
-    requestRoomJoin({ roomName: trimmed, soloJourney: false });
-    dispatch(
-      showNotification({
-        type: 'success',
-        message: `Joining lobby ${trimmed}…`,
-      })
-    );
-  };
-
-  useEffect(() => {
-    if (lobbySettings.mode === 'multiplayer' && lobbySettings.roomName) {
-      navigate(`/${lobbySettings.roomName}/${lobbySettings.owner?.username}`);
-    }
-  }, [
-    lobbySettings.mode,
-    lobbySettings.roomName,
-    lobbySettings.owner,
-    navigate,
-  ]);
+  const { joinMutliplayerRoom } = useGameFlow({ roomName });
 
   return (
     <Wrapper>
@@ -65,10 +34,14 @@ const JoinPage = () => {
             aria-label="Room name"
             onChange={(event) => setRoomName(event.target.value)}
             onKeyDown={(event) => {
-              if (event.key === 'Enter' && roomName.trim()) handleJoin();
+              if (event.key === 'Enter' && roomName.trim())
+                joinMutliplayerRoom();
             }}
           />
-          <StartButton onClick={handleJoin} disabled={!roomName.trim()}>
+          <StartButton
+            onClick={joinMutliplayerRoom}
+            disabled={!roomName.trim()}
+          >
             Join Lobby
           </StartButton>
           <JoinHint>Join an existing room or create a new one.</JoinHint>
@@ -78,4 +51,4 @@ const JoinPage = () => {
   );
 };
 
-export default JoinPage;
+export default RoomAccessPage;

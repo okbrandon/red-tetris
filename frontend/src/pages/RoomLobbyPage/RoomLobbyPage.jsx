@@ -1,5 +1,4 @@
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import {
   Wrapper,
   Card,
@@ -8,41 +7,20 @@ import {
   LogoTitle,
 } from '../UsernameSetupPage/UsernameSetupPage.styles';
 import BackButton from '@/components/Backbutton/BackButton';
-import { PlayerList, Player } from './RoomLobbyPage.styles';
-import { showNotification } from '@/store/slices/notificationSlice';
-import {
-  requestRoomLeave,
-  requestStartGame,
-} from '@/store/slices/socketThunks.js';
+import { PlayerList, Player } from './RoomRoomLobbyPage.styles';
+import useGameFlow from '@/hooks/useGameFlow';
 
-const LobbyPage = () => {
-  const { username } = useSelector((state) => state.user);
-  const { players, roomName, isOwner } = useSelector((state) => state.game);
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+const RoomLobbyPage = () => {
+  const username = useSelector((state) => state.user.username);
+  const { players, roomName, isOwner } = useSelector(
+    (state) => state.game
+  );
 
-  const handleStartGame = () => {
-    if (!isOwner) {
-      dispatch(
-        showNotification({
-          type: 'error',
-          message: 'Only the lobby owner can start the game.',
-        })
-      );
-      return;
-    }
-    requestStartGame();
-  };
-
-  const handleLeaveLobby = () => {
-    requestRoomLeave();
-    dispatch(showNotification({ type: 'info', message: 'Leaving lobby…' }));
-    navigate('/menu');
-  };
+  const { startMultiplayerGame, leaveLobby } = useGameFlow({ roomName });
 
   return (
     <Wrapper>
-      <BackButton onClick={handleLeaveLobby} />
+      <BackButton onClick={leaveLobby} />
 
       <LogoTitle>Lobby</LogoTitle>
 
@@ -57,7 +35,7 @@ const LobbyPage = () => {
           ))}
         </PlayerList>
 
-        <StartButton onClick={handleStartGame} disabled={!isOwner}>
+        <StartButton onClick={startMultiplayerGame} disabled={!isOwner}>
           {isOwner ? 'Start Game' : 'Waiting for host'}
         </StartButton>
       </Card>
@@ -65,4 +43,4 @@ const LobbyPage = () => {
   );
 };
 
-export default LobbyPage;
+export default RoomLobbyPage;

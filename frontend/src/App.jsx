@@ -7,11 +7,11 @@ import {
 } from 'react-router-dom';
 import UsernameSetupPage from '@/pages/UsernameSetupPage/UsernameSetupPage';
 import ModeSelectPage from '@/pages/ModeSelectPage/ModeSelectPage';
-import GamePlayPage from '@/pages/GamePlayPage/GamePlayPage';
 import RoomAccessPage from '@/pages/RoomAccessPage/RoomAccessPage';
 import AnimatedBackground from './components/AnimatedBackground/AnimatedBackground';
 import Notification from '@/components/Notification/Notification';
 import { updateUsername } from '@/store/slices/userThunks.js';
+import ArenaRouter from './pages/Arena/ArenaRouterPage/ArenaRouter';
 
 function RedirectOnRefresh() {
   const navigate = useNavigate();
@@ -66,7 +66,7 @@ function App() {
         <Route path="/" element={<UsernameSetupPage />} />
         <Route path="/menu" element={<ModeSelectPage />} />
         <Route path="/join" element={<RoomAccessPage />} />
-        <Route path="/:room/:player_name" element={<GamePlayPage />} />
+        <Route path="/:room/:player_name" element={<ArenaRouter />} />
       </Routes>
     </Router>
   );

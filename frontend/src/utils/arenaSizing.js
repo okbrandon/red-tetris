@@ -1,3 +1,5 @@
+import { CELL_SIZE, DEFAULT_BOARD_ROWS } from './tetris';
+
 export const deriveCardScale = (count) => {
   if (count <= 1) return 1;
   if (count === 2) return 0.95;
@@ -6,14 +8,10 @@ export const deriveCardScale = (count) => {
   return Math.max(scaled, 0.6);
 };
 
-export const estimateOpponentCellSize = (
-  baseCellSize,
-  opponentCount,
-  tallestBoardRows = 20
-) => {
-  const preferred = Math.max(10, Math.floor(baseCellSize * 0.45));
-  const minimum = Math.max(4, Math.floor(baseCellSize * 0.18));
-  const maximum = Math.max(preferred, Math.floor(baseCellSize * 0.55));
+export const estimateOpponentCellSize = (opponentCount) => {
+  const preferred = Math.max(10, Math.floor(CELL_SIZE * 0.45));
+  const minimum = Math.max(4, Math.floor(CELL_SIZE * 0.18));
+  const maximum = Math.max(preferred, Math.floor(CELL_SIZE * 0.55));
 
   if (!opponentCount) {
     return Math.max(minimum, Math.min(preferred, maximum));
@@ -34,14 +32,14 @@ export const estimateOpponentCellSize = (
     opponentCount;
 
   const chromeAllowance = 64;
-  const heightRatio = (availablePerCard - chromeAllowance) / tallestBoardRows;
+  const heightRatio = (availablePerCard - chromeAllowance) / DEFAULT_BOARD_ROWS;
   const heightBound = Number.isFinite(heightRatio)
     ? Math.floor(heightRatio)
     : preferred;
   const safeCandidate = heightBound > 0 ? heightBound : minimum;
 
-  const soloCap = Math.max(minimum, Math.floor(baseCellSize * 0.42));
-  const duoCap = Math.max(minimum, Math.floor(baseCellSize * 0.36));
+  const soloCap = Math.max(minimum, Math.floor(CELL_SIZE * 0.42));
+  const duoCap = Math.max(minimum, Math.floor(CELL_SIZE * 0.36));
   const tierCap =
     opponentCount === 1
       ? Math.min(maximum, soloCap)
@@ -50,4 +48,19 @@ export const estimateOpponentCellSize = (
         : maximum;
 
   return Math.max(minimum, Math.min(safeCandidate, tierCap));
+};
+
+export const computePrimaryCellSize = () => {
+  if (typeof window === 'undefined') return 32;
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const sidebarWidth = w >= 880 ? Math.min(Math.max(w * 0.34, 280), 400) : 0;
+  const layoutPadding = w >= 880 ? 64 : 32;
+  const availableWidth = w - sidebarWidth - layoutPadding;
+  const widthBased = availableWidth / 10;
+  const verticalPadding = Math.max(h * 0.3, 260);
+  const availableHeight = Math.max(h - verticalPadding, 240);
+  const heightBased = availableHeight / 20;
+  const raw = Math.floor(Math.min(widthBased, heightBased));
+  return Math.max(20, Math.min(raw, 42));
 };

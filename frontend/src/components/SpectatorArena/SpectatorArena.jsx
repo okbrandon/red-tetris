@@ -71,7 +71,7 @@ const computeStats = (player) => {
   return entries;
 };
 
-const SpectatorArena = ({ onLeaveGame }) => {
+const SpectatorArena = ({ leaveRoom }) => {
   const { you, players: gamePlayers } = useSelector((state) => state.game);
 
   const players = Array.isArray(gamePlayers) ? gamePlayers : [];
@@ -220,9 +220,9 @@ const SpectatorArena = ({ onLeaveGame }) => {
                 <FocusedName>No active opponents</FocusedName>
               </FocusedHeader>
               <EmptyState>No boards to watch right now.</EmptyState>
-              {typeof onLeaveGame === 'function' && (
+              {typeof leaveRoom === 'function' && (
                 <SpectatorActions>
-                  <ExitButton type="button" onClick={onLeaveGame}>
+                  <ExitButton type="button" onClick={leaveRoom}>
                     Leave Game
                   </ExitButton>
                 </SpectatorActions>
@@ -257,9 +257,9 @@ const SpectatorArena = ({ onLeaveGame }) => {
                   </FocusedStats>
                 )}
               </FocusedBody>
-              {typeof onLeaveGame === 'function' && (
+              {typeof leaveRoom === 'function' && (
                 <SpectatorActions>
-                  <ExitButton type="button" onClick={onLeaveGame}>
+                  <ExitButton type="button" onClick={leaveRoom}>
                     Leave Game
                   </ExitButton>
                 </SpectatorActions>
@@ -273,7 +273,7 @@ const SpectatorArena = ({ onLeaveGame }) => {
 };
 
 SpectatorArena.propTypes = {
-  onLeaveGame: PropTypes.func,
+  leaveRoom: PropTypes.func,
 };
 
 export default SpectatorArena;
