@@ -49,6 +49,7 @@ const TetrisGrid = ({
   currentPiece,
   rows = DEFAULT_BOARD_ROWS,
   cols = DEFAULT_BOARD_COLS,
+  cellSize = CELL_SIZE,
 }) => {
   const normalizedGrid = useMemo(
     () => normalizeGrid(grid, rows, cols, BASE_TETRIS_COLORS),
@@ -71,8 +72,8 @@ const TetrisGrid = ({
       aria-rowcount={rows}
       aria-colcount={cols}
       style={{
-        gridTemplateColumns: `repeat(${cols}, ${CELL_SIZE}px)`,
-        gridTemplateRows: `repeat(${rows}, ${CELL_SIZE}px)`,
+        gridTemplateColumns: `repeat(${cols}, ${cellSize}px)`,
+        gridTemplateRows: `repeat(${rows}, ${cellSize}px)`,
       }}
     >
       {normalizedGrid.map((row, y) =>
@@ -84,7 +85,7 @@ const TetrisGrid = ({
             data-filled={cell.filled ? 'true' : 'false'}
             data-ghost={cell.ghost ? 'true' : 'false'}
             data-indestructible={cell.indestructible ? 'true' : 'false'}
-            $size={CELL_SIZE}
+            $size={cellSize}
             $filled={cell.filled}
             $ghost={cell.ghost}
             $showGrid={showGrid}
@@ -112,6 +113,7 @@ TetrisGrid.propTypes = {
     type: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   }),
+  cellSize: PropTypes.number,
 };
 
 export default TetrisGrid;

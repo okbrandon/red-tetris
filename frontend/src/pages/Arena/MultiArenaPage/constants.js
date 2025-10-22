@@ -7,3 +7,4 @@ import {
 export const OPPONENT_CELL_SIZE = Math.max(12, Math.floor(CELL_SIZE * 0.5));
 export const DEFAULT_ROWS = DEFAULT_BOARD_ROWS;
 export const DEFAULT_COLS = DEFAULT_BOARD_COLS;
+export const MAX_VISIBLE_SPECTERS = 3;

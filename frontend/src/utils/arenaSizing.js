@@ -50,6 +50,29 @@ export const estimateOpponentCellSize = (opponentCount) => {
   return Math.max(minimum, Math.min(safeCandidate, tierCap));
 };
 
+const MIN_PREVIEW_CELL_SIZE = 3;
+const PREVIEW_SCALE = 0.5;
+const MAX_PREVIEW_HEIGHT = 118;
+const MAX_PREVIEW_WIDTH = 148;
+const BOARD_PADDING = 6;
+
+export const derivePreviewCellSize = ({
+  opponentCount = 0,
+  rows = DEFAULT_BOARD_ROWS,
+  cols = 10,
+} = {}) => {
+  const safeRows = Math.max(1, rows);
+  const safeCols = Math.max(1, cols);
+  const baseSize = estimateOpponentCellSize(opponentCount);
+  const scaled = Math.floor(baseSize * PREVIEW_SCALE);
+  const heightBound = Math.floor(
+    (MAX_PREVIEW_HEIGHT - BOARD_PADDING) / safeRows
+  );
+  const widthBound = Math.floor((MAX_PREVIEW_WIDTH - BOARD_PADDING) / safeCols);
+  const candidate = Math.min(scaled, heightBound, widthBound);
+  return Math.max(MIN_PREVIEW_CELL_SIZE, candidate);
+};
+
 export const computePrimaryCellSize = () => {
   if (typeof window === 'undefined') return 32;
   const w = window.innerWidth;

@@ -3,11 +3,17 @@ import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import TetrisGrid from '@/components/TetrisGrid/TetrisGrid.jsx';
 import useResponsiveValue from '@/hooks/useResponsiveValue.js';
-import { deriveBoardDimensions } from '@/utils/tetris.js';
+import {
+  DEFAULT_BOARD_COLS,
+  DEFAULT_BOARD_ROWS,
+  deriveBoardDimensions,
+} from '@/utils/tetris.js';
 import {
   deriveCardScale,
+  derivePreviewCellSize,
   estimateOpponentCellSize,
 } from '@/utils/arenaSizing.js';
+import { MAX_VISIBLE_SPECTERS } from '../MultiArenaPage/constants.js';
 import {
   ArenaContainer as SpectatorContainer,
   ArenaLayout as SpectatorLayout,
@@ -79,28 +85,35 @@ const SpectatorArena = ({ leaveRoom }) => {
     () => players.filter((player) => (you?.id ? player?.id !== you.id : true)),
     [players, you?.id]
   );
+  const visibleOpponents = useMemo(
+    () => opponents.slice(0, MAX_VISIBLE_SPECTERS),
+    [opponents]
+  );
 
-  const [selectedId, setSelectedId] = useState(() => opponents[0]?.id ?? null);
+  const [selectedId, setSelectedId] = useState(
+    () => visibleOpponents[0]?.id ?? null
+  );
 
   useEffect(() => {
-    if (!opponents.length) {
+    if (!visibleOpponents.length) {
       setSelectedId(null);
       return;
     }
-    const firstId = opponents[0]?.id ?? null;
+    const firstId = visibleOpponents[0]?.id ?? null;
     const hasSelected =
-      selectedId && opponents.some((player) => player?.id === selectedId);
+      selectedId &&
+      visibleOpponents.some((player) => player?.id === selectedId);
     if (!hasSelected && selectedId !== firstId) {
       setSelectedId(firstId);
     }
-  }, [opponents, selectedId]);
+  }, [visibleOpponents, selectedId]);
 
   const focusedPlayer = useMemo(
     () =>
-      opponents.find((player) => player?.id === selectedId) ??
-      opponents[0] ??
+      visibleOpponents.find((player) => player?.id === selectedId) ??
+      visibleOpponents[0] ??
       null,
-    [opponents, selectedId]
+    [visibleOpponents, selectedId]
   );
 
   const focusedBoard = Array.isArray(focusedPlayer?.specter)
@@ -118,28 +131,9 @@ const SpectatorArena = ({ leaveRoom }) => {
       [safeRows, safeCols]
     )
   );
-  const tallestSpecterRows = useMemo(() => {
-    if (!opponents.length) return 20;
-    return (
-      opponents.reduce((maxRows, opponent) => {
-        const board = Array.isArray(opponent?.specter) ? opponent.specter : [];
-        const { rows: boardRows } = deriveBoardDimensions(board);
-        return boardRows > maxRows ? boardRows : maxRows;
-      }, 0) || 20
-    );
-  }, [opponents]);
   const spectatorScale = useMemo(
-    () => deriveCardScale(opponents.length),
-    [opponents.length]
-  );
-  const previewCellSize = useMemo(
-    () =>
-      estimateOpponentCellSize(
-        focusedCellSize || 20,
-        opponents.length,
-        tallestSpecterRows
-      ),
-    [focusedCellSize, opponents.length, tallestSpecterRows]
+    () => deriveCardScale(visibleOpponents.length),
+    [visibleOpponents.length]
   );
   const focusedStats = useMemo(
     () => computeStats(focusedPlayer),
@@ -155,11 +149,11 @@ const SpectatorArena = ({ leaveRoom }) => {
       <SpectatorLayout>
         <SpectatorColumn style={cardScaleStyle}>
           <SectionLabel>{`Opponents${
-            opponents.length ? ` (${opponents.length})` : ''
+            visibleOpponents.length ? ` (${visibleOpponents.length})` : ''
           }`}</SectionLabel>
-          {opponents.length ? (
+          {visibleOpponents.length ? (
             <SpectatorList aria-label="Players to spectate">
-              {opponents.map((opponent, index) => {
+              {visibleOpponents.map((opponent, index) => {
                 const miniBoard = Array.isArray(opponent?.specter)
                   ? opponent.specter
                   : [];
@@ -167,6 +161,9 @@ const SpectatorArena = ({ leaveRoom }) => {
                   deriveBoardDimensions(miniBoard);
                 const ordinal = index + 1;
                 const isActive = opponent?.id === focusedPlayer?.id;
+                const previewCellSize = estimateOpponentCellSize({
+                  opponentCount: visibleOpponents.length,
+                });
 
                 return (
                   <SpectatorCard
@@ -213,7 +210,7 @@ const SpectatorArena = ({ leaveRoom }) => {
         </SpectatorColumn>
 
         <SpectatorMain>
-          {!opponents.length ? (
+          {!visibleOpponents.length ? (
             <FocusedPanel role="region" aria-label="Spectator focus panel">
               <FocusedHeader>
                 <FocusedBadge>Watching</FocusedBadge>

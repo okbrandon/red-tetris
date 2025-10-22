@@ -56,7 +56,7 @@ export const OpponentGrid = styled.div`
   grid-template-columns: repeat(auto-fit, minmax(var(--card-min), 1fr));
   gap: clamp(0.7rem, 1.2vw, 1.2rem);
   flex: 1 1 auto;
-  justify-items: stretch;
+  justify-items: center;
 `;
 
 export const OpponentCard = styled.div`

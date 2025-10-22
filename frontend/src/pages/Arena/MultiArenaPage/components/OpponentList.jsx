@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import OpponentBoard from './OpponentBoard.jsx';
 import {
   EmptyNotice,
@@ -5,14 +6,18 @@ import {
   OpponentGrid,
   SectionLabel,
 } from '../MultiArenaPage.styles.js';
-import { useMemo } from 'react';
 import {
   deriveCardScale,
   estimateOpponentCellSize,
 } from '@/utils/arenaSizing.js';
+import { MAX_VISIBLE_SPECTERS } from '../constants.js';
 
 const OpponentList = ({ opponents }) => {
-  const opponentCount = opponents.length;
+  const visibleOpponents = useMemo(
+    () => opponents.slice(0, MAX_VISIBLE_SPECTERS),
+    [opponents]
+  );
+  const opponentCount = visibleOpponents.length;
 
   const opponentCellSize = useMemo(
     () => estimateOpponentCellSize(opponentCount),
@@ -36,7 +41,7 @@ const OpponentList = ({ opponents }) => {
       }`}</SectionLabel>
       {opponentCount ? (
         <OpponentGrid aria-label="Opponent boards">
-          {opponents.map((opponent, index) => (
+          {visibleOpponents.map((opponent, index) => (
             <OpponentBoard
               key={
                 opponent?.id ||
