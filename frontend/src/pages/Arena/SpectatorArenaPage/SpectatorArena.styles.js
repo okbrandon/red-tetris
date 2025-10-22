@@ -11,10 +11,10 @@ export {
   MiniBoard,
   EmptyNotice,
   MainColumn,
-} from '../MultiplayerArena/MultiplayerArena.styles.js';
+} from '../MultiArenaPage/MultiArenaPage.styles.js';
 
 import styled from 'styled-components';
-import { BoardFrame as BaseBoardFrame } from '../GameView/GameView.styles.js';
+import { BoardFrame as BaseBoardFrame } from '@/components/GameView/GameView.styles.js';
 
 export const SpectatorActions = styled.div`
   display: flex;

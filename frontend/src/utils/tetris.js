@@ -64,3 +64,107 @@ export const extractPieceBlocks = (piece, { preferShape = false } = {}) => {
   }
   return blocks;
 };
+
+export const setAlpha = (color, alpha) => {
+  if (!color) return `rgba(0,0,0,${alpha})`;
+  const trimmed = color.trim();
+
+  if (trimmed.startsWith('rgba')) {
+    const body = trimmed
+      .slice(5, -1)
+      .split(',')
+      .map((part) => part.trim());
+    if (body.length >= 3) {
+      return `rgba(${body[0]}, ${body[1]}, ${body[2]}, ${alpha})`;
+    }
+  }
+
+  if (trimmed.startsWith('rgb(')) {
+    const body = trimmed
+      .slice(4, -1)
+      .split(',')
+      .map((part) => part.trim());
+    if (body.length === 3) {
+      return `rgba(${body.join(', ')}, ${alpha})`;
+    }
+  }
+
+  if (trimmed.startsWith('#')) {
+    let hex = trimmed.slice(1);
+    if (hex.length === 3) {
+      hex = hex
+        .split('')
+        .map((c) => c + c)
+        .join('');
+    }
+    if (hex.length === 6) {
+      const value = Number.parseInt(hex, 16);
+      const r = (value >> 16) & 255;
+      const g = (value >> 8) & 255;
+      const b = value & 255;
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+  }
+
+  return color;
+};
+
+export const normalizeCell = (value = {}, palette) => {
+  const filled = Boolean(value.filled);
+  const ghost = Boolean(value.ghost);
+  const indestructible = Boolean(value.indestructible);
+  const baseColor = value.color
+    ? (palette[value.color] ?? value.color)
+    : undefined;
+  const resolvedColor = ghost
+    ? palette.ghost
+    : indestructible
+      ? palette.indestructible
+      : baseColor;
+  const color = resolvedColor ?? palette.empty ?? BASE_TETRIS_COLORS.empty;
+  const shadowColor = ghost
+    ? setAlpha(color, 0.25)
+    : setAlpha(color, filled ? 0.45 : 0.12);
+
+  return {
+    filled: ghost ? false : filled,
+    ghost,
+    indestructible,
+    color,
+    shadowColor,
+  };
+};
+
+export const normalizeGrid = (grid, rows, cols, palette) => {
+  const source = Array.isArray(grid) ? grid : [];
+  const normalized = [];
+  for (let y = 0; y < rows; y += 1) {
+    const row = [];
+    for (let x = 0; x < cols; x += 1) {
+      const rowSource = Array.isArray(source[y]) ? source[y] : [];
+      row.push(normalizeCell(rowSource[x], palette));
+    }
+    normalized.push(row);
+  }
+  return normalized;
+};
+
+export const normalizeActivePiece = (piece, palette) => {
+  if (!piece) return null;
+  if (!Array.isArray(piece.shape)) return null;
+
+  const blocks = extractPieceBlocks(piece, { preferShape: true });
+
+  if (blocks.length === 0) return null;
+
+  const color = piece.color
+    ? (palette[piece.color] ?? piece.color)
+    : palette.default;
+
+  return {
+    blocks,
+    position: piece.position ?? { x: 0, y: 0 },
+    color,
+    shadowColor: setAlpha(color, 0.45),
+  };
+};

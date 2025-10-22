@@ -7,7 +7,7 @@ import {
   LogoTitle,
 } from '../UsernameSetupPage/UsernameSetupPage.styles';
 import BackButton from '@/components/Backbutton/BackButton';
-import { PlayerList, Player } from './RoomRoomLobbyPage.styles';
+import { PlayerList, Player } from './RoomLobbyPage.styles';
 import useGameFlow from '@/hooks/useGameFlow';
 
 const RoomLobbyPage = () => {

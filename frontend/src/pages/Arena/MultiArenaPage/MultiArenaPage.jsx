@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import SpectatorArena from '@/components/SpectatorArena/SpectatorArena.jsx';
+import SpectatorArena from '../SpectatorArenaPage/SpectatorArena.jsx';
 import {
   ArenaContainer,
   ArenaLayout,

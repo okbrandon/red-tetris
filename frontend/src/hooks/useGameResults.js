@@ -21,6 +21,7 @@ const useGameResults = () => {
       (gameStatus === 'in-game' && playerOutcome?.outcome)
     ) {
       dispatch(setIsResultModalOpen(true));
+      console.log('Opening result modal');
     }
   }, [gameStatus, playerOutcome, dispatch]);
 
@@ -31,12 +32,14 @@ const useGameResults = () => {
       isResultModalOpen
     ) {
       dispatch(setIsResultModalOpen(false));
+      console.log('Closing result modal');
     }
   }, [gameStatus, playerOutcome, dispatch, isResultModalOpen]);
 
   useEffect(() => {
     if (!gameStatus) {
       navigate('/menu');
+      console.log('No active game, navigating to menu');
     }
   }, [gameStatus, navigate]);
 
@@ -45,6 +48,7 @@ const useGameResults = () => {
     dispatch(setSpectatorActive(false));
     requestRoomLeave();
     dispatch(showNotification({ type: 'info', message: 'Returning to menu…' }));
+    console.log('Returning to menu');
   };
 
   const spectateGame = () => {
@@ -56,6 +60,7 @@ const useGameResults = () => {
     dispatch(setSpectatorActive(false));
     requestRoomLeave();
     dispatch(showNotification({ type: 'info', message: 'Leaving room…' }));
+    console.log('Leaving room');
   };
 
   return { returnToMenu, spectateGame, leaveRoom };

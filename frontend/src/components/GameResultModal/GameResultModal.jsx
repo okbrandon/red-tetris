@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import {
   Overlay,
@@ -8,33 +9,7 @@ import {
   ActionButton,
 } from './GameResultModal.styles.js';
 import { requestRestartGame } from '@/store/slices/socketThunks.js';
-
-const VARIANTS = {
-  win: {
-    badge: 'Victory',
-    title: 'You Won!',
-    color: '#4ade80',
-    background: 'rgba(74, 222, 128, 0.18)',
-    shadow: '0 16px 28px rgba(74, 222, 128, 0.28)',
-    defaultMessage: 'You outlasted every challenger. Nicely stacked!',
-  },
-  lose: {
-    badge: 'Defeat',
-    title: 'Game Over',
-    color: '#f87171',
-    background: 'rgba(248, 113, 113, 0.16)',
-    shadow: '0 16px 28px rgba(248, 113, 113, 0.28)',
-    defaultMessage: 'Another chance awaits. Shake it off and try again.',
-  },
-  info: {
-    badge: 'Game Over',
-    title: 'Game Finished',
-    color: '#c4b5fd',
-    background: 'rgba(196, 181, 253, 0.16)',
-    shadow: '0 16px 28px rgba(196, 181, 253, 0.26)',
-    defaultMessage: 'The match has ended. Thanks for playing!',
-  },
-};
+import { deriveGameResultState } from '@/utils/gameResult.js';
 
 const GameResultModal = ({
   outcome,
@@ -45,10 +20,17 @@ const GameResultModal = ({
   isGameOver = false,
   onSpectate,
 }) => {
-  const variant =
-    outcome && Object.prototype.hasOwnProperty.call(VARIANTS, outcome.outcome)
-      ? VARIANTS[outcome.outcome]
-      : VARIANTS.info;
+  const viewState = useMemo(
+    () =>
+      deriveGameResultState({
+        outcome,
+        isOwner,
+        isGameOver,
+        canSpectate,
+        onSpectate,
+      }),
+    [outcome, isOwner, isGameOver, canSpectate, onSpectate]
+  );
 
   const handleRestart = () => {
     requestRestartGame();
@@ -61,16 +43,20 @@ const GameResultModal = ({
         aria-modal="true"
         aria-labelledby="game-result-title"
       >
-        <OutcomeBadge $variant={variant}>{variant.badge}</OutcomeBadge>
-        <Title id="game-result-title">Game Over</Title>
-        <Message>{outcome?.message || 'Game Over'}</Message>
-        {!isOwner && isGameOver && <Message>Waiting for host...</Message>}
-        {isOwner && isGameOver && (
+        <OutcomeBadge $variant={viewState.variant}>
+          {viewState.variant.badge}
+        </OutcomeBadge>
+        <Title id="game-result-title">{viewState.variant.title}</Title>
+        <Message>{viewState.message}</Message>
+        {viewState.waitingMessageVisible && (
+          <Message>Waiting for host...</Message>
+        )}
+        {viewState.restartVisible && (
           <ActionButton type="button" onClick={handleRestart}>
             Restart Game
           </ActionButton>
         )}
-        {canSpectate && typeof onSpectate === 'function' && (
+        {viewState.spectateEnabled && (
           <ActionButton type="button" onClick={onSpectate}>
             Spectate Match
           </ActionButton>
@@ -92,6 +78,7 @@ GameResultModal.propTypes = {
   isOwner: PropTypes.bool,
   placement: PropTypes.oneOf(['page', 'board']),
   canSpectate: PropTypes.bool,
+  isGameOver: PropTypes.bool,
   onSpectate: PropTypes.func,
 };
 

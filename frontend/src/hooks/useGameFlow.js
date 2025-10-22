@@ -16,26 +16,23 @@ const useGameFlow = ({ roomName }) => {
   const username = useSelector((state) => state.user.username);
 
   useEffect(() => {
-    if (!gameStatus) {
-      navigate('/menu');
-    }
-  }, [gameStatus, navigate]);
-
-  useEffect(() => {
     if (mode === 'solo' && roomName && gameStatus !== 'in-game') {
       requestStartGame();
+      console.log('useGameFlow: Starting solo game');
     }
   }, [mode, roomName, gameStatus]);
 
   useEffect(() => {
     if (mode === 'solo' && roomName && gameStatus === 'in-game') {
       navigate(`/${roomName}/${username}`);
+      console.log('useGameFlow: Navigating to solo game arena');
     }
   }, [mode, roomName, gameStatus, navigate, username]);
 
   useEffect(() => {
     if (mode === 'multiplayer' && roomName && gameStatus === 'waiting') {
       navigate(`/${roomName}/${username}`);
+      console.log('useGameFlow: Navigating to multiplayer lobby');
     }
   }, [mode, roomName, navigate, username, gameStatus]);
 

@@ -18,7 +18,7 @@ const RoomAccessPage = () => {
   const { roomName: originalRoomName } = useSelector((state) => state.game);
   const [roomName, setRoomName] = useState(originalRoomName);
 
-  const { joinMutliplayerRoom } = useGameFlow({ roomName });
+  const { joinMultiplayerRoom } = useGameFlow({ roomName });
 
   return (
     <Wrapper>
@@ -35,11 +35,11 @@ const RoomAccessPage = () => {
             onChange={(event) => setRoomName(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === 'Enter' && roomName.trim())
-                joinMutliplayerRoom();
+                joinMultiplayerRoom();
             }}
           />
           <StartButton
-            onClick={joinMutliplayerRoom}
+            onClick={joinMultiplayerRoom}
             disabled={!roomName.trim()}
           >
             Join Lobby
