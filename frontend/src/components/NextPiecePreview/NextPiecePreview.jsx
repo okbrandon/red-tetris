@@ -7,22 +7,14 @@ import {
 } from '@/utils/tetrisPreview.js';
 import { Board, Cell } from './NextPiecePreview.styles.js';
 
-const NextPiecePreview = ({
-  piece,
-  cellSize = 18,
-  rows = DEFAULT_PREVIEW_ROWS,
-  cols = DEFAULT_PREVIEW_COLS,
-}) => {
-  const preview = useMemo(
-    () => createPreviewData(piece, undefined, { rows, cols }),
-    [piece, rows, cols]
-  );
+const NextPiecePreview = ({ piece, cellSize = 18 }) => {
+  const preview = useMemo(() => createPreviewData(piece), [piece]);
 
   return (
     <Board
       style={{
-        gridTemplateColumns: `repeat(${cols}, ${cellSize}px)`,
-        gridTemplateRows: `repeat(${rows}, ${cellSize}px)`,
+        gridTemplateColumns: `repeat(${DEFAULT_PREVIEW_COLS}, ${cellSize}px)`,
+        gridTemplateRows: `repeat(${DEFAULT_PREVIEW_ROWS}, ${cellSize}px)`,
       }}
     >
       {preview.matrix.map((r, y) =>
@@ -38,6 +30,7 @@ const NextPiecePreview = ({
     </Board>
   );
 };
+
 NextPiecePreview.propTypes = {
   piece: PropTypes.shape({
     id: PropTypes.number,
@@ -47,8 +40,6 @@ NextPiecePreview.propTypes = {
     color: PropTypes.string,
   }),
   cellSize: PropTypes.number,
-  rows: PropTypes.number,
-  cols: PropTypes.number,
 };
 
 export default NextPiecePreview;

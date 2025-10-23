@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import propTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import SpectatorArena from '../SpectatorArenaPage/SpectatorArena.jsx';
 import {
@@ -6,8 +7,8 @@ import {
   ArenaLayout,
   MainColumn,
 } from './MultiArenaPage.styles.js';
-import OpponentList from './components/OpponentList.jsx';
 import GameView from '@/components/GameView/GameView.jsx';
+import SpecterColumn from '@/components/SpecterColumn/SpecterColumn.jsx';
 
 const MultiArena = ({ resultModal, leaveRoom }) => {
   const { you, players, grid, spectator } = useSelector((state) => state.game);
@@ -20,19 +21,24 @@ const MultiArena = ({ resultModal, leaveRoom }) => {
   }, [players, you?.id]);
 
   if (spectator?.active) {
-    return <SpectatorArena leaveRoom={leaveRoom} />;
+    return <SpectatorArena leaveRoom={leaveRoom} opponents={opponents} />;
   }
 
   return (
     <ArenaContainer>
       <ArenaLayout>
-        <OpponentList opponents={opponents} />
+        <SpecterColumn opponents={opponents} />
         <MainColumn>
-          <GameView grid={grid} resultModal={resultModal} />
+          <GameView grid={grid} resultModal={resultModal} isPlaying={true} />
         </MainColumn>
       </ArenaLayout>
     </ArenaContainer>
   );
+};
+
+MultiArena.propTypes = {
+  resultModal: propTypes.node.isRequired,
+  leaveRoom: propTypes.func.isRequired,
 };
 
 export default MultiArena;

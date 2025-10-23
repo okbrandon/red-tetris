@@ -45,7 +45,7 @@ const renderOverlay = (piece) => {
 
 const TetrisGrid = ({
   grid,
-  showGrid = true,
+  showGrid = false,
   currentPiece,
   rows = DEFAULT_BOARD_ROWS,
   cols = DEFAULT_BOARD_COLS,

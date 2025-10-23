@@ -1,5 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
+import propTypes from 'prop-types';
 import TetrisGrid from '../TetrisGrid/TetrisGrid.jsx';
 import { Subtitle } from '@/pages/UsernameSetupPage/UsernameSetupPage.styles.js';
 import NextPiecePreview from '../NextPiecePreview/NextPiecePreview.jsx';
@@ -8,7 +9,7 @@ import {
   extractMoveDirection,
   shouldIgnoreForGameControls,
 } from '@/utils/keyboard.js';
-import { CELL_SIZE } from '@/utils/tetris.js';
+import { CELL_SIZE, computeStats } from '@/utils/tetris.js';
 import GameResultModal from '../GameResultModal/GameResultModal.jsx';
 import {
   Layout,
@@ -23,13 +24,18 @@ import {
   VerticalPreview,
   PreviewSlot,
   EmptyQueue,
+  ExitButton,
+  FocusedStats,
+  StatLabel,
+  StatRow,
+  StatValue,
+  SpectatorActions,
 } from './GameView.styles.js';
 
-const GameView = ({ grid, resultModal }) => {
-  const { currentPiece, nextPieces, score } = useSelector(
-    (state) => state.game
-  );
-  const queue = nextPieces;
+const GamePlayingView = ({ resultModal, grid }) => {
+  const { score, nextPieces } = useSelector((state) => state.game);
+  const primaryPreviewSize = Math.max(16, Math.floor(CELL_SIZE * 0.6));
+  const queuePreviewSize = Math.max(14, Math.floor(CELL_SIZE * 0.48));
 
   useEffect(() => {
     if (typeof window === 'undefined') return () => {};
@@ -45,25 +51,16 @@ const GameView = ({ grid, resultModal }) => {
     };
 
     window.addEventListener('keydown', handleKeyDown);
-
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
 
-  const primaryPreviewSize = Math.max(16, Math.floor(CELL_SIZE * 0.6));
-  const queuePreviewSize = Math.max(14, Math.floor(CELL_SIZE * 0.48));
-
   return (
     <Layout>
       <BoardArea>
         <BoardFrame>
-          <TetrisGrid
-            cellSize={CELL_SIZE}
-            showGrid
-            grid={grid}
-            currentPiece={currentPiece}
-          />
+          <TetrisGrid showGrid grid={grid} />
           {resultModal.isOpen && (
             <GameResultModal
               outcome={resultModal.outcome}
@@ -92,9 +89,9 @@ const GameView = ({ grid, resultModal }) => {
 
         <InfoCard aria-label="Upcoming pieces">
           <InfoLabel>Next Pieces</InfoLabel>
-          {queue.length ? (
+          {nextPieces.length ? (
             <VerticalPreview>
-              {queue.slice(0, 3).map((piece, index) => (
+              {nextPieces.slice(0, 3).map((piece, index) => (
                 <PreviewSlot key={piece?.id ?? piece?.name ?? `next-${index}`}>
                   <NextPiecePreview
                     piece={piece}
@@ -112,6 +109,91 @@ const GameView = ({ grid, resultModal }) => {
       </PanelArea>
     </Layout>
   );
+};
+
+GamePlayingView.propTypes = {
+  resultModal: propTypes.shape({
+    isOpen: propTypes.bool.isRequired,
+    outcome: propTypes.string,
+    onConfirm: propTypes.func.isRequired,
+    isOwner: propTypes.bool,
+    canSpectate: propTypes.bool,
+    onSpectate: propTypes.func,
+    isGameOver: propTypes.bool,
+  }).isRequired,
+  grid: propTypes.arrayOf(propTypes.array).isRequired,
+};
+
+const FocusedSpecter = ({ grid, focusedPlayer, leaveRoom }) => {
+  const focusedStats = useMemo(
+    () => computeStats(focusedPlayer),
+    [focusedPlayer]
+  );
+
+  return (
+    <Layout>
+      <BoardArea>
+        <BoardFrame>
+          <TetrisGrid showGrid grid={grid} />
+        </BoardFrame>
+        {focusedStats.length > 0 && (
+          <FocusedStats>
+            {focusedStats.map(({ label, value }) => (
+              <StatRow key={label}>
+                <StatLabel>{label}</StatLabel>
+                <StatValue>{value}</StatValue>
+              </StatRow>
+            ))}
+          </FocusedStats>
+        )}
+      </BoardArea>
+      <SpectatorActions>
+        <ExitButton type="button" onClick={leaveRoom}>
+          Leave Game
+        </ExitButton>
+      </SpectatorActions>
+    </Layout>
+  );
+};
+
+FocusedSpecter.propTypes = {
+  grid: propTypes.arrayOf(propTypes.array).isRequired,
+  focusedPlayer: propTypes.object,
+  leaveRoom: propTypes.func,
+};
+
+const GameView = ({
+  resultModal,
+  grid,
+  isPlaying,
+  focusedPlayer,
+  leaveRoom,
+}) => {
+  return isPlaying ? (
+    <GamePlayingView resultModal={resultModal} grid={grid} />
+  ) : (
+    <FocusedSpecter
+      grid={grid}
+      focusedPlayer={focusedPlayer}
+      leaveRoom={leaveRoom}
+    />
+  );
+};
+
+GameView.propTypes = {
+  resultModal: propTypes.shape({
+    isOpen: propTypes.bool.isRequired,
+    outcome: propTypes.string,
+    onConfirm: propTypes.func.isRequired,
+    isOwner: propTypes.bool,
+    canSpectate: propTypes.bool,
+    onSpectate: propTypes.func,
+    isGameOver: propTypes.bool,
+  }),
+  grid: propTypes.arrayOf(propTypes.array).isRequired,
+  isPlaying: propTypes.bool,
+  focusedPlayer: propTypes.object,
+  leaveRoom: propTypes.func,
 };
 
 export default GameView;

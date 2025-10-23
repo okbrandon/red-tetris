@@ -1,35 +1,6 @@
-import styled, { css } from 'styled-components';
+import { styled } from 'styled-components';
 
-export const ArenaContainer = styled.div`
-  width: min(100%, 94vw);
-  max-width: 1600px;
-  height: 100%;
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: stretch;
-  margin: 0 auto;
-  box-sizing: border-box;
-`;
-
-export const ArenaLayout = styled.div`
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: clamp(12px, 2vw, 24px);
-  padding: clamp(16px, 2vw, 24px);
-  box-sizing: border-box;
-
-  @media (min-width: 880px) {
-    display: grid;
-    grid-template-columns: clamp(340px, 40vw, 520px) minmax(0, 1fr);
-    align-items: stretch;
-  }
-`;
-
-export const OpponentColumn = styled.section`
+export const SpecterColumnContainer = styled.section`
   --card-scale: 1;
   display: grid;
   grid-template-rows: auto 1fr;
@@ -41,16 +12,7 @@ export const OpponentColumn = styled.section`
   flex: 1 1 auto;
 `;
 
-export const SectionLabel = styled.h3`
-  margin: 0;
-  font-size: 0.76rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: rgba(215, 206, 246, 0.72);
-  text-align: left;
-`;
-
-export const OpponentGrid = styled.div`
+export const SpecterGrid = styled.div`
   --card-min: clamp(140px, 20vw, 200px);
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(var(--card-min), 1fr));
@@ -59,7 +21,7 @@ export const OpponentGrid = styled.div`
   justify-items: center;
 `;
 
-export const OpponentCard = styled.div`
+export const SpecterCard = styled.div`
   width: 100%;
   min-width: 0;
   border-radius: calc(12px * var(--card-scale, 1));
@@ -85,7 +47,7 @@ export const OpponentCard = styled.div`
     box-shadow: 0 24px 38px rgba(14, 9, 30, 0.46);
   }
 
-  &[is-interactive='true'] {
+  &[data-interactive='true'] {
     &:hover,
     &:focus-visible {
       transform: translateY(-2px);
@@ -97,7 +59,7 @@ export const OpponentCard = styled.div`
   }
 `;
 
-export const OpponentBadge = styled.span`
+export const SpecterBadge = styled.span`
   padding: calc(0.18rem * var(--card-scale, 1))
     calc(0.55rem * var(--card-scale, 1));
   border-radius: 999px;
@@ -109,14 +71,14 @@ export const OpponentBadge = styled.span`
   color: rgba(190, 183, 232, 0.78);
 `;
 
-export const OpponentName = styled.span`
+export const SpecterName = styled.span`
   font-size: calc(0.78rem * var(--card-scale, 1));
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: rgba(229, 222, 255, 0.88);
 `;
 
-export const OpponentHeader = styled.div`
+export const SpecterHeader = styled.div`
   display: flex;
   flex-direction: column;
   gap: calc(0.35rem * var(--card-scale, 1));
@@ -148,14 +110,4 @@ export const EmptyNotice = styled.p`
   color: rgba(199, 191, 234, 0.68);
   text-align: center;
   width: 100%;
-`;
-
-export const MainColumn = styled.section`
-  display: flex;
-  flex-direction: column;
-  gap: clamp(0.6rem, 1.4vw, 1rem);
-  min-height: 0;
-  align-items: stretch;
-  justify-content: center;
-  max-height: 100%;
 `;

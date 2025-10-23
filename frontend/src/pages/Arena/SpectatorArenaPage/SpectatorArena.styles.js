@@ -1,64 +1,9 @@
 export {
   ArenaContainer,
   ArenaLayout,
-  OpponentColumn,
-  SectionLabel,
-  OpponentGrid,
-  OpponentCard,
-  OpponentBadge,
-  OpponentName,
-  OpponentHeader,
-  MiniBoard,
-  EmptyNotice,
-  MainColumn,
 } from '../MultiArenaPage/MultiArenaPage.styles.js';
-
 import styled from 'styled-components';
 import { BoardFrame as BaseBoardFrame } from '@/components/GameView/GameView.styles.js';
-
-export const SpectatorActions = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  align-self: flex-end;
-  width: 100%;
-  margin-top: clamp(0.4rem, 1vw, 0.8rem);
-`;
-
-export const ExitButton = styled.button`
-  appearance: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  border: 1px solid rgba(255, 118, 137, 0.5);
-  border-radius: 999px;
-  padding: 0.55rem 1.3rem;
-  font-size: 0.74rem;
-  font-weight: 600;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: rgba(255, 182, 194, 0.86);
-  background: rgba(44, 22, 36, 0.72);
-  cursor: pointer;
-  transition:
-    transform 0.18s ease,
-    background 0.18s ease,
-    border-color 0.18s ease,
-    color 0.18s ease;
-
-  &:hover,
-  &:focus-visible {
-    transform: translateY(-1px);
-    border-color: rgba(255, 182, 194, 0.85);
-    color: rgba(255, 214, 222, 0.95);
-    background: rgba(62, 26, 40, 0.82);
-    outline: none;
-  }
-
-  &:active {
-    transform: translateY(0);
-    background: rgba(58, 24, 36, 0.74);
-  }
-`;
 
 export const FocusedPanel = styled.div`
   width: 100%;
@@ -116,39 +61,6 @@ export const SpectatorBoardFrame = styled(BaseBoardFrame)`
   display: flex;
   align-items: center;
   justify-content: center;
-`;
-
-export const FocusedStats = styled.dl`
-  margin: 0;
-  display: grid;
-  gap: clamp(0.6rem, 1.2vw, 0.9rem);
-  padding: clamp(0.9rem, 2vw, 1.2rem);
-  border-radius: 16px;
-  border: 1px solid rgba(162, 130, 235, 0.22);
-  background: rgba(21, 18, 36, 0.72);
-  box-shadow: 0 18px 32px rgba(10, 7, 20, 0.32);
-`;
-
-export const StatRow = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.6rem;
-`;
-
-export const StatLabel = styled.dt`
-  margin: 0;
-  font-size: 0.68rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: rgba(199, 191, 234, 0.72);
-`;
-
-export const StatValue = styled.dd`
-  margin: 0;
-  font-size: clamp(1rem, 2.4vw, 1.3rem);
-  letter-spacing: 0.06em;
-  color: #f6f1ff;
 `;
 
 export const EmptyState = styled.p`

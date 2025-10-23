@@ -11,9 +11,16 @@ export const buildPreviewMatrix = (
 ) => {
   const safeRows = Math.max(0, rows);
   const safeCols = Math.max(0, cols);
-  const matrix = Array.from({ length: safeRows }, () => Array(safeCols).fill(0));
+  const matrix = Array.from({ length: safeRows }, () =>
+    Array(safeCols).fill(0)
+  );
 
-  if (!Array.isArray(blocks) || blocks.length === 0 || safeRows === 0 || safeCols === 0) {
+  if (
+    !Array.isArray(blocks) ||
+    blocks.length === 0 ||
+    safeRows === 0 ||
+    safeCols === 0
+  ) {
     return matrix;
   }
 
@@ -29,7 +36,12 @@ export const buildPreviewMatrix = (
     if (y > maxY) maxY = y;
   }
 
-  if (!Number.isFinite(minX) || !Number.isFinite(minY) || !Number.isFinite(maxX) || !Number.isFinite(maxY)) {
+  if (
+    !Number.isFinite(minX) ||
+    !Number.isFinite(minY) ||
+    !Number.isFinite(maxX) ||
+    !Number.isFinite(maxY)
+  ) {
     return matrix;
   }
 
@@ -58,18 +70,18 @@ const resolveColorFromPiece = (piece, palette, fallbackKey = 1) => {
   return palette[fallbackKey] ?? palette.default ?? 'rgba(0,0,0,0)';
 };
 
-export const createPreviewData = (
-  piece,
-  palette = BASE_TETRIS_COLORS,
-  { rows = DEFAULT_PREVIEW_ROWS, cols = DEFAULT_PREVIEW_COLS } = {}
-) => {
-  const normalizedPiece = normalizeActivePiece(piece, palette);
-  const matrix = buildPreviewMatrix(normalizedPiece?.blocks, rows, cols);
+export const createPreviewData = (piece) => {
+  const normalizedPiece = normalizeActivePiece(piece, BASE_TETRIS_COLORS);
+  const matrix = buildPreviewMatrix(
+    normalizedPiece?.blocks,
+    DEFAULT_PREVIEW_ROWS,
+    DEFAULT_PREVIEW_COLS
+  );
 
   const color =
     normalizedPiece?.color ??
-    resolveColorFromPiece(piece, palette) ??
-    palette.default ??
+    resolveColorFromPiece(piece, BASE_TETRIS_COLORS) ??
+    BASE_TETRIS_COLORS.default ??
     'rgba(0,0,0,0)';
 
   return {

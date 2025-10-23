@@ -2,7 +2,7 @@ import { styled } from 'styled-components';
 
 export const ArenaContainer = styled.div`
   width: min(100%, 94vw);
-  max-width: 1500px;
+  max-width: 950px;
   height: 100%;
   flex: 1 1 auto;
   display: flex;

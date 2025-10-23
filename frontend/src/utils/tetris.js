@@ -168,3 +168,24 @@ export const normalizeActivePiece = (piece, palette) => {
     shadowColor: setAlpha(color, 0.45),
   };
 };
+
+export const computeStats = (player) => {
+  if (!player || typeof player !== 'object') return [];
+  const stats = player.stats || {};
+
+  const entries = [];
+  const score = stats.score ?? player.score;
+  if (typeof score === 'number') {
+    entries.push({ label: 'Score', value: score });
+  }
+  const lines = stats.linesCleared ?? stats.lines ?? player.linesCleared;
+  if (typeof lines === 'number') {
+    entries.push({ label: 'Lines', value: lines });
+  }
+  const level = stats.level ?? player.level;
+  if (typeof level === 'number') {
+    entries.push({ label: 'Level', value: level });
+  }
+
+  return entries;
+};
