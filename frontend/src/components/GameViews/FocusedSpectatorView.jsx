@@ -15,10 +15,7 @@ import {
 } from './GameView.styles.js';
 
 const FocusedSpectatorView = ({ grid, focusedPlayer, leaveRoom }) => {
-  const stats = useMemo(
-    () => computeStats(focusedPlayer),
-    [focusedPlayer]
-  );
+  const stats = useMemo(() => computeStats(focusedPlayer), [focusedPlayer]);
 
   return (
     <Layout>
@@ -53,4 +50,3 @@ FocusedSpectatorView.propTypes = {
 };
 
 export default FocusedSpectatorView;
-

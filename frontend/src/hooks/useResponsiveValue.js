@@ -1,14 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 const useResponsiveValue = (calculate) => {
   const isFn = typeof calculate === 'function';
-  const getValue = () => (isFn ? calculate() : calculate);
+  const getValue = useCallback(
+    () => (isFn ? calculate() : calculate),
+    [isFn, calculate]
+  );
 
   const [value, setValue] = useState(getValue);
 
   useEffect(() => {
     setValue(getValue());
-  }, [calculate]);
+  }, [getValue]);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !isFn) {

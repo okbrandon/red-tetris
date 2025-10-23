@@ -12,9 +12,7 @@ import useGameFlow from '@/hooks/useGameFlow';
 
 const RoomLobbyPage = () => {
   const username = useSelector((state) => state.user.username);
-  const { players, roomName, isOwner } = useSelector(
-    (state) => state.game
-  );
+  const { players, roomName, isOwner } = useSelector((state) => state.game);
 
   const { startMultiplayerGame, leaveLobby } = useGameFlow({ roomName });
 

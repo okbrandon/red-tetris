@@ -6,4 +6,4 @@ export const ButtonGrid = styled.div`
   grid-template-columns: 1fr;
   width: min(380px, 80vw);
   margin: 0 auto;
-`
+`;

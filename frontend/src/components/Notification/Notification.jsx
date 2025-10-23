@@ -12,9 +12,7 @@ import useNotification from '@/hooks/useNotification.js';
 
 const Notification = () => {
   const dispatch = useDispatch();
-  const { message, type } = useSelector(
-    (state) => state.notification
-  );
+  const { message, type } = useSelector((state) => state.notification);
 
   const { isOpen, shouldRender } = useNotification();
 

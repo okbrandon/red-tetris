@@ -32,5 +32,5 @@ export const HOST_NAME = import.meta.env.VITE_HOST_NAME ?? 'localhost';
 const _VITE_SOCKET_URL = import.meta.env.VITE_SOCKET_URL;
 
 export const SOCKET_URL = _VITE_SOCKET_URL
-    ? _VITE_SOCKET_URL.replace('HOST_NAME', HOST_NAME)
-    : `http://${HOST_NAME}:3000`;
+  ? _VITE_SOCKET_URL.replace('HOST_NAME', HOST_NAME)
+  : `http://${HOST_NAME}:3000`;

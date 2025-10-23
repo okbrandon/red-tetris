@@ -9,4 +9,3 @@ export const resultModalShape = propTypes.shape({
   onSpectate: propTypes.func,
   isGameOver: propTypes.bool,
 });
-

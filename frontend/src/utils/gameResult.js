@@ -47,9 +47,7 @@ export const deriveGameResultState = ({
   const variant = GAME_RESULT_VARIANTS[variantKey];
 
   const message =
-    outcome?.message ??
-    variant.defaultMessage ??
-    DEFAULT_FALLBACK_MESSAGE;
+    outcome?.message ?? variant.defaultMessage ?? DEFAULT_FALLBACK_MESSAGE;
 
   const waitingMessageVisible = Boolean(!isOwner && isGameOver);
   const restartVisible = Boolean(isOwner && isGameOver);
