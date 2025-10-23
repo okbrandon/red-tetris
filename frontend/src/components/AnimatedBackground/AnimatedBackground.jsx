@@ -260,11 +260,11 @@ const AnimatedBackground = () => (
     <Pieces>
       {PIECES.map((piece) => (
         <Piece key={piece.id} style={piece.style}>
-          {piece.tileOffsets.map((position, index) => (
+          {piece.coordinates.map(([x, y], idx) => (
             <Tile
-              key={`${piece.id}-${index}`}
+              key={`${piece.id}-${x}-${y}`}
               $color={piece.color}
-              style={position}
+              style={createTileStyle([x, y])}
             />
           ))}
         </Piece>
