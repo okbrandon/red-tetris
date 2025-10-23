@@ -5,9 +5,9 @@ import {
   shouldIgnoreForGameControls,
 } from '@/utils/keyboard.js';
 
-const usePieceControls = () => {
+const usePieceControls = ({ isResultModalOpen = false } = {}) => {
   useEffect(() => {
-    if (typeof window === 'undefined') return undefined;
+    if (typeof window === 'undefined' || isResultModalOpen) return undefined;
 
     const handleKeyDown = (event) => {
       if (!event || shouldIgnoreForGameControls(event.target)) return;
@@ -23,8 +23,7 @@ const usePieceControls = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [isResultModalOpen]);
 };
 
 export default usePieceControls;
-

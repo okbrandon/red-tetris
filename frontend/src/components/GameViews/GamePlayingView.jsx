@@ -24,12 +24,11 @@ import { resultModalShape } from '../GameResultModal/GameResultModal.propTypes.j
 const GamePlayingView = ({ resultModal, grid, score, nextPieces }) => {
   const primaryPreviewSize = Math.max(16, Math.floor(CELL_SIZE * 0.6));
   const queuePreviewSize = Math.max(14, Math.floor(CELL_SIZE * 0.48));
-
-  usePieceControls();
-
   const isResultModalOpen = Boolean(resultModal?.isOpen);
   const resolvedScore = typeof score === 'number' ? score : 0;
   const upcomingPieces = Array.isArray(nextPieces) ? nextPieces : [];
+
+  usePieceControls({ isResultModalOpen });
 
   return (
     <Layout>
