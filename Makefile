@@ -1,6 +1,7 @@
 SHELL := /bin/bash
 
 PROJECT_NAME := $(notdir $(CURDIR))
+HOST_NAME := $(shell hostname -s)
 DC := docker compose
 NPM := npm
 NPX := npx
@@ -58,6 +59,14 @@ env:
 	elif [ ! -f "$(ENV_FILE)" ]; then \
 		printf "Missing %s; supply one manually.\n" "$(ENV_FILE)"; \
 	fi
+
+	@if grep -q "HOST_NAME" "$(ENV_FILE)"; then \
+		sed -i "s/HOST_NAME/$(HOST_NAME)/g" "$(ENV_FILE)"; \
+		printf "Replaced HOST_NAME placeholder in %s with %s\n" "$(ENV_FILE)" "$(HOST_NAME)"; \
+	fi
+
+docker-build: env
+	$(DC) build
 
 docker-up: env
 	$(DC) up -d --remove-orphans
