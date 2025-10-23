@@ -60,9 +60,12 @@ env:
 		printf "Missing %s; supply one manually.\n" "$(ENV_FILE)"; \
 	fi
 
-	@if grep -q "HOST_NAME" "$(ENV_FILE)"; then \
-		sed -i "s/HOST_NAME/$(HOST_NAME)/g" "$(ENV_FILE)"; \
-		printf "Replaced HOST_NAME placeholder in %s with %s\n" "$(ENV_FILE)" "$(HOST_NAME)"; \
+	@if grep -q "^VITE_HOST_NAME=" "$(ENV_FILE)"; then \
+		sed -i "s/^VITE_HOST_NAME=.*/VITE_HOST_NAME=$(HOST_NAME)/" "$(ENV_FILE)"; \
+		printf "Set VITE_HOST_NAME in %s to %s\n" "$(ENV_FILE)" "$(HOST_NAME)"; \
+	else \
+		echo "VITE_HOST_NAME=$(HOST_NAME)" >> "$(ENV_FILE)"; \
+		printf "Appended VITE_HOST_NAME=%s to %s\n" "$(HOST_NAME)" "$(ENV_FILE)"; \
 	fi
 
 docker-build: env
