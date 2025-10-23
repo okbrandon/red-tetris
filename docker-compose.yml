@@ -43,6 +43,7 @@ services:
     networks:
       - public
     environment:
+      VITE_HOST_NAME: ${VITE_HOST_NAME}
       VITE_SOCKET_URL: ${VITE_SOCKET_URL}
     ports:
       - "8080:80"
