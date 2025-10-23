@@ -41,28 +41,3 @@ export const Cell = styled.div`
       : 'none';
   }};
 `;
-
-export const Overlay = styled.div`
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-`;
-
-export const OverlayInner = styled.div`
-  position: absolute;
-`;
-
-export const Block = styled.div`
-  position: absolute;
-  width: ${({ $size }) => $size}px;
-  height: ${({ $size }) => $size}px;
-  border-radius: 3px;
-  background: linear-gradient(
-    145deg,
-    var(--block-color, rgba(191, 90, 242, 1)) 0%,
-    rgba(255, 255, 255, 0.9) 140%
-  );
-  box-shadow:
-    0 0 12px var(--block-shadow, rgba(0, 0, 0, 0.45)),
-    inset 0 0 1px rgba(255, 255, 255, 0.25);
-`;
