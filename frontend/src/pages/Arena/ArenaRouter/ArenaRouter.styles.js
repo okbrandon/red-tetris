@@ -6,8 +6,6 @@ import {
 
 export const PageWrapper = styled(Wrapper)`
   justify-content: flex-start;
-  align-items: stretch;
-  gap: clamp(1.2rem, 3vw, 2.4rem);
   padding: clamp(1rem, 3vh, 1.8rem) clamp(1rem, 4vw, 2.6rem);
   overflow: hidden;
   box-sizing: border-box;

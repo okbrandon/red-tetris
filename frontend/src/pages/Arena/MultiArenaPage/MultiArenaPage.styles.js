@@ -1,4 +1,4 @@
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 export const ArenaContainer = styled.div`
   width: min(100%, 94vw);

@@ -1,6 +1,6 @@
 export const DEFAULT_BOARD_ROWS = 20;
 export const DEFAULT_BOARD_COLS = 10;
-export const CELL_SIZE = 32;
+export const CELL_SIZE = 34.5;
 
 export const PIECE_COLOR_MAP = Object.freeze({
   1: 'rgba(0,229,255,1)',
