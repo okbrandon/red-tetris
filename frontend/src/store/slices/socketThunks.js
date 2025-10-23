@@ -35,7 +35,7 @@ const parseServerPayload = (payload) => {
     try {
       return JSON.parse(payload);
     } catch (error) {
-      return { raw: payload };
+      return { raw: error };
     }
   }
   return payload;
@@ -55,14 +55,6 @@ export const initializeSocket = () => {
   dispatch(connectRequested());
 
   const cleanup = [];
-
-  // const addListener = (event, handler, { raw = false } = {}) => {
-  //     const wrapped = raw
-  //         ? handler
-  //         : (data) => handler(parseServerPayload(data));
-  //     socket.on(event, wrapped);
-  //     cleanup.push(() => socket.off(event, wrapped));
-  // };
 
   const logListener = (event, direction, payload) => {
     console.log(
