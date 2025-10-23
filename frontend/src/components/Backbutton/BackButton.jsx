@@ -2,6 +2,7 @@ import {
   BackButtonContainer,
   BackButton as BackButtonButton,
 } from './BackButton.styles.js';
+import propTypes from 'prop-types';
 
 const BackButton = ({ onClick }) => {
   return (
@@ -14,6 +15,10 @@ const BackButton = ({ onClick }) => {
       </BackButtonButton>
     </BackButtonContainer>
   );
+};
+
+BackButton.propTypes = {
+  onClick: propTypes.func.isRequired,
 };
 
 export default BackButton;
