@@ -23,6 +23,7 @@ export const SpecterGrid = styled.div`
 
 export const SpecterCard = styled.div`
   width: 100%;
+  max-width: 240px;
   min-width: 0;
   border-radius: calc(12px * var(--card-scale, 1));
   border: 1px solid rgba(142, 107, 225, 0.2);
