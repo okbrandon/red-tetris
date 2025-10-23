@@ -6,6 +6,7 @@
 
 import gameSettings from './constants/game-settings.js';
 import outgoingEvents from './constants/outgoing-events.js';
+import incomingEvents from './constants/incoming-events.js';
 import Statistics from './statistics.js';
 
 class Player {
@@ -27,6 +28,12 @@ class Player {
 		this.hasLost = false;
 		this.score = 0;
 		this.statistics = null;
+		this.rateLimiters = {
+			[incomingEvents.MOVE_PIECE]: {
+				lastCalled: 0,
+				cooldown: 20, // ms
+			},
+		}
 	}
 
 	/**
@@ -487,6 +494,9 @@ class Player {
 		if (!this.currentPiece)
 			return;
 
+		const now = Date.now();
+		const rateLimiter = this.rateLimiters[incomingEvents.MOVE_PIECE];
+
 		const { position } = this.currentPiece;
 		let newPosition = { ...position };
 		let rotate = false;
@@ -503,6 +513,8 @@ class Player {
 				newPosition.x += 1;
 				break;
 			case 'up':
+				if (now - rateLimiter.lastCalled < rateLimiter.cooldown)
+					return;
 				rotate = true;
 				break;
 			case 'space':
@@ -550,6 +562,7 @@ class Player {
 			this.grid = this.mergePieceIntoGrid(this.currentPiece, this.grid);
 		}
 
+		rateLimiter.lastCalled = now;
 		this.sendGrid();
 	}
 
