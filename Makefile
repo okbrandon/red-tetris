@@ -1,6 +1,7 @@
 SHELL := /bin/bash
 
 PROJECT_NAME := $(notdir $(CURDIR))
+HOST_NAME := $(shell hostname -s)
 DC := docker compose
 NPM := npm
 NPX := npx
@@ -58,6 +59,17 @@ env:
 	elif [ ! -f "$(ENV_FILE)" ]; then \
 		printf "Missing %s; supply one manually.\n" "$(ENV_FILE)"; \
 	fi
+
+	@if grep -q "^VITE_HOST_NAME=" "$(ENV_FILE)"; then \
+		sed -i "s/^VITE_HOST_NAME=.*/VITE_HOST_NAME=$(HOST_NAME)/" "$(ENV_FILE)"; \
+		printf "Set VITE_HOST_NAME in %s to %s\n" "$(ENV_FILE)" "$(HOST_NAME)"; \
+	else \
+		echo "VITE_HOST_NAME=$(HOST_NAME)" >> "$(ENV_FILE)"; \
+		printf "Appended VITE_HOST_NAME=%s to %s\n" "$(HOST_NAME)" "$(ENV_FILE)"; \
+	fi
+
+docker-build: env
+	$(DC) build
 
 docker-up: env
 	$(DC) up -d --remove-orphans

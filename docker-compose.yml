@@ -33,14 +33,20 @@ services:
       - mongo-data:/data/db
     command: mongod --quiet
 
-  # frontend:
-  #   build: ./frontend
-  #   container_name: red-tetris-frontend
-  #   restart: always
-  #   networks:
-  #     - public
-  #   ports:
-  #     - "8080:8080"
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_SOCKET_URL: ${VITE_SOCKET_URL}
+    container_name: red-tetris-frontend
+    restart: always
+    networks:
+      - public
+    environment:
+      VITE_HOST_NAME: ${VITE_HOST_NAME}
+      VITE_SOCKET_URL: ${VITE_SOCKET_URL}
+    ports:
+      - "8080:80"
 
 networks:
   public:
