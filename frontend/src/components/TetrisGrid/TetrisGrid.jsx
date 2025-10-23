@@ -26,9 +26,9 @@ const renderOverlay = (piece) => {
           transform: `translate3d(${piece.position.x * CELL_SIZE}px, ${piece.position.y * CELL_SIZE}px, 0)`,
         }}
       >
-        {piece.blocks.map(([bx, by]) => (
+        {piece.blocks.map(([bx, by], i) => (
           <Block
-            key={`${bx}-${by}`}
+            key={i}
             $size={CELL_SIZE}
             style={{
               left: bx * CELL_SIZE,
