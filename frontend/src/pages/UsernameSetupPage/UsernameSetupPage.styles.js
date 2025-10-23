@@ -180,12 +180,3 @@ export const HintText = styled.div`
   opacity: 0.7;
   font-size: 0.85rem;
 `;
-
-// Wider card variant for game layout
-export const GameCard = styled(Card)`
-  width: min(96vw, 1180px);
-
-  @media (min-width: 1400px) {
-    width: 1280px;
-  }
-`;
