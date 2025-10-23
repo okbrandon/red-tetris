@@ -40,10 +40,10 @@ export const MainColumn = styled.section`
 `;
 
 export const SectionLabel = styled.h3`
-    margin: 0;
-    font-size: 0.76rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: rgba(215, 206, 246, 0.72);
-    text-align: left;
+  margin: 0;
+  font-size: 0.76rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(215, 206, 246, 0.72);
+  text-align: left;
 `;
