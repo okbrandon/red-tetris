@@ -4,7 +4,9 @@ import {
   Routes,
   Route,
   useNavigate,
+  useLocation,
 } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import UsernameSetupPage from '@/pages/UsernameSetupPage/UsernameSetupPage';
 import ModeSelectPage from '@/pages/ModeSelectPage/ModeSelectPage';
 import RoomAccessPage from '@/pages/RoomAccessPage/RoomAccessPage';
@@ -12,6 +14,9 @@ import AnimatedBackground from './components/AnimatedBackground/AnimatedBackgrou
 import Notification from '@/components/Notification/Notification';
 import { updateUsername } from '@/store/slices/userThunks.js';
 import ArenaRouter from './pages/Arena/ArenaRouter/ArenaRouter';
+import { resetGameState } from '@/store/slices/gameSlice.js';
+import { resetUser } from '@/store/slices/userSlice.js';
+import { resetSocketState } from '@/store/slices/socketSlice.js';
 
 function RedirectOnRefresh() {
   const navigate = useNavigate();
@@ -36,6 +41,41 @@ function RedirectOnRefresh() {
   return null;
 }
 
+function UsernameGuard() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const username = useSelector((state) => state.user.username);
+  const hasResetRef = useRef(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const storedUsername = window.localStorage.getItem('username');
+
+    if (username || storedUsername) {
+      hasResetRef.current = false;
+      return;
+    }
+
+    if (!hasResetRef.current) {
+      hasResetRef.current = true;
+      window.localStorage.removeItem('username');
+      dispatch(resetGameState());
+      dispatch(resetUser());
+      dispatch(resetSocketState());
+    }
+
+    if (location.pathname !== '/') {
+      navigate('/', { replace: true });
+    }
+  }, [dispatch, navigate, location.pathname, username]);
+
+  return null;
+}
+
 function App() {
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -43,22 +83,14 @@ function App() {
     }
 
     const storedUsername = window.localStorage.getItem('username');
-    if (!storedUsername) {
-      return;
+    if (storedUsername) {
+      updateUsername(storedUsername);
     }
-
-    const legacyNavigationType = window.performance?.navigation?.type;
-    const isReload = legacyNavigationType === 'reload';
-
-    if (!isReload) {
-      return;
-    }
-
-    updateUsername(storedUsername);
   }, []);
 
   return (
     <Router>
+      <UsernameGuard />
       <RedirectOnRefresh />
       <AnimatedBackground />
       <Notification />
