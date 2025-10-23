@@ -7,11 +7,14 @@ import {
   ArenaLayout,
   MainColumn,
 } from './MultiArenaPage.styles.js';
-import GameView from '@/components/GameView/GameView.jsx';
 import SpecterColumn from '@/components/SpecterColumn/SpecterColumn.jsx';
+import { resultModalShape } from '@/components/GameResultModal/GameResultModal.propTypes.js';
+import GamePlayingView from '@/components/GameViews/GamePlayingView.jsx';
 
 const MultiArena = ({ resultModal, leaveRoom }) => {
-  const { you, players, grid, spectator } = useSelector((state) => state.game);
+  const { you, players, grid, spectator, score, nextPieces } = useSelector(
+    (state) => state.game
+  );
 
   const opponents = useMemo(() => {
     if (!Array.isArray(players)) return [];
@@ -29,7 +32,12 @@ const MultiArena = ({ resultModal, leaveRoom }) => {
       <ArenaLayout>
         <SpecterColumn opponents={opponents} />
         <MainColumn>
-          <GameView grid={grid} resultModal={resultModal} isPlaying={true} />
+          <GamePlayingView
+            grid={grid}
+            resultModal={resultModal}
+            score={score}
+            nextPieces={nextPieces}
+          />
         </MainColumn>
       </ArenaLayout>
     </ArenaContainer>
@@ -37,7 +45,7 @@ const MultiArena = ({ resultModal, leaveRoom }) => {
 };
 
 MultiArena.propTypes = {
-  resultModal: propTypes.node.isRequired,
+  resultModal: resultModalShape.isRequired,
   leaveRoom: propTypes.func.isRequired,
 };
 

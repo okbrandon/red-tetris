@@ -5,7 +5,7 @@ import {
   ArenaLayout as SpectatorLayout,
 } from './SpectatorArena.styles.js';
 import SpecterColumn from '@/components/SpecterColumn/SpecterColumn.jsx';
-import GameView from '@/components/GameView/GameView.jsx';
+import FocusedSpectatorView from '@/components/GameViews/FocusedSpectatorView.jsx';
 
 const SpectatorArena = ({ leaveRoom, opponents }) => {
   const [selectedId, setSelectedId] = useState(() => opponents[0]?.id ?? null);
@@ -42,8 +42,7 @@ const SpectatorArena = ({ leaveRoom, opponents }) => {
           selectedId={selectedId}
           setSelectedId={setSelectedId}
         />
-        <GameView
-          isPlaying={false}
+        <FocusedSpectatorView
           grid={focusedBoard}
           focusedPlayer={focusedPlayer}
           leaveRoom={leaveRoom}

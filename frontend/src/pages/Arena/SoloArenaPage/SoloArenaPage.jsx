@@ -1,20 +1,25 @@
 import { useSelector } from 'react-redux';
 import { ArenaContainer } from './SoloArenaPage.styles';
-import GameView from '@/components/GameView/GameView';
-import propTypes from 'prop-types';
+import { resultModalShape } from '@/components/GameResultModal/GameResultModal.propTypes';
+import GamePlayingView from '@/components/GameViews/GamePlayingView';
 
 const SoloArena = ({ resultModal }) => {
-  const grid = useSelector((state) => state.game.grid);
+  const { grid, score, nextPieces } = useSelector((state) => state.game);
 
   return (
     <ArenaContainer>
-      <GameView grid={grid} resultModal={resultModal} isPlaying={true} />
+      <GamePlayingView
+        grid={grid}
+        resultModal={resultModal}
+        score={score}
+        nextPieces={nextPieces}
+      />
     </ArenaContainer>
   );
 };
 
 SoloArena.propTypes = {
-  resultModal: propTypes.node.isRequired,
-}
+  resultModal: resultModalShape.isRequired,
+};
 
 export default SoloArena;

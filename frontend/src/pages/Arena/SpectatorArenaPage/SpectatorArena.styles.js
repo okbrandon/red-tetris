@@ -3,7 +3,7 @@ export {
   ArenaLayout,
 } from '../MultiArenaPage/MultiArenaPage.styles.js';
 import styled from 'styled-components';
-import { BoardFrame as BaseBoardFrame } from '@/components/GameView/GameView.styles.js';
+import { BoardFrame as BaseBoardFrame } from '@/components/GameViews/GameView.styles.js';
 
 export const FocusedPanel = styled.div`
   width: 100%;

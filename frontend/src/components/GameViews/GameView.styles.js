@@ -59,6 +59,15 @@ export const PanelHeading = styled.div`
   gap: 0.25rem;
 `;
 
+export const PanelTitle = styled.h2`
+  margin: 0;
+  font-size: clamp(1.1rem, 2.4vw, 1.5rem);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #f6f1ff;
+`;
+
 export const PanelCaption = styled.p`
   margin: 0;
   font-size: 0.8rem;
