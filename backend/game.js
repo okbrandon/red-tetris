@@ -226,6 +226,12 @@ class Game {
 			return;
 
 		this.updateInterval = setInterval(() => {
+			if (this.shouldEndGame()) {
+				console.log('[' + this.id + '] GAME OVER (END GAME CHECK)');
+				this.stop();
+				return;
+			}
+
 			if (this.ticks % this.tickingInterval === 0) {
 				if (!this.isProcessingTick) {
 					this.isProcessingTick = true;
@@ -233,12 +239,6 @@ class Game {
 					setImmediate(async () => {
 						try {
 							const clients = [...this.clients];
-
-							if (this.shouldEndGame()) {
-								console.log('[' + this.id + '] GAME OVER (END GAME CHECK)');
-								this.stop();
-								return;
-							}
 
 							console.log('[' + this.id + '] GAME TICK (' + this.ticks + ')');
 							for (const client of clients) {
