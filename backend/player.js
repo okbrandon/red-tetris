@@ -491,7 +491,7 @@ class Player {
 	 * @param {'down' | 'left' | 'right' | 'up' | 'space'} [direction='down'] - The direction to move the piece.
 	 */
 	movePiece(direction = 'down') {
-		if (!this.currentPiece)
+		if (!this.currentPiece || this.hasLost)
 			return;
 
 		const now = Date.now();
