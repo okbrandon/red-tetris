@@ -114,7 +114,7 @@ export const normalizeCell = (value = {}, palette) => {
   const ghost = Boolean(value.ghost);
   const indestructible = Boolean(value.indestructible);
   const baseColor = value.color
-    ? (palette[value.color] ?? value.color)
+    ? palette[value.color]
     : undefined;
   const resolvedColor = ghost
     ? palette.ghost
