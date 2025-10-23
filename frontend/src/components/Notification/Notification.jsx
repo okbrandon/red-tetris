@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { hideNotification } from '@/store/slices/notificationSlice';
 import {
@@ -8,38 +7,16 @@ import {
   Content,
   DismissButton,
   accentByType,
-  ANIMATION_MS,
 } from './Notification.styles.js';
+import useNotification from '@/hooks/useNotification.js';
 
 const Notification = () => {
   const dispatch = useDispatch();
-  const { isVisible, message, type, duration, id } = useSelector(
+  const { message, type } = useSelector(
     (state) => state.notification
   );
-  const [shouldRender, setShouldRender] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-    if (!isVisible) return undefined;
-    const timeout = setTimeout(() => {
-      dispatch(hideNotification());
-    }, duration);
-    return () => clearTimeout(timeout);
-  }, [dispatch, duration, id, isVisible]);
-
-  useEffect(() => {
-    if (isVisible) {
-      setShouldRender(true);
-      const raf = requestAnimationFrame(() => setIsOpen(true));
-      return () => cancelAnimationFrame(raf);
-    }
-
-    if (!shouldRender) return undefined;
-
-    setIsOpen(false);
-    const timeout = setTimeout(() => setShouldRender(false), ANIMATION_MS);
-    return () => clearTimeout(timeout);
-  }, [isVisible, shouldRender]);
+  const { isOpen, shouldRender } = useNotification();
 
   if (!shouldRender) {
     return null;
