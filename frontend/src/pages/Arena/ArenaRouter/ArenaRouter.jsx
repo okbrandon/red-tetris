@@ -50,7 +50,7 @@ const ArenaRouter = () => {
         {mode === 'multiplayer' ? 'Multiplayer' : 'Game'}
       </GameLogoTitle>
       {mode === 'multiplayer' ? (
-        <MultiArena resultModal={resultModalProps} />
+        <MultiArena resultModal={resultModalProps} leaveRoom={leaveRoom} />
       ) : (
         <SoloArena resultModal={resultModalProps} />
       )}
