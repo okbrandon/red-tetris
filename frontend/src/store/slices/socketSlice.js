@@ -1,15 +1,15 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-const initialState = {
+const createInitialState = () => ({
   status: 'idle',
   socketId: null,
   lastError: null,
   lastEvent: null,
-};
+});
 
 const socketSlice = createSlice({
   name: 'socket',
-  initialState,
+  initialState: createInitialState(),
   reducers: {
     connectRequested: (state) => {
       state.status = 'connecting';
@@ -35,6 +35,7 @@ const socketSlice = createSlice({
     clearSocketEvent: (state) => {
       state.lastEvent = null;
     },
+    resetSocketState: () => createInitialState(),
   },
 });
 
@@ -45,6 +46,7 @@ export const {
   socketDisconnected,
   socketEventReceived,
   clearSocketEvent,
+  resetSocketState,
 } = socketSlice.actions;
 
 export default socketSlice.reducer;
