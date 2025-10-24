@@ -104,9 +104,13 @@ class Player {
 				owner: {
 					id: this.room.owner.id,
 					username: this.room.owner.username,
+					score: this.room.owner.score,
+					hasLost: this.room.owner.hasLost
 				},
 				status: this.room.status,
-				soloJourney: this.room.soloJourney
+				soloJourney: this.room.soloJourney,
+				maxPlayers: this.room.maxPlayers,
+				mode: this.room.mode
 			},
 			grid: finalGrid,
 			currentPiece: this.currentPiece,
@@ -193,7 +197,8 @@ class Player {
 				},
 				status: this.room.status,
 				soloJourney: this.room.soloJourney,
-				maxPlayers: this.room.maxPlayers
+				maxPlayers: this.room.maxPlayers,
+				mode: this.room.mode
 			},
 			you: {
 				id: this.id,
