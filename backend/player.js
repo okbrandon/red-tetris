@@ -35,6 +35,10 @@ class Player {
 				lastCalled: 0,
 				cooldown: 20, // ms
 			},
+			[incomingEvents.PIECE_SPAWN]: {
+				lastCalled: 0,
+				cooldown: 150, // ms
+			}
 		}
 	}
 
@@ -478,6 +482,7 @@ class Player {
 
 		const nextPiece = this.nextPiece();
 		const offsetY = nextPiece.getLeadingEmptyRows();
+		const rateLimiter = this.rateLimiters[incomingEvents.PIECE_SPAWN];
 
 		this.clearFullLines();
 		if (!this.isValidMove(nextPiece, this.grid, nextPiece.position)) {
@@ -491,6 +496,8 @@ class Player {
 		if (this.isValidMove(this.currentPiece, this.grid, this.currentPiece.position)) {
 			this.grid = this.mergePieceIntoGrid(this.currentPiece, this.grid);
 		}
+
+		rateLimiter.lastCalled = Date.now();
 		this.sendGrid();
 	}
 
@@ -503,7 +510,8 @@ class Player {
 			return;
 
 		const now = Date.now();
-		const rateLimiter = this.rateLimiters[incomingEvents.MOVE_PIECE];
+		const movePieceLimiter = this.rateLimiters[incomingEvents.MOVE_PIECE];
+		const spawnPieceLimiter = this.rateLimiters[incomingEvents.PIECE_SPAWN];
 
 		const { position } = this.currentPiece;
 		let newPosition = { ...position };
@@ -521,11 +529,13 @@ class Player {
 				newPosition.x += 1;
 				break;
 			case 'up':
-				if (now - rateLimiter.lastCalled < rateLimiter.cooldown)
+				if (now - movePieceLimiter.lastCalled < movePieceLimiter.cooldown)
 					return;
 				rotate = true;
 				break;
 			case 'space':
+				if (now - spawnPieceLimiter.lastCalled < spawnPieceLimiter.cooldown)
+					return;
 				hardDrop = true;
 				break;
 			default:
@@ -566,7 +576,7 @@ class Player {
 			}
 		}
 
-		rateLimiter.lastCalled = now;
+		movePieceLimiter.lastCalled = now;
 		this.sendGrid();
 	}
 

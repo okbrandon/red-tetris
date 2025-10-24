@@ -81,11 +81,20 @@ const RESTART_GAME = 'restart-game';
  */
 const MOVE_PIECE = 'move-piece';
 
+/**
+ * @constant {string} PIECE_SPAWN - Local event for piece spawning.
+ *
+ * @description This event is used internally to handle the spawning of new pieces for players.
+ * It is not intended to be emitted by clients directly.
+ */
+const PIECE_SPAWN = 'piece-spawn';
+
 export default {
 	CLIENT_UPDATE,
 	ROOM_JOIN,
 	ROOM_LEAVE,
 	START_GAME,
 	RESTART_GAME,
-	MOVE_PIECE
+	MOVE_PIECE,
+	PIECE_SPAWN
 };
