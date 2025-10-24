@@ -13,10 +13,12 @@ import ArenaRouter from './pages/Arena/ArenaRouter/ArenaRouter';
 import { useEffect, useRef } from 'react';
 import { updateUsername } from './store/slices/userThunks';
 import { requestRoomJoin } from './store/slices/socketThunks';
+import { useDispatch } from 'react-redux';
 
 function HandleRoute() {
   const navigate = useNavigate();
   const hasReset = useRef(false);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (hasReset.current) return;
@@ -43,7 +45,7 @@ function HandleRoute() {
         navigate('/', { replace: true });
       } else {
         updateUsername(usernameFromPath);
-        requestRoomJoin({ roomName, soloJourney: false });
+        dispatch(requestRoomJoin({ roomName, soloJourney: false }));
       }
       return;
     }
@@ -56,7 +58,8 @@ function HandleRoute() {
       return;
     }
     navigate('/', { replace: true });
-  });
+  }, [dispatch, navigate]);
+
   return null;
 }
 
