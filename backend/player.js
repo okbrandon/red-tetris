@@ -364,8 +364,7 @@ class Player {
 	 * @returns {Array<Array<Object>>} - The updated grid.
 	 */
 	mergePieceIntoGrid(piece, grid, isGhost = false) {
-		const gridClone = structuredClone(grid);
-		return this.updatePieceOnGrid(piece, gridClone, (piece) => ({
+		return this.updatePieceOnGrid(piece, grid, (piece) => ({
 			filled: true,
 			color: piece.color,
 			indestructible: false,
@@ -380,8 +379,7 @@ class Player {
 	 * @returns {Array<Array<Object>>} - The updated grid.
 	 */
 	removePieceFromGrid(piece, grid) {
-		const gridClone = structuredClone(grid);
-		return this.updatePieceOnGrid(piece, gridClone, () => ({
+		return this.updatePieceOnGrid(piece, grid, () => ({
 			filled: false,
 			color: 'transparent',
 			indestructible: false,
