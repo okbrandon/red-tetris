@@ -7,6 +7,7 @@
 import gameSettings from './constants/game-settings.js';
 import outgoingEvents from './constants/outgoing-events.js';
 import incomingEvents from './constants/incoming-events.js';
+import gameModes from './constants/game-modes.js';
 import Statistics from './statistics.js';
 
 class Player {
@@ -75,7 +76,9 @@ class Player {
 		const gridClone = structuredClone(this.grid);
 		const gridWithoutCurrent = this.removePieceFromGrid(this.currentPiece, gridClone);
 		const gridWithGhost = this.mergePieceIntoGrid(this.getGhostPiece(gridWithoutCurrent), gridWithoutCurrent, true);
-		const finalGrid = this.mergePieceIntoGrid(this.currentPiece, gridWithGhost);
+		const finalGrid = (this.room.mode === gameModes.INVISIBLE_FALLING_PIECES ?
+			gridWithGhost : this.mergePieceIntoGrid(this.currentPiece, gridWithGhost)
+		);
 
 		const nextPiecesData = Array.from(this.pieces)
 			.slice(this.currentPieceIndex % this.pieces.size, this.currentPieceIndex % this.pieces.size + 3)
