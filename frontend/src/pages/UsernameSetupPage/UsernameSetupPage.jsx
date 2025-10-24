@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { updateUsername } from '@/store/slices/userThunks.js';
@@ -13,11 +13,21 @@ import {
   FormRow,
   HintText,
 } from './UsernameSetupPage.styles';
+import { resetGameState } from '@/store/slices/gameSlice';
+import { resetUser } from '@/store/slices/userSlice';
+import { resetSocketState } from '@/store/slices/socketSlice';
 
 const UsernameSetupPage = () => {
   const navigate = useNavigate();
   const [name, setName] = useState('');
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(resetGameState());
+    dispatch(resetUser());
+    dispatch(resetSocketState());
+    window.localStorage.removeItem('username');
+  }, [dispatch]);
 
   const handleStart = () => {
     const trimmed = name.trim();
