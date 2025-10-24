@@ -7,6 +7,7 @@ import gameSettings from './constants/game-settings.js';
 import gameStatus from './constants/game-status.js';
 import outgoingEvents from './constants/outgoing-events.js';
 import utils from './utils.js';
+import gameModes from './constants/game-modes.js';
 
 class Game {
 
@@ -14,10 +15,16 @@ class Game {
 	 * @param {string} id - Unique ID for the game room.
 	 * @param {Object} [owner=null] - Initial owner of the game room.
 	 * @param {boolean} [soloJourney=false] - Whether the game is in solo journey mode.
+	 * @param {string} [mode=gameModes.CLASSIC] - The game mode to use.
 	 */
-	constructor(id, owner = null, soloJourney = false) {
+	constructor(id, owner = null, soloJourney = false, mode = gameModes.CLASSIC) {
+		// Room setup
+		const roomId = soloJourney
+			? utils.randomString(5) + gameSettings.TAG_SINGLEPLAYER + id
+			: id;
+
 		/** @type {string} */
-		this.id = soloJourney ? utils.randomString(5) + gameSettings.TAG_SINGLEPLAYER + id : id;
+		this.id = roomId;
 		/** @type {Object|null} */
 		this.owner = owner;
 		/** @type {string} */
@@ -33,11 +40,38 @@ class Game {
 		/** @type {Tetromino} */
 		this.tetromino = new Tetromino();
 		/** @type {boolean} */
-		this.soloJourney = soloJourney;
+		this.soloJourney = Boolean(soloJourney);
 		/** @type {NodeJS.Timeout|null} */
 		this.updateInterval = null;
 		/** @type {number} */
-		this.maxPlayers = soloJourney ? 1 : gameSettings.MAX_PLAYERS_PER_ROOM;
+		this.maxPlayers = this.soloJourney ? 1 : gameSettings.MAX_PLAYERS_PER_ROOM;
+		/** @type {string} */
+		this.mode = Object.values(gameModes).includes(mode) ? mode : gameModes.CLASSIC;
+
+		// Ticking settings
+		const isFastMode = this.mode === gameModes.FAST_PACED;
+
+		/** @type {number} */
+		this.tickingInterval = isFastMode ? 500 : 1000;
+		/** @type {boolean} */
+		this.isProcessingTick = false;
+		/** @type {number} */
+		this.morphingTickingInterval = 2000;
+		/** @type {number} */
+		this.ticks = 0;
+	}
+
+	/**
+	 * Changes the game mode.
+	 * @param {string} newMode - The new game mode to set.
+	 * @throws Will throw an error if the new mode is invalid.
+	 */
+	changeMode(newMode) {
+		if (!Object.values(gameModes).includes(newMode))
+			throw new Error('Invalid game mode');
+
+		this.mode = newMode;
+		this.tickingInterval = this.mode === gameModes.FAST_PACED ? 500 : 1000;
 	}
 
 	/**
@@ -203,20 +237,45 @@ class Game {
 			return;
 
 		this.updateInterval = setInterval(() => {
-			const clients = [...this.clients];
-
 			if (this.shouldEndGame()) {
 				console.log('[' + this.id + '] GAME OVER (END GAME CHECK)');
 				this.stop();
 				return;
 			}
 
-			console.log('[' + this.id + '] GAME TICK');
+			if (this.ticks > 0) {
+				if (this.ticks % this.tickingInterval === 0) {
+					if (!this.isProcessingTick) {
+						this.isProcessingTick = true;
 
-			clients.forEach(client => {
-				client.tickInterval();
-			});
-		}, 1000);
+						setImmediate(async () => {
+							try {
+								const clients = [...this.clients];
+
+								console.log('[' + this.id + '] GAME TICK (' + this.ticks + ')');
+								for (const client of clients) {
+									await Promise.resolve().then(() => client.tickInterval());
+								}
+							} finally {
+								this.isProcessingTick = false;
+							}
+						});
+					}
+				}
+
+				if (this.mode === gameModes.MORPH_FALLING_PIECES
+					&& this.ticks % this.morphingTickingInterval === 0) {
+					const clients = [...this.clients];
+
+					console.log('[' + this.id + '] MORPHING PIECES TICK (' + this.ticks + ')');
+					clients.forEach(client => {
+						client.swapWithNext();
+					});
+				}
+			}
+
+			this.ticks += 1;
+		}, 1);
 	}
 
 	/**

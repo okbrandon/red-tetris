@@ -11,6 +11,7 @@ import incomingEvents from "./constants/incoming-events.js";
 import outgoingEvents from "./constants/outgoing-events.js";
 import gameStatus from "./constants/game-status.js";
 import gameSettings from "./constants/game-settings.js";
+import gameModes from "./constants/game-modes.js";
 import mongo from "./mongo.js";
 
 const PORT = process.env.PORT || 3000;
@@ -68,11 +69,12 @@ const deleteRoom = (room) => {
  * @returns {Game} - The created Game instance.
  * @throws {Error} - If the room already exists.
  */
-const createRoom = (id, soloJourney) => {
+const createRoom = (id, soloJourney, mode = null) => {
 	if (rooms.has(id))
 		throw new Error('Game already exists');
 
 	const room = new Game(id, null, soloJourney);
+	room.changeMode(mode || gameModes.CLASSIC);
 
 	rooms.set(room.id, room);
 	return room;
@@ -94,7 +96,8 @@ const joinRoom = (socket, room, client) => {
 		socket.emit(outgoingEvents.ROOM_JOINED, JSON.stringify({
 			roomName: roomName,
 			soloJourney: room.soloJourney,
-			maxPlayers: room.maxPlayers
+			maxPlayers: room.maxPlayers,
+			mode: room.mode
 		}));
 
 		room.broadcastRoom();
@@ -169,6 +172,7 @@ io.on("connection", (socket) => {
 	socket.on(incomingEvents.ROOM_JOIN, (data) => {
 		const roomName = data.roomName;
 		const soloJourney = data.soloJourney || false;
+		const mode = data.mode || null;
 
 		if (!roomName) {
 			socket.emit(outgoingEvents.ERROR, JSON.stringify({
@@ -205,7 +209,7 @@ io.on("connection", (socket) => {
 
 		if (!room) {
 			try {
-				const room = createRoom(roomName, soloJourney);
+				const room = createRoom(roomName, soloJourney, mode);
 
 				room.assignOwner(client);
 				room.playerJoin(client);
@@ -214,7 +218,8 @@ io.on("connection", (socket) => {
 				socket.emit(outgoingEvents.ROOM_CREATED, JSON.stringify({
 					roomName: room.id,
 					soloJourney: soloJourney,
-					maxPlayers: room.maxPlayers
+					maxPlayers: room.maxPlayers,
+					mode: room.mode
 				}));
 				room.broadcastRoom();
 			} catch (error) {

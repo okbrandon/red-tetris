@@ -7,6 +7,8 @@
 import gameSettings from './constants/game-settings.js';
 import outgoingEvents from './constants/outgoing-events.js';
 import incomingEvents from './constants/incoming-events.js';
+import gameModes from './constants/game-modes.js';
+import gameStatus from './constants/game-status.js';
 import Statistics from './statistics.js';
 
 class Player {
@@ -33,6 +35,10 @@ class Player {
 				lastCalled: 0,
 				cooldown: 20, // ms
 			},
+			[incomingEvents.PIECE_SPAWN]: {
+				lastCalled: 0,
+				cooldown: 150, // ms
+			}
 		}
 	}
 
@@ -75,7 +81,9 @@ class Player {
 		const gridClone = structuredClone(this.grid);
 		const gridWithoutCurrent = this.removePieceFromGrid(this.currentPiece, gridClone);
 		const gridWithGhost = this.mergePieceIntoGrid(this.getGhostPiece(gridWithoutCurrent), gridWithoutCurrent, true);
-		const finalGrid = this.mergePieceIntoGrid(this.currentPiece, gridWithGhost);
+		const finalGrid = (this.room.mode === gameModes.INVISIBLE_FALLING_PIECES ?
+			gridWithGhost : this.mergePieceIntoGrid(this.currentPiece, gridWithGhost)
+		);
 
 		const nextPiecesData = Array.from(this.pieces)
 			.slice(this.currentPieceIndex % this.pieces.size, this.currentPieceIndex % this.pieces.size + 3)
@@ -134,7 +142,8 @@ class Player {
 				},
 				status: this.room.status,
 				soloJourney: this.room.soloJourney,
-				maxPlayers: this.room.maxPlayers
+				maxPlayers: this.room.maxPlayers,
+				mode: this.room.mode
 			},
 			winner: winner ? {
 				id: winner.id,
@@ -322,6 +331,7 @@ class Player {
 	 * @returns {Array<Array<Object>>} - The updated grid.
 	 */
 	updatePieceOnGrid(piece, grid, updateCell) {
+		const gridClone = structuredClone(grid);
 		const shape = piece.shape;
 		const rows = this.room.rows;
 		const cols = this.room.cols;
@@ -334,16 +344,16 @@ class Player {
 
 					if (gridX >= 0 && gridX < cols && gridY >= 0 && gridY < rows) {
 
-						if (grid[gridY][gridX]?.indestructible)
+						if (gridClone[gridY][gridX]?.indestructible)
 							return;
 
-						grid[gridY][gridX] = updateCell(piece);
+						gridClone[gridY][gridX] = updateCell(piece);
 					}
 				}
 			});
 		});
 
-		return grid;
+		return gridClone;
 	}
 
 	/**
@@ -470,6 +480,7 @@ class Player {
 
 		const nextPiece = this.nextPiece();
 		const offsetY = nextPiece.getLeadingEmptyRows();
+		const rateLimiter = this.rateLimiters[incomingEvents.PIECE_SPAWN];
 
 		this.clearFullLines();
 		if (!this.isValidMove(nextPiece, this.grid, nextPiece.position)) {
@@ -483,6 +494,8 @@ class Player {
 		if (this.isValidMove(this.currentPiece, this.grid, this.currentPiece.position)) {
 			this.grid = this.mergePieceIntoGrid(this.currentPiece, this.grid);
 		}
+
+		rateLimiter.lastCalled = Date.now();
 		this.sendGrid();
 	}
 
@@ -495,7 +508,8 @@ class Player {
 			return;
 
 		const now = Date.now();
-		const rateLimiter = this.rateLimiters[incomingEvents.MOVE_PIECE];
+		const movePieceLimiter = this.rateLimiters[incomingEvents.MOVE_PIECE];
+		const spawnPieceLimiter = this.rateLimiters[incomingEvents.PIECE_SPAWN];
 
 		const { position } = this.currentPiece;
 		let newPosition = { ...position };
@@ -513,11 +527,13 @@ class Player {
 				newPosition.x += 1;
 				break;
 			case 'up':
-				if (now - rateLimiter.lastCalled < rateLimiter.cooldown)
+				if (now - movePieceLimiter.lastCalled < movePieceLimiter.cooldown)
 					return;
 				rotate = true;
 				break;
 			case 'space':
+				if (now - spawnPieceLimiter.lastCalled < spawnPieceLimiter.cooldown)
+					return;
 				hardDrop = true;
 				break;
 			default:
@@ -558,11 +574,55 @@ class Player {
 			}
 		}
 
-		if (!hardDrop) {
+		movePieceLimiter.lastCalled = now;
+		this.sendGrid();
+	}
+
+	/**
+	 * Swaps the current piece with the next piece in the queue.
+	 * Reverts if the swap results in an invalid position.
+	 */
+	swapWithNext() {
+		if (!this.currentPiece || this.hasLost)
+			return;
+		if (!this.room || this.room.status !== gameStatus.IN_GAME)
+			return;
+		if (this.pieces.size === 0)
+			return;
+
+		const piecesArr = Array.from(this.pieces);
+		const nextIndex = this.currentPieceIndex % this.pieces.size;
+		const nextPiece = piecesArr[nextIndex];
+
+		if (!nextPiece)
+			return;
+
+		const prevShape = this.currentPiece.shape;
+		const prevColor = this.currentPiece.color;
+		const nextShape = nextPiece.shape;
+		const nextColor = nextPiece.color;
+
+		this.grid = this.removePieceFromGrid(this.currentPiece, this.grid);
+		this.currentPiece.shape = nextShape;
+		this.currentPiece.color = nextColor;
+
+		nextPiece.shape = prevShape;
+		nextPiece.color = prevColor;
+
+		// checking that the new current piece position is valid
+		if (!this.isValidMove(this.currentPiece, this.grid, this.currentPiece.position)) {
+			this.currentPiece.shape = prevShape;
+			this.currentPiece.color = prevColor;
+
+			nextPiece.shape = nextShape;
+			nextPiece.color = nextColor;
+
 			this.grid = this.mergePieceIntoGrid(this.currentPiece, this.grid);
+			this.sendGrid();
+			return;
 		}
 
-		rateLimiter.lastCalled = now;
+		this.grid = this.mergePieceIntoGrid(this.currentPiece, this.grid);
 		this.sendGrid();
 	}
 
