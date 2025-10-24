@@ -18,8 +18,13 @@ class Game {
 	 * @param {string} [mode=gameModes.CLASSIC] - The game mode to use.
 	 */
 	constructor(id, owner = null, soloJourney = false, mode = gameModes.CLASSIC) {
+		// Room setup
+		const roomId = soloJourney
+			? utils.randomString(5) + gameSettings.TAG_SINGLEPLAYER + id
+			: id;
+
 		/** @type {string} */
-		this.id = soloJourney ? utils.randomString(5) + gameSettings.TAG_SINGLEPLAYER + id : id;
+		this.id = roomId;
 		/** @type {Object|null} */
 		this.owner = owner;
 		/** @type {string} */
@@ -35,21 +40,25 @@ class Game {
 		/** @type {Tetromino} */
 		this.tetromino = new Tetromino();
 		/** @type {boolean} */
-		this.soloJourney = soloJourney;
+		this.soloJourney = Boolean(soloJourney);
 		/** @type {NodeJS.Timeout|null} */
 		this.updateInterval = null;
 		/** @type {number} */
-		this.maxPlayers = soloJourney ? 1 : gameSettings.MAX_PLAYERS_PER_ROOM;
+		this.maxPlayers = this.soloJourney ? 1 : gameSettings.MAX_PLAYERS_PER_ROOM;
 		/** @type {string} */
 		this.mode = Object.values(gameModes).includes(mode) ? mode : gameModes.CLASSIC;
+
+		// Ticking settings
+		const isFastMode = this.mode === gameModes.FAST_PACED;
+
 		/** @type {number} */
-		this.ticks = 0;
-		/** @type {number} */
-		this.tickingInterval = mode === gameModes.FAST_PACED ? 500 : 1000;
+		this.tickingInterval = isFastMode ? 500 : 1000;
 		/** @type {boolean} */
 		this.isProcessingTick = false;
 		/** @type {number} */
 		this.morphingTickingInterval = 2000;
+		/** @type {number} */
+		this.ticks = 0;
 	}
 
 	/**
