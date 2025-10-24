@@ -1,97 +1,69 @@
-import { useEffect, useRef } from 'react';
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   useNavigate,
-  useLocation,
 } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
 import UsernameSetupPage from '@/pages/UsernameSetupPage/UsernameSetupPage';
 import ModeSelectPage from '@/pages/ModeSelectPage/ModeSelectPage';
 import RoomAccessPage from '@/pages/RoomAccessPage/RoomAccessPage';
 import AnimatedBackground from './components/AnimatedBackground/AnimatedBackground';
 import Notification from '@/components/Notification/Notification';
-import { updateUsername } from '@/store/slices/userThunks.js';
 import ArenaRouter from './pages/Arena/ArenaRouter/ArenaRouter';
-import { resetGameState } from '@/store/slices/gameSlice.js';
-import { resetUser } from '@/store/slices/userSlice.js';
-import { resetSocketState } from '@/store/slices/socketSlice.js';
+import { useEffect, useRef } from 'react';
+import { updateUsername } from './store/slices/userThunks';
+import { requestRoomJoin } from './store/slices/socketThunks';
 
-function RedirectOnRefresh() {
+function HandleRoute() {
   const navigate = useNavigate();
-  const initialHandledRef = useRef(false);
+  const hasReset = useRef(false);
 
   useEffect(() => {
-    if (initialHandledRef.current) {
+    if (hasReset.current) return;
+    hasReset.current = true;
+
+    const currentPath = window.location.pathname;
+    const pathSegments = currentPath.split('/').filter(Boolean);
+    const isArenaRoute = pathSegments.length === 2;
+    if (isArenaRoute) {
+      let usernameFromPath = null;
+      let roomName = null;
+
+      const rawPlayerName = pathSegments[1];
+      const rawRoomName = pathSegments[0];
+      try {
+        usernameFromPath = decodeURIComponent(rawPlayerName).trim();
+        roomName = decodeURIComponent(rawRoomName).trim();
+      } catch {
+        usernameFromPath = rawPlayerName.trim();
+        roomName = rawRoomName.trim();
+      }
+
+      if (!usernameFromPath || !roomName) {
+        navigate('/', { replace: true });
+      } else {
+        updateUsername(usernameFromPath);
+        requestRoomJoin({ roomName, soloJourney: false });
+      }
       return;
     }
-    initialHandledRef.current = true;
 
     const knownPages = ['/', '/menu', '/join'];
     const storedUsername = window.localStorage.getItem('username');
-    const currentPath = window.location.pathname;
 
     if (storedUsername && knownPages.includes(currentPath)) {
+      updateUsername(storedUsername);
       return;
     }
     navigate('/', { replace: true });
-  }, [navigate]);
-
-  return null;
-}
-
-function UsernameGuard() {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const username = useSelector((state) => state.user.username);
-  const hasResetRef = useRef(false);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    const storedUsername = window.localStorage.getItem('username');
-
-    if (username || storedUsername) {
-      hasResetRef.current = false;
-      return;
-    }
-
-    if (!hasResetRef.current) {
-      hasResetRef.current = true;
-      window.localStorage.removeItem('username');
-      dispatch(resetGameState());
-      dispatch(resetUser());
-      dispatch(resetSocketState());
-    }
-
-    if (location.pathname !== '/') {
-      navigate('/', { replace: true });
-    }
-  }, [dispatch, navigate, location.pathname, username]);
-
+  });
   return null;
 }
 
 function App() {
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    const storedUsername = window.localStorage.getItem('username');
-    if (storedUsername) {
-      updateUsername(storedUsername);
-    }
-  }, []);
-
   return (
     <Router>
-      <UsernameGuard />
-      <RedirectOnRefresh />
+      <HandleRoute />
       <AnimatedBackground />
       <Notification />
       <Routes>
