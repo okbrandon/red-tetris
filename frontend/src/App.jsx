@@ -13,12 +13,10 @@ import ArenaRouter from './pages/Arena/ArenaRouter/ArenaRouter';
 import { useEffect, useRef } from 'react';
 import { updateUsername } from './store/slices/userThunks';
 import { requestRoomJoin } from './store/slices/socketThunks';
-import { useDispatch } from 'react-redux';
 
 function HandleRoute() {
   const navigate = useNavigate();
   const hasReset = useRef(false);
-  const dispatch = useDispatch();
 
   useEffect(() => {
     if (hasReset.current) return;
@@ -28,6 +26,13 @@ function HandleRoute() {
     const pathSegments = currentPath.split('/').filter(Boolean);
     const isArenaRoute = pathSegments.length === 2;
     if (isArenaRoute) {
+      const [navigationEntry] =
+        window.performance.getEntriesByType('navigation');
+      const isReload =
+        navigationEntry?.type === 'reload' ||
+        window.performance.navigation?.type ===
+          window.performance.navigation?.TYPE_RELOAD;
+
       let usernameFromPath = null;
       let roomName = null;
 
@@ -43,9 +48,12 @@ function HandleRoute() {
 
       if (!usernameFromPath || !roomName) {
         navigate('/', { replace: true });
+      } else if (isReload) {
+        updateUsername(usernameFromPath);
+        navigate('/menu', { replace: true });
       } else {
         updateUsername(usernameFromPath);
-        dispatch(requestRoomJoin({ roomName, soloJourney: false }));
+        requestRoomJoin({ roomName, soloJourney: false });
       }
       return;
     }
@@ -58,7 +66,7 @@ function HandleRoute() {
       return;
     }
     navigate('/', { replace: true });
-  }, [dispatch, navigate]);
+  }, [navigate]);
 
   return null;
 }
