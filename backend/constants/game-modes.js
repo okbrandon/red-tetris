@@ -19,8 +19,16 @@ const FAST_PACED = 'fast-paced';
  */
 const INVISIBLE_FALLING_PIECES = 'invisible-falling-pieces';
 
+/**
+ * @constant {string} MORPH_FALLING_PIECES - Morphing falling pieces game mode.
+ *
+ * @description The MORPH_FALLING_PIECES game mode features pieces that change shape as they fall, adding an extra layer of complexity to the gameplay.
+ */
+const MORPH_FALLING_PIECES = 'morph-falling-pieces';
+
 export default {
 	CLASSIC,
 	FAST_PACED,
-	INVISIBLE_FALLING_PIECES
+	INVISIBLE_FALLING_PIECES,
+	MORPH_FALLING_PIECES
 };

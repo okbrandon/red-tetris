@@ -8,6 +8,7 @@ import gameSettings from './constants/game-settings.js';
 import outgoingEvents from './constants/outgoing-events.js';
 import incomingEvents from './constants/incoming-events.js';
 import gameModes from './constants/game-modes.js';
+import gameStatus from './constants/game-status.js';
 import Statistics from './statistics.js';
 
 class Player {
@@ -566,6 +567,54 @@ class Player {
 		}
 
 		rateLimiter.lastCalled = now;
+		this.sendGrid();
+	}
+
+	/**
+	 * Swaps the current piece with the next piece in the queue.
+	 * Reverts if the swap results in an invalid position.
+	 */
+	swapWithNext() {
+		if (!this.currentPiece || this.hasLost)
+			return;
+		if (!this.room || this.room.status !== gameStatus.IN_GAME)
+			return;
+		if (this.pieces.size === 0)
+			return;
+
+		const piecesArr = Array.from(this.pieces);
+		const nextIndex = this.currentPieceIndex % this.pieces.size;
+		const nextPiece = piecesArr[nextIndex];
+
+		if (!nextPiece)
+			return;
+
+		const prevShape = this.currentPiece.shape;
+		const prevColor = this.currentPiece.color;
+		const nextShape = nextPiece.shape;
+		const nextColor = nextPiece.color;
+
+		this.grid = this.removePieceFromGrid(this.currentPiece, this.grid);
+		this.currentPiece.shape = nextShape;
+		this.currentPiece.color = nextColor;
+
+		nextPiece.shape = prevShape;
+		nextPiece.color = prevColor;
+
+		// checking that the new current piece position is valid
+		if (!this.isValidMove(this.currentPiece, this.grid, this.currentPiece.position)) {
+			this.currentPiece.shape = prevShape;
+			this.currentPiece.color = prevColor;
+
+			nextPiece.shape = nextShape;
+			nextPiece.color = nextColor;
+
+			this.grid = this.mergePieceIntoGrid(this.currentPiece, this.grid);
+			this.sendGrid();
+			return;
+		}
+
+		this.grid = this.mergePieceIntoGrid(this.currentPiece, this.grid);
 		this.sendGrid();
 	}
 

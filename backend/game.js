@@ -48,6 +48,8 @@ class Game {
 		this.tickingInterval = mode === gameModes.FAST_PACED ? 500 : 1000;
 		/** @type {boolean} */
 		this.isProcessingTick = false;
+		/** @type {number} */
+		this.morphingTickingInterval = 2000;
 	}
 
 	/**
@@ -249,6 +251,16 @@ class Game {
 						}
 					});
 				}
+			}
+
+			if (this.mode === gameModes.MORPH_FALLING_PIECES
+				&& this.ticks % this.morphingTickingInterval === 0) {
+				const clients = [...this.clients];
+
+				console.log('[' + this.id + '] MORPHING PIECES TICK (' + this.ticks + ')');
+				clients.forEach(client => {
+					client.swapWithNext();
+				});
 			}
 
 			this.ticks += 1;
