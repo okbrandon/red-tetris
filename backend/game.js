@@ -72,6 +72,7 @@ class Game {
 
 		this.mode = newMode;
 		this.tickingInterval = this.mode === gameModes.FAST_PACED ? 500 : 1000;
+		this.broadcastRoom();
 	}
 
 	/**
@@ -143,12 +144,18 @@ class Game {
 
 		clients.forEach(client => {
 			client.emit(outgoingEvents.ROOM_BROADCAST, JSON.stringify({
-				room: this.id,
-				owner: {
-					id: this.owner.id,
-					username: this.owner.username,
-					hasLost: this.owner.hasLost,
-					score: this.owner.score
+				room: {
+					id: this.id,
+					owner: {
+						id: this.owner.id,
+						username: this.owner.username,
+						hasLost: this.owner.hasLost,
+						score: this.owner.score
+					},
+					mode: this.mode,
+					status: this.status,
+					soloJourney: this.soloJourney,
+					maxPlayers: this.maxPlayers,
 				},
 				you: {
 					id: client.id,
@@ -180,7 +187,19 @@ class Game {
 
 		clients.forEach(client => {
 			client.emit(outgoingEvents.LINES_CLEARED, JSON.stringify({
-				room: this.id,
+				room: {
+					id: this.id,
+					owner: {
+						id: this.owner.id,
+						username: this.owner.username,
+						hasLost: this.owner.hasLost,
+						score: this.owner.score
+					},
+					mode: this.mode,
+					status: this.status,
+					soloJourney: this.soloJourney,
+					maxPlayers: this.maxPlayers,
+				},
 				you: {
 					id: client.id,
 					username: client.username,
@@ -306,7 +325,19 @@ class Game {
 			client.grid = client.mergePieceIntoGrid(nextPiece, client.grid, nextPiece.position);
 
 			client.emit(outgoingEvents.GAME_STARTED, JSON.stringify({
-				room: this.id,
+				room: {
+					id: this.id,
+					owner: {
+						id: this.owner.id,
+						username: this.owner.username,
+						hasLost: this.owner.hasLost,
+						score: this.owner.score
+					},
+					mode: this.mode,
+					status: this.status,
+					soloJourney: this.soloJourney,
+					maxPlayers: this.maxPlayers,
+				},
 				you: {
 					id: client.id,
 					username: client.username,

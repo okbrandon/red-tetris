@@ -357,6 +357,36 @@ io.on("connection", (socket) => {
 		}
 	});
 
+	// Handle room mode change
+	socket.on(incomingEvents.ROOM_MODE, (data) => {
+		const room = client.room;
+
+		if (!room) {
+			socket.emit(outgoingEvents.ERROR, JSON.stringify({
+				message: 'Not in a room'
+			}));
+			return;
+		}
+
+		const mode = data.mode;
+
+		if (!mode) {
+			socket.emit(outgoingEvents.ERROR, JSON.stringify({
+				message: 'Mode is required'
+			}));
+			return;
+		}
+
+		try {
+			room.changeMode(mode);
+		} catch (error) {
+			socket.emit(outgoingEvents.ERROR, JSON.stringify({
+				message: error.message
+			}));
+			return;
+		}
+	});
+
 	// Handle disconnection
 	socket.on("disconnect", () => {
 		const room = client.room;

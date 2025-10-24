@@ -89,6 +89,13 @@ const MOVE_PIECE = 'move-piece';
  */
 const PIECE_SPAWN = 'piece-spawn';
 
+/**
+ * @constant {string} ROOM_MODE - Sent when a player changes the room mode.
+ *
+ * @description This event is sent by the client to the server when they want to change the game mode of the room.
+ */
+const ROOM_MODE = 'room-mode';
+
 export default {
 	CLIENT_UPDATE,
 	ROOM_JOIN,
@@ -96,5 +103,6 @@ export default {
 	START_GAME,
 	RESTART_GAME,
 	MOVE_PIECE,
-	PIECE_SPAWN
+	PIECE_SPAWN,
+	ROOM_MODE
 };
