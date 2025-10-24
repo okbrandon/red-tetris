@@ -243,33 +243,35 @@ class Game {
 				return;
 			}
 
-			if (this.ticks % this.tickingInterval === 0) {
-				if (!this.isProcessingTick) {
-					this.isProcessingTick = true;
+			if (this.ticks > 0) {
+				if (this.ticks % this.tickingInterval === 0) {
+					if (!this.isProcessingTick) {
+						this.isProcessingTick = true;
 
-					setImmediate(async () => {
-						try {
-							const clients = [...this.clients];
+						setImmediate(async () => {
+							try {
+								const clients = [...this.clients];
 
-							console.log('[' + this.id + '] GAME TICK (' + this.ticks + ')');
-							for (const client of clients) {
-								await Promise.resolve().then(() => client.tickInterval());
+								console.log('[' + this.id + '] GAME TICK (' + this.ticks + ')');
+								for (const client of clients) {
+									await Promise.resolve().then(() => client.tickInterval());
+								}
+							} finally {
+								this.isProcessingTick = false;
 							}
-						} finally {
-							this.isProcessingTick = false;
-						}
+						});
+					}
+				}
+
+				if (this.mode === gameModes.MORPH_FALLING_PIECES
+					&& this.ticks % this.morphingTickingInterval === 0) {
+					const clients = [...this.clients];
+
+					console.log('[' + this.id + '] MORPHING PIECES TICK (' + this.ticks + ')');
+					clients.forEach(client => {
+						client.swapWithNext();
 					});
 				}
-			}
-
-			if (this.mode === gameModes.MORPH_FALLING_PIECES
-				&& this.ticks % this.morphingTickingInterval === 0) {
-				const clients = [...this.clients];
-
-				console.log('[' + this.id + '] MORPHING PIECES TICK (' + this.ticks + ')');
-				clients.forEach(client => {
-					client.swapWithNext();
-				});
 			}
 
 			this.ticks += 1;
