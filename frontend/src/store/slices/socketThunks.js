@@ -21,6 +21,7 @@ import {
   setLobbySettings,
   setGameMode,
   setPlayerOutcome,
+  addLineClearLogEntry,
 } from './gameSlice.js';
 import { store } from '../store.js';
 
@@ -39,6 +40,40 @@ const parseServerPayload = (payload) => {
     }
   }
   return payload;
+};
+
+const formatLineClearedMessage = (payload) => {
+  const scorerName =
+    payload?.scorer?.username?.trim() || payload?.scorer?.id || 'Someone';
+  const details = payload?.details ?? {};
+  const clearedLines = Number(details?.clearedLines) || 0;
+  const scoredPoints = Number(details?.scoredPoints);
+  const description = details?.description?.trim();
+  const penaltyLines = Math.max(clearedLines - 1, 0);
+
+  const linesText =
+    clearedLines === 1 ? '1 line' : `${clearedLines || '0'} lines`;
+
+  let message = `${scorerName} cleared ${linesText}`;
+
+  if (description) {
+    const article = /^[aeiou]/i.test(description) ? 'an' : 'a';
+    message += ` and scored ${article} ${description}!`;
+  } else if (Number.isFinite(scoredPoints) && scoredPoints > 0) {
+    message += ` for ${scoredPoints} points!`;
+  } else {
+    message += '!';
+  }
+
+  if (penaltyLines > 0) {
+    const penaltyText =
+      penaltyLines === 1
+        ? 'Everyone gets 1 penalty line!'
+        : `Everyone gets ${penaltyLines} penalty lines!`;
+    message += ` ${penaltyText}`;
+  }
+
+  return message;
 };
 
 export const initializeSocket = () => {
@@ -258,6 +293,28 @@ export const initializeSocket = () => {
     );
   });
 
+  addListener(SERVER_EVENTS.LINES_CLEARED, (payload) => {
+    dispatch(
+      socketEventReceived({
+        direction: 'incoming',
+        type: SERVER_EVENTS.LINES_CLEARED,
+        payload,
+      })
+    );
+
+    if (!payload) return;
+
+    const message = formatLineClearedMessage(payload);
+    dispatch(
+      addLineClearLogEntry({
+        message,
+        scorer: payload.scorer ?? null,
+        details: payload.details ?? null,
+        timestamp: Date.now(),
+      })
+    );
+  });
+
   return () => {
     cleanup.forEach((fn) => fn());
     listenersBound = false;
@@ -273,6 +330,7 @@ export const ensureSocketConnection = () => {
     if (!socketClient.isConnected()) {
       socketClient.connect();
     }
+
     return;
   }
 
