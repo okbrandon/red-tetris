@@ -125,6 +125,28 @@ export const EmptyQueue = styled.p`
   color: rgba(199, 191, 234, 0.58);
 `;
 
+export const EventLogList = styled.ul`
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.4rem, 1vw, 0.6rem);
+`;
+
+export const EventLogItem = styled.li`
+  display: block;
+  border-radius: 10px;
+  border: 1px solid rgba(162, 130, 235, 0.2);
+  background: rgba(33, 25, 58, 0.64);
+  box-shadow: inset 0 1px 0 rgba(217, 206, 255, 0.08);
+  padding: clamp(0.45rem, 1.2vw, 0.6rem) clamp(0.6rem, 1.4vw, 0.8rem);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: rgba(246, 241, 255, 0.92);
+  line-height: 1.35;
+`;
+
 export const ExitButton = styled.button`
   appearance: none;
   display: inline-flex;

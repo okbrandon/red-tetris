@@ -18,15 +18,24 @@ import {
   VerticalPreview,
   PreviewSlot,
   EmptyQueue,
+  EventLogList,
+  EventLogItem,
 } from './GameView.styles.js';
 import { resultModalShape } from '../GameResultModal/GameResultModal.propTypes.js';
 
-const GamePlayingView = ({ resultModal, grid, score, nextPieces }) => {
+const GamePlayingView = ({
+  resultModal,
+  grid,
+  score,
+  nextPieces,
+  lineClearLog,
+}) => {
   const primaryPreviewSize = Math.max(16, Math.floor(CELL_SIZE * 0.6));
   const queuePreviewSize = Math.max(14, Math.floor(CELL_SIZE * 0.48));
   const isResultModalOpen = Boolean(resultModal?.isOpen);
   const resolvedScore = typeof score === 'number' ? score : 0;
   const upcomingPieces = Array.isArray(nextPieces) ? nextPieces : [];
+  const lineClears = Array.isArray(lineClearLog) ? lineClearLog : [];
 
   usePieceControls({ isResultModalOpen });
 
@@ -78,6 +87,21 @@ const GamePlayingView = ({ resultModal, grid, score, nextPieces }) => {
             <EmptyQueue>No preview available</EmptyQueue>
           )}
         </InfoCard>
+
+        <InfoCard aria-label="Line clear log">
+          <InfoLabel>Line Clears</InfoLabel>
+          {lineClears.length ? (
+            <EventLogList>
+              {lineClears.map((entry) => (
+                <EventLogItem key={entry.id ?? entry.message}>
+                  {entry.message}
+                </EventLogItem>
+              ))}
+            </EventLogList>
+          ) : (
+            <EmptyQueue>No line clears yet</EmptyQueue>
+          )}
+        </InfoCard>
       </PanelArea>
     </Layout>
   );
@@ -88,6 +112,12 @@ GamePlayingView.propTypes = {
   grid: propTypes.arrayOf(propTypes.array).isRequired,
   score: propTypes.number,
   nextPieces: propTypes.arrayOf(propTypes.object),
+  lineClearLog: propTypes.arrayOf(
+    propTypes.shape({
+      id: propTypes.oneOfType([propTypes.string, propTypes.number]),
+      message: propTypes.string.isRequired,
+    })
+  ),
 };
 
 export default GamePlayingView;

@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 export const SOLO_ROOM_NAME = 'solo-local';
+const MAX_LINE_CLEAR_LOG_SIZE = 6;
 
 const createInitialState = () => ({
   mode: '',
@@ -23,6 +24,7 @@ const createInitialState = () => ({
   },
   players: [],
   isResultModalOpen: false,
+  lineClearLog: [],
 });
 
 export const gameSlice = createSlice({
@@ -63,10 +65,11 @@ export const gameSlice = createSlice({
       const status = action.payload.status;
       state.gameStatus = status;
 
-      if (status === 'in-game' || status === 'waiting') {
-        if (status === 'in-game') {
-          state.playerOutcome = { outcome: '', message: '' };
-        }
+      if (status === 'in-game') {
+        state.playerOutcome = { outcome: '', message: '' };
+        state.lineClearLog = [];
+      } else if (status === 'waiting') {
+        state.lineClearLog = [];
       } else if (status === 'game-over') {
         state.spectator = { eligible: false, active: false };
       }
@@ -120,6 +123,30 @@ export const gameSlice = createSlice({
     setIsResultModalOpen: (state, action) => {
       state.isResultModalOpen = Boolean(action.payload);
     },
+    addLineClearLogEntry: (state, action) => {
+      const payload = action.payload ?? {};
+      if (!payload.message) return;
+
+      const entry = {
+        id:
+          payload.id ??
+          `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        message: payload.message,
+        scorer: payload.scorer ?? null,
+        details: payload.details ?? null,
+        timestamp: Number.isFinite(payload.timestamp)
+          ? payload.timestamp
+          : Date.now(),
+      };
+
+      const currentLog = Array.isArray(state.lineClearLog)
+        ? state.lineClearLog
+        : [];
+      state.lineClearLog = [entry, ...currentLog].slice(
+        0,
+        MAX_LINE_CLEAR_LOG_SIZE
+      );
+    },
     resetGameState: () => createInitialState(), // room_left
   },
 });
@@ -134,5 +161,6 @@ export const {
   setPlayerOutcome,
   setSpectatorActive,
   setIsResultModalOpen,
+  addLineClearLogEntry,
 } = gameSlice.actions;
 export default gameSlice.reducer;
