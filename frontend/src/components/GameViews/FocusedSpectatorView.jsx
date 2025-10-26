@@ -1,21 +1,43 @@
 import { useMemo } from 'react';
 import propTypes from 'prop-types';
 import TetrisGrid from '../TetrisGrid/TetrisGrid.jsx';
-import { computeStats } from '@/utils/tetris.js';
 import {
   Layout,
   BoardArea,
   BoardFrame,
-  FocusedStats,
-  StatRow,
-  StatLabel,
-  StatValue,
+  PanelArea,
+  PanelHeading,
+  PanelTitle,
+  PanelCaption,
+  InfoCard,
+  InfoLabel,
+  ScoreValue,
+  EmptyQueue,
+  EventLogList,
+  EventLogItem,
   SpectatorActions,
   ExitButton,
 } from './GameView.styles.js';
 
-const FocusedSpectatorView = ({ grid, focusedPlayer, leaveRoom }) => {
-  const stats = useMemo(() => computeStats(focusedPlayer), [focusedPlayer]);
+const FocusedSpectatorView = ({
+  grid,
+  focusedPlayer,
+  leaveRoom,
+  lineClearLog,
+}) => {
+  const playerName =
+    focusedPlayer?.username?.trim() ||
+    focusedPlayer?.name?.trim() ||
+    'Player';
+  const resolvedScore = useMemo(() => {
+    if (!focusedPlayer) return 0;
+    const statsScore = focusedPlayer?.stats?.score;
+    if (typeof statsScore === 'number') return statsScore;
+    return typeof focusedPlayer?.score === 'number' ? focusedPlayer.score : 0;
+  }, [focusedPlayer]);
+
+  const lineClears = Array.isArray(lineClearLog) ? lineClearLog : [];
+  const hasFocusedPlayer = Boolean(focusedPlayer);
 
   return (
     <Layout>
@@ -23,22 +45,45 @@ const FocusedSpectatorView = ({ grid, focusedPlayer, leaveRoom }) => {
         <BoardFrame>
           <TetrisGrid showGrid grid={grid} />
         </BoardFrame>
-        {stats.length > 0 && (
-          <FocusedStats>
-            {stats.map(({ label, value }) => (
-              <StatRow key={label}>
-                <StatLabel>{label}</StatLabel>
-                <StatValue>{value}</StatValue>
-              </StatRow>
-            ))}
-          </FocusedStats>
-        )}
       </BoardArea>
-      <SpectatorActions>
-        <ExitButton type="button" onClick={leaveRoom}>
-          Leave Game
-        </ExitButton>
-      </SpectatorActions>
+      <PanelArea>
+        <PanelHeading>
+          <PanelTitle>
+            {hasFocusedPlayer ? `Spectating ${playerName}` : 'Spectating'}
+          </PanelTitle>
+          <PanelCaption>
+            {hasFocusedPlayer
+              ? 'Keep an eye on their score surge.'
+              : 'Select a player to begin spectating.'}
+          </PanelCaption>
+        </PanelHeading>
+
+        <InfoCard aria-label="Focused player score">
+          <InfoLabel>Score</InfoLabel>
+          <ScoreValue>{resolvedScore}</ScoreValue>
+        </InfoCard>
+
+        <InfoCard aria-label="Line clear log">
+          <InfoLabel>Line Clears</InfoLabel>
+          {lineClears.length ? (
+            <EventLogList>
+              {lineClears.map((entry) => (
+                <EventLogItem key={entry.id ?? entry.message}>
+                  {entry.message}
+                </EventLogItem>
+              ))}
+            </EventLogList>
+          ) : (
+            <EmptyQueue>No line clears yet</EmptyQueue>
+          )}
+        </InfoCard>
+
+        <SpectatorActions>
+          <ExitButton type="button" onClick={leaveRoom}>
+            Leave Game
+          </ExitButton>
+        </SpectatorActions>
+      </PanelArea>
     </Layout>
   );
 };
@@ -47,6 +92,12 @@ FocusedSpectatorView.propTypes = {
   grid: propTypes.arrayOf(propTypes.array).isRequired,
   focusedPlayer: propTypes.object,
   leaveRoom: propTypes.func,
+  lineClearLog: propTypes.arrayOf(
+    propTypes.shape({
+      id: propTypes.oneOfType([propTypes.string, propTypes.number]),
+      message: propTypes.string,
+    })
+  ),
 };
 
 export default FocusedSpectatorView;

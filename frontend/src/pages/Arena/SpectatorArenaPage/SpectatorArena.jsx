@@ -7,7 +7,7 @@ import {
 import SpecterColumn from '@/components/SpecterColumn/SpecterColumn.jsx';
 import FocusedSpectatorView from '@/components/GameViews/FocusedSpectatorView.jsx';
 
-const SpectatorArena = ({ leaveRoom, opponents }) => {
+const SpectatorArena = ({ leaveRoom, opponents, lineClearLog }) => {
   const [selectedId, setSelectedId] = useState(() => opponents[0]?.id ?? null);
 
   useEffect(() => {
@@ -46,6 +46,7 @@ const SpectatorArena = ({ leaveRoom, opponents }) => {
           grid={focusedBoard}
           focusedPlayer={focusedPlayer}
           leaveRoom={leaveRoom}
+          lineClearLog={lineClearLog}
         />
       </SpectatorLayout>
     </SpectatorContainer>
@@ -60,6 +61,12 @@ SpectatorArena.propTypes = {
       username: PropTypes.string,
       name: PropTypes.string,
       specter: PropTypes.arrayOf(PropTypes.array),
+    })
+  ),
+  lineClearLog: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      message: PropTypes.string,
     })
   ),
 };

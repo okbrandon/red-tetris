@@ -23,7 +23,13 @@ const MultiArena = ({ resultModal, leaveRoom }) => {
   }, [players, you?.id]);
 
   if (spectator?.active) {
-    return <SpectatorArena leaveRoom={leaveRoom} opponents={opponents} />;
+    return (
+      <SpectatorArena
+        leaveRoom={leaveRoom}
+        opponents={opponents}
+        lineClearLog={lineClearLog}
+      />
+    );
   }
 
   return (
