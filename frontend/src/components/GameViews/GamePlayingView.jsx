@@ -50,7 +50,7 @@ const GamePlayingView = ({ resultModal, grid, score, nextPieces }) => {
       </BoardArea>
       <PanelArea>
         <PanelHeading>
-          <PanelTitle>Solo Journey</PanelTitle>
+          <PanelTitle>Game in Progress</PanelTitle>
           <PanelCaption>Stay sharp, stack the neon skyline.</PanelCaption>
         </PanelHeading>
 
