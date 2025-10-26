@@ -88,11 +88,11 @@ export const gameSlice = createSlice({
     },
     setLobbySettings: (state, action) => {
       // room_broadcast
-      const { room, owner, you, clients } = action.payload;
+      const { room, you, clients } = action.payload;
       state.roomName = room || null;
-      state.owner = owner || null;
+      state.owner = room.owner || null;
       state.you = you || null;
-      state.isOwner = you && owner && you.id === owner.id;
+      state.isOwner = you && room.owner && you.id === room.owner.id;
       if (Array.isArray(clients) && clients.length > 0) {
         if (state.gameStatus && state.gameStatus !== 'waiting') {
           // Build a Map for O(1) client lookup by id
