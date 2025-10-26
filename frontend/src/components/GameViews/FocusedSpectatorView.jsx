@@ -26,9 +26,7 @@ const FocusedSpectatorView = ({
   lineClearLog,
 }) => {
   const playerName =
-    focusedPlayer?.username?.trim() ||
-    focusedPlayer?.name?.trim() ||
-    'Player';
+    focusedPlayer?.username?.trim() || focusedPlayer?.name?.trim() || 'Player';
   const resolvedScore = useMemo(() => {
     if (!focusedPlayer) return 0;
     const statsScore = focusedPlayer?.stats?.score;
