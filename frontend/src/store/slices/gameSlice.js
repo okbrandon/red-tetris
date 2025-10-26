@@ -89,7 +89,7 @@ export const gameSlice = createSlice({
     setLobbySettings: (state, action) => {
       // room_broadcast
       const { room, you, clients } = action.payload;
-      state.roomName = room || null;
+      state.roomName = room.id || null;
       state.owner = room.owner || null;
       state.you = you || null;
       state.isOwner = you && room.owner && you.id === room.owner.id;
