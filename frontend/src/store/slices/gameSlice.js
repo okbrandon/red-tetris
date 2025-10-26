@@ -42,7 +42,7 @@ export const gameSlice = createSlice({
       }
     },
     setGameState: (state, action) => {
-      const { room, you, grid, currentPiece, nextPieces, clients, score } =
+      const { room, you, grid, currentPiece, nextPieces, clients } =
         action.payload ?? {};
 
       if (room) {
@@ -55,8 +55,8 @@ export const gameSlice = createSlice({
       state.grid = grid || [[]];
       state.nextPieces = Array.isArray(nextPieces) ? nextPieces : [];
 
-      if (typeof score === 'number') {
-        state.score = score;
+      if (typeof you.score === 'number') {
+        state.score = you.score;
       }
 
       state.players = Array.isArray(clients) ? clients : [];
