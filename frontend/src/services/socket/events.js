@@ -5,6 +5,7 @@ export const CLIENT_EVENTS = Object.freeze({
   START_GAME: 'start-game',
   RESTART_GAME: 'restart-game',
   MOVE_PIECE: 'move-piece',
+  ROOM_MODE: 'room-mode',
 });
 
 export const SERVER_EVENTS = Object.freeze({

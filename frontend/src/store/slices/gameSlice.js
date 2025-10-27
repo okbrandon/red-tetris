@@ -14,6 +14,7 @@ const createInitialState = () => ({
   },
   score: 0,
   roomName: '',
+  roomMode: '',
   you: null,
   grid: [[]],
   nextPieces: [],
@@ -49,6 +50,7 @@ export const gameSlice = createSlice({
         state.mode = room.soloJourney ? 'solo' : 'multiplayer';
         state.roomName = room.id || state.roomName || '';
         state.owner = room.owner || state.owner;
+        state.roomMode = room.mode || state.roomMode || '';
       }
       state.you = you || null;
       state.currentPiece = currentPiece || null;
@@ -94,6 +96,7 @@ export const gameSlice = createSlice({
       const { room, you, clients } = action.payload;
       state.roomName = room.id || null;
       state.owner = room.owner || null;
+      state.roomMode = room.mode || state.roomMode || '';
       state.you = you || null;
       state.isOwner = you && room.owner && you.id === room.owner.id;
       if (Array.isArray(clients) && clients.length > 0) {
