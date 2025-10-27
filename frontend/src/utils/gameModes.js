@@ -3,25 +3,29 @@ export const SOLO_MODE_OPTIONS = [
     id: 'classic',
     title: 'Classic',
     badge: 'Balanced',
-    description: 'Traditional pacing with steady gravity and familiar scoring—perfect for warming up.',
+    description:
+      'Traditional pacing with steady gravity and familiar scoring—perfect for warming up.',
   },
   {
     id: 'fast-paced',
     title: 'Fast Paced',
     badge: 'Speed Rush',
-    description: 'Pieces fall twice as fast right from the start. Keep up or get buried.',
+    description:
+      'Pieces fall twice as fast right from the start. Keep up or get buried.',
   },
   {
     id: 'invisible-falling-pieces',
     title: 'Invisible Pieces',
     badge: 'Mind Game',
-    description: 'Falling pieces vanish until they land. Trust your instincts and spatial memory.',
+    description:
+      'Falling pieces vanish until they land. Trust your instincts and spatial memory.',
   },
   {
     id: 'morph-falling-pieces',
     title: 'Morph Pieces',
     badge: 'Chaos Mode',
-    description: 'Pieces shapeshift on the way down. Adapt on the fly and tame the unexpected.',
+    description:
+      'Pieces shapeshift on the way down. Adapt on the fly and tame the unexpected.',
   },
 ];
 
