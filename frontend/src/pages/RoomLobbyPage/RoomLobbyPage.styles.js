@@ -24,3 +24,11 @@ export const Player = styled.li`
     0 8px 20px rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(6px);
 `;
+
+export const ModeSection = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin: 1rem 0 1.5rem;
+`;

@@ -73,8 +73,10 @@ const createRoom = (id, soloJourney, mode = null) => {
 	if (rooms.has(id))
 		throw new Error('Game already exists');
 
-	const room = new Game(id, null, soloJourney);
-	room.changeMode(mode || gameModes.CLASSIC);
+	const normalizedMode = Object.values(gameModes).includes(mode)
+		? mode
+		: gameModes.CLASSIC;
+	const room = new Game(id, null, soloJourney, normalizedMode);
 
 	rooms.set(room.id, room);
 	return room;
@@ -364,6 +366,13 @@ io.on("connection", (socket) => {
 		if (!room) {
 			socket.emit(outgoingEvents.ERROR, JSON.stringify({
 				message: 'Not in a room'
+			}));
+			return;
+		}
+
+		if (room.owner?.id !== client.id) {
+			socket.emit(outgoingEvents.ERROR, JSON.stringify({
+				message: 'Only the room owner can change the mode'
 			}));
 			return;
 		}

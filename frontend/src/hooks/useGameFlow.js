@@ -4,7 +4,9 @@ import {
   requestRoomJoin,
   requestRoomLeave,
   requestStartGame,
+  requestRoomModeChange,
 } from '@/store/slices/socketThunks';
+import { getModeDetails } from '@/utils/gameModes';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -12,7 +14,9 @@ import { useNavigate } from 'react-router-dom';
 const useGameFlow = ({ roomName }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isOwner, mode, gameStatus } = useSelector((state) => state.game);
+  const { isOwner, mode, gameStatus, roomMode } = useSelector(
+    (state) => state.game
+  );
   const username = useSelector((state) => state.user.username);
 
   useEffect(() => {
@@ -36,8 +40,12 @@ const useGameFlow = ({ roomName }) => {
     }
   }, [mode, roomName, navigate, username, gameStatus]);
 
-  const joinSoloRoom = () => {
-    requestRoomJoin({ roomName: SOLO_ROOM_NAME, soloJourney: true });
+  const joinSoloRoom = (selectedMode = 'classic') => {
+    requestRoomJoin({
+      roomName: SOLO_ROOM_NAME,
+      soloJourney: true,
+      mode: selectedMode,
+    });
     dispatch(
       showNotification({ type: 'info', message: 'Starting solo journey...' })
     );
@@ -81,11 +89,39 @@ const useGameFlow = ({ roomName }) => {
     dispatch(showNotification({ type: 'info', message: 'Leaving lobby…' }));
   };
 
+  const changeRoomMode = (newMode) => {
+    if (!isOwner) {
+      dispatch(
+        showNotification({
+          type: 'error',
+          message: 'Only the lobby owner can change the game mode.',
+        })
+      );
+      return;
+    }
+
+    if (!newMode || newMode === roomMode) {
+      return;
+    }
+
+    requestRoomModeChange({ mode: newMode });
+    const modeDetails = getModeDetails(newMode);
+    dispatch(
+      showNotification({
+        type: 'info',
+        message: modeDetails
+          ? `Switching lobby to ${modeDetails.title} mode…`
+          : 'Switching lobby mode…',
+      })
+    );
+  };
+
   return {
     joinSoloRoom,
     joinMultiplayerRoom,
     startMultiplayerGame,
     leaveLobby,
+    changeRoomMode,
   };
 };
 

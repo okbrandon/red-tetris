@@ -374,6 +374,11 @@ export const requestRestartGame = () => {
   emitWithTracking(CLIENT_EVENTS.RESTART_GAME);
 };
 
+export const requestRoomModeChange = (payload) => {
+  ensureSocketConnection();
+  emitWithTracking(CLIENT_EVENTS.ROOM_MODE, payload);
+};
+
 export const requestPieceMove = (payload) => {
   ensureSocketConnection();
   emitWithTracking(CLIENT_EVENTS.MOVE_PIECE, payload);
