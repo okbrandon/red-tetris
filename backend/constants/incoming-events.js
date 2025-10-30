@@ -54,18 +54,16 @@ const ROOM_LEAVE = 'room-leave';
 const START_GAME = 'start-game';
 
 /**
- * @constant {string} RESTART_GAME - Sent when the owner restarts the game in a room.
- *
- * @description This event is sent by the client to the server when the room owner wants to restart the game after it has finished.
- * The server processes this event and resets the game state if possible.
- * The server responds with a @property {string} GAME_STATE event to update all players with the new game state.
- * If an error occurs (e.g., game not finished, client not owner), the server responds with an @property {string} ERROR event.
- *
- * @example
- * // Client-side example of emitting the RESTART_GAME event
- * socket.emit('restart-game');
- */
-const RESTART_GAME = 'restart-game';
+ * @constant {string} RESET_GAME - Sent when the owner resets the game in a room.
+*
+* @description This event is sent by the client to the server when the room owner wants to reset the game to its initial state.
+* The server processes this event and resets the game state if possible.
+*
+* @example
+* // Client-side example of emitting the RESET_GAME event
+* socket.emit('reset-game');
+*/
+const RESET_GAME = 'reset-game';
 
 /**
  * @constant {string} MOVE_PIECE - Sent when a player moves a piece in the game.
@@ -101,7 +99,7 @@ export default {
 	ROOM_JOIN,
 	ROOM_LEAVE,
 	START_GAME,
-	RESTART_GAME,
+	RESET_GAME,
 	MOVE_PIECE,
 	PIECE_SPAWN,
 	ROOM_MODE

@@ -295,7 +295,7 @@ io.on("connection", (socket) => {
 	});
 
 	// Handle game restarting
-	socket.on(incomingEvents.RESTART_GAME, () => {
+	socket.on(incomingEvents.RESET_GAME, () => {
 		const room = client.room;
 
 		if (!room) {
