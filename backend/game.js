@@ -373,11 +373,39 @@ class Game {
 
 		const clients = [...this.clients];
 
-		clients.forEach(client => client.reset());
-
 		this.status = gameStatus.WAITING;
 		this.tetromino.reset();
-		this.start();
+
+		clients.forEach(client => {
+			client.reset();
+			client.emit(outgoingEvents.GAME_RESTORED, JSON.stringify({
+				room: {
+					id: this.id,
+					owner: {
+						id: this.owner.id,
+						username: this.owner.username,
+						hasLost: this.owner.hasLost,
+						score: this.owner.score
+					},
+					mode: this.mode,
+					status: this.status,
+					soloJourney: this.soloJourney,
+					maxPlayers: this.maxPlayers,
+				},
+				you: {
+					id: client.id,
+					username: client.username,
+					hasLost: client.hasLost,
+					score: client.score
+				},
+				clients: clients.map(c => ({
+					id: c.id,
+					username: c.username,
+					hasLost: c.hasLost,
+					score: c.score
+				}))
+			}))
+		});
 	}
 
 	/**

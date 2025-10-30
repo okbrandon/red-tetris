@@ -151,6 +151,15 @@ const GAME_STATE = 'game-state';
 const GAME_OVER = 'game-over';
 
 /**
+ * @constant {string} GAME_RESTORED - Sent when the game is reset to its initial state.
+ *
+ * @description This event is sent by the server to all clients in a room to notify them that the game has been reset.
+ * The event indicates that the game status has changed back to "waiting" and that players can prepare for a new game.
+ * It contains data such as the room ID and any relevant game settings.
+ */
+const GAME_RESTORED = 'game-restored';
+
+/**
  * @constant {string} GAME_LOST - Sent when a player loses the game.
  *
  * @description This event is sent by the server to a specific client to notify them that they have lost the game.
@@ -183,6 +192,7 @@ export default {
 	GAME_STARTED,
 	GAME_STATE,
 	GAME_OVER,
+	GAME_RESTORED,
 	GAME_LOST,
 	LINES_CLEARED,
 	PLAYER_STATS_BOARD
