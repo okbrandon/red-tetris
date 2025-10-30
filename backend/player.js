@@ -47,6 +47,13 @@ class Player {
 	 * @param {*} username - New username.
 	 */
 	updateUsername(username) {
+		if (typeof username !== 'string' || username.trim().length === 0) {
+			throw new Error('Invalid username');
+		}
+		if (username.length > 16 || !gameSettings.NAME_VALIDATION_REGEX.test(username)) {
+			throw new Error('Username must be alphanumeric and up to 16 characters long');
+		}
+
 		this.username = username;
 		this.statistics = new Statistics(this.username);
 		this.statistics.load().then(() => {

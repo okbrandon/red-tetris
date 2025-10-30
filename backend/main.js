@@ -161,13 +161,20 @@ io.on("connection", (socket) => {
 			return;
 		}
 
-		client.updateUsername(data.username);
-		socket.emit(outgoingEvents.CLIENT_UPDATED, JSON.stringify({
-			id: client.id,
-			username: client.username
-		}));
-		client.sendPlayerStatsBoard();
-		console.log(`[${client.id}] Updated username to ${client.username}`);
+		try {
+			client.updateUsername(data.username);
+			socket.emit(outgoingEvents.CLIENT_UPDATED, JSON.stringify({
+				id: client.id,
+				username: client.username
+			}));
+			client.sendPlayerStatsBoard();
+			console.log(`[${client.id}] Updated username to ${client.username}`);
+		} catch (error) {
+			socket.emit(outgoingEvents.ERROR, JSON.stringify({
+				message: error.message
+			}));
+			return;
+		}
 	});
 
 	// Handle room joining
@@ -194,7 +201,7 @@ io.on("connection", (socket) => {
 			}));
 			return;
 		}
-		if (!gameSettings.ROOM_NAME_VALIDATION_REGEX.test(roomName)) {
+		if (!gameSettings.NAME_VALIDATION_REGEX.test(roomName)) {
 			socket.emit(outgoingEvents.ERROR, JSON.stringify({
 				message: 'Room name can only contain letters, numbers, underscores, and dashes'
 			}));
