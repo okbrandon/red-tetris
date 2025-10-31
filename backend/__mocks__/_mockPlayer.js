@@ -19,5 +19,6 @@ export function createMockPlayer({ id = 'p1', hasLost = false, room = null } = {
 		sendGrid: jest.fn(),
 		grid: [],
 		currentPiece: { position: { y: 0 }, getLeadingEmptyRows: jest.fn(() => 0) },
+		swapWithNext: jest.fn(),
 	};
 }

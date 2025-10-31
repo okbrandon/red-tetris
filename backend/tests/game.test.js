@@ -3,6 +3,7 @@ import Game from '../game.js';
 import Tetromino from '../tetromino.js';
 import gameSettings from '../constants/game-settings.js';
 import gameStatus from '../constants/game-status.js';
+import gameModes from '../constants/game-modes.js';
 import outgoingEvents from '../constants/outgoing-events.js';
 import { createMockPlayer } from '../__mocks__/_mockPlayer.js';
 
@@ -15,7 +16,7 @@ describe('Game', () => {
 	 */
 	beforeEach(() => {
 		jest.useFakeTimers();
-		game = new Game('room1', { id: 'owner', username: 'Owner' });
+		game = new Game('room1', { id: 'owner', username: 'Owner' }, false, gameModes.CLASSIC);
 	});
 
 	/**
@@ -30,7 +31,7 @@ describe('Game', () => {
 	/**
 	 * Confirms that the constructor initializes all properties correctly.
 	 */
-	test('constructor sets properties', () => {
+	test('game constructor sets properties', () => {
 		expect(game.id).toBe('room1');
 		expect(game.owner).toEqual({ id: 'owner', username: 'Owner' });
 		expect(game.status).toBe(gameStatus.WAITING);
@@ -42,6 +43,50 @@ describe('Game', () => {
 		expect(game.soloJourney).toBe(false);
 		expect(game.updateInterval).toBeNull();
 		expect(game.maxPlayers).toBe(gameSettings.MAX_PLAYERS_PER_ROOM);
+		expect(game.mode).toBe(gameModes.CLASSIC);
+		expect(game.tickingInterval).toBe(1000);
+	});
+
+	/**
+	 * Confirms that the constructor sets properties for FAST_PACED mode.
+	 */
+	test('fast paced game constructor sets properties', () => {
+		const fastPaced = new Game('roomFP', { id: 'ownerFP', username: 'OwnerFP' }, false, gameModes.FAST_PACED);
+
+		expect(fastPaced.id).toBe('roomFP');
+		expect(fastPaced.owner).toEqual({ id: 'ownerFP', username: 'OwnerFP' });
+		expect(fastPaced.status).toBe(gameStatus.WAITING);
+		expect(fastPaced.clients).toBeInstanceOf(Set);
+		expect(fastPaced.grids).toBeInstanceOf(Map);
+		expect(fastPaced.cols).toBe(gameSettings.FRAME_COLS);
+		expect(fastPaced.rows).toBe(gameSettings.FRAME_ROWS);
+		expect(fastPaced.tetromino).toBeInstanceOf(Tetromino);
+		expect(fastPaced.soloJourney).toBe(false);
+		expect(fastPaced.updateInterval).toBeNull();
+		expect(fastPaced.maxPlayers).toBe(gameSettings.MAX_PLAYERS_PER_ROOM);
+		expect(fastPaced.mode).toBe(gameModes.FAST_PACED);
+		expect(fastPaced.tickingInterval).toBe(500);
+	});
+
+	/**
+	 * Confirms that the constructor handles invalid gameMode by defaulting to CLASSIC.
+	 */
+	test('invalid game constructor sets properties', () => {
+		const invalid = new Game('roomInv', { id: 'ownerInv', username: 'OwnerInv' }, false, 'invalid');
+
+		expect(invalid.id).toBe('roomInv');
+		expect(invalid.owner).toEqual({ id: 'ownerInv', username: 'OwnerInv' });
+		expect(invalid.status).toBe(gameStatus.WAITING);
+		expect(invalid.clients).toBeInstanceOf(Set);
+		expect(invalid.grids).toBeInstanceOf(Map);
+		expect(invalid.cols).toBe(gameSettings.FRAME_COLS);
+		expect(invalid.rows).toBe(gameSettings.FRAME_ROWS);
+		expect(invalid.tetromino).toBeInstanceOf(Tetromino);
+		expect(invalid.soloJourney).toBe(false);
+		expect(invalid.updateInterval).toBeNull();
+		expect(invalid.maxPlayers).toBe(gameSettings.MAX_PLAYERS_PER_ROOM);
+		expect(invalid.mode).toBe(gameModes.CLASSIC);
+		expect(invalid.tickingInterval).toBe(1000);
 	});
 
 	/**
@@ -285,6 +330,20 @@ describe('Game', () => {
 	});
 
 	/**
+	 * Confirms that shouldEndGame returns true if all clients have lost.
+	 */
+	test('shouldEndGame returns true if all clients have lost', () => {
+		const player1 = createMockPlayer({ hasLost: true });
+		const player2 = createMockPlayer({ hasLost: true });
+
+		game.clients.add(player1);
+		game.clients.add(player2);
+		game.status = gameStatus.IN_GAME;
+
+		expect(game.shouldEndGame()).toBe(true);
+	});
+
+	/**
 	 * Confirms that shouldEndGame returns true if soloJourney and client hasLost.
 	 */
 	test('shouldEndGame returns true if soloJourney and client hasLost', () => {
@@ -417,6 +476,29 @@ describe('Game', () => {
 		jest.advanceTimersByTime(1000);
 
 		expect(stopSpy).toHaveBeenCalled();
+
+		jest.useRealTimers();
+		clearInterval(game.updateInterval);
+	});
+
+	/**
+	 * Confirms that startInterval correctly ticks for MORPHING mode.
+	 */
+	test('startInterval correctly ticks for MORPHING mode', async () => {
+		const player = createMockPlayer();
+
+		game.clients.add(player);
+		game.mode = gameModes.MORPH_FALLING_PIECES;
+		jest.spyOn(game, 'shouldEndGame').mockReturnValue(false);
+		jest.useFakeTimers();
+		game.startInterval();
+
+		expect(game.updateInterval).not.toBeNull();
+
+		jest.advanceTimersByTime(4000);
+
+		await Promise.resolve();
+		expect(player.tickInterval).toHaveBeenCalled();
 
 		jest.useRealTimers();
 		clearInterval(game.updateInterval);
@@ -568,6 +650,103 @@ describe('Game', () => {
 
 		expect(other.penalize).toHaveBeenCalledWith(2);
 		expect(other.sendGrid).toHaveBeenCalled();
+	});
+
+	/**
+	 * Confirms that changeMode throws if the gameMode is invalid.
+	 */
+	test('changeMode throws if the gameMode is invalid', () => {
+		expect(() => {
+			game.changeMode('invalidMode');
+		}).toThrow('Invalid game mode');
+	})
+
+	/**
+	 * Confirms that changeMode updates the gameMode if valid.
+	 */
+	test('changeMode updates the gameMode if valid', () => {
+		game.changeMode(gameModes.FAST_PACED);
+		expect(game.mode).toBe(gameModes.FAST_PACED);
+	})
+
+	/**
+	 * Confirms that changeMode updates tickingInterval based on mode.
+	 */
+	test('changeMode updates tickingInterval based on mode', () => {
+		game.changeMode(gameModes.FAST_PACED);
+		expect(game.tickingInterval).toBe(500);
+
+		game.changeMode(gameModes.CLASSIC);
+		expect(game.tickingInterval).toBe(1000);
+
+		game.changeMode(gameModes.MORPH_FALLING_PIECES);
+		expect(game.tickingInterval).toBe(1000);
+	})
+
+	/**
+	 * Confirms that getWinner returns null if the game is not finished.
+	 */
+	test('getWinner returns null if the game is finished', () => {
+		game.status = gameStatus.IN_GAME;
+		expect(game.getWinner()).toBeNull();
+	})
+
+	/**
+	 * Confirms that getWinner returns null if no clients.
+	 */
+	test('getWinner returns null if soloJourney and client lost', () => {
+		const player = createMockPlayer({ hasLost: true });
+
+		game.clients.add(player);
+		game.soloJourney = true;
+		game.status = gameStatus.FINISHED;
+
+		expect(game.getWinner()).toBeNull();
+	});
+
+	/**
+	 * Confirms that getWinner returns the sole client if soloJourney and not lost.
+	 */
+	test('getWinner returns the sole client if soloJourney and not lost', () => {
+		const player = createMockPlayer({ hasLost: false });
+
+		game.clients.add(player);
+		game.soloJourney = true;
+		game.status = gameStatus.FINISHED;
+
+		expect(game.getWinner()).toBe(player);
+	});
+
+	/**
+	 * Confirms that getWinner returns null if multiple clients not lost.
+	 */
+	test('getWinner returns null if multiple clients not lost', () => {
+		const player1 = createMockPlayer({ hasLost: false });
+		const player2 = createMockPlayer({ hasLost: false });
+
+		game.clients.add(player1);
+		game.clients.add(player2);
+		game.soloJourney = false;
+		game.status = gameStatus.FINISHED;
+
+		expect(game.getWinner()).toBeNull();
+	});
+
+	/**
+	 * Confirms that getWinner returns null if all clients lost.
+	 */
+	test('getWinner returns the sole winner', () => {
+		const winner = createMockPlayer({ id: 'winner', hasLost: false });
+		const loser1 = createMockPlayer({ hasLost: true });
+		const loser2 = createMockPlayer({ hasLost: true });
+
+		game.clients.add(winner);
+		game.clients.add(loser1);
+		game.clients.add(loser2);
+		game.soloJourney = false;
+		game.status = gameStatus.FINISHED;
+
+		expect(game.getWinner()).toBe(winner);
 	});
 
 });
