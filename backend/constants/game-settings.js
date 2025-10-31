@@ -39,9 +39,9 @@ const MAX_PLAYERS_PER_ROOM = 4;
 const TAG_SINGLEPLAYER = '@';
 
 /**
- * @constant {RegExp} ROOM_NAME_VALIDATION_REGEX - The regex pattern used to validate room names.
+ * @constant {RegExp} NAME_VALIDATION_REGEX - The regex pattern used to validate names and room names.
  */
-const ROOM_NAME_VALIDATION_REGEX = /^[a-zA-Z0-9_-]+$/;
+const NAME_VALIDATION_REGEX = /^[a-zA-Z0-9_-]+$/;
 
 /**
  * @constant {Object} BPS_SCORING - The scoring system based on the number of lines cleared at once.
@@ -65,6 +65,6 @@ export default {
 	DEFAULT_EMPTY_GRID,
 	MAX_PLAYERS_PER_ROOM,
 	TAG_SINGLEPLAYER,
-	ROOM_NAME_VALIDATION_REGEX,
+	NAME_VALIDATION_REGEX,
 	BPS_SCORING
 };
