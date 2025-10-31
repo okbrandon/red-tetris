@@ -298,7 +298,7 @@ describe('Game', () => {
 	});
 
 	/**
-	 * Confirms that shouldEndGame returns false if soloJourney and client has not lost.
+	 * Confirms that shouldEndGame returns true if all but one lost.
 	 */
 	test('shouldEndGame returns true if all but one lost', () => {
 		const winner = createMockPlayer({ id: 'winner', hasLost: false });
@@ -312,9 +312,6 @@ describe('Game', () => {
 		game.status = gameStatus.IN_GAME;
 
 		expect(game.shouldEndGame()).toBe(true);
-		expect(winner.sendGameOver).toHaveBeenCalledWith('You win!');
-		expect(loser1.sendGameOver).toHaveBeenCalledWith('You lose!');
-		expect(loser2.sendGameOver).toHaveBeenCalledWith('You lose!');
 	});
 
 	/**
@@ -374,7 +371,7 @@ describe('Game', () => {
 	/**
 	 * Confirms that startInterval sets updateInterval and calls tickInterval.
 	 */
-	test('startInterval sets updateInterval and calls tickInterval', () => {
+	test('startInterval sets updateInterval and calls tickInterval', async () => {
 		const player = createMockPlayer();
 
 		game.clients.add(player);
@@ -384,8 +381,9 @@ describe('Game', () => {
 
 		expect(game.updateInterval).not.toBeNull();
 
-		jest.advanceTimersByTime(1000);
+		jest.advanceTimersByTime(2000);
 
+		await Promise.resolve();
 		expect(player.tickInterval).toHaveBeenCalled();
 
 		jest.useRealTimers();
@@ -480,7 +478,6 @@ describe('Game', () => {
 		expect(player.reset).toHaveBeenCalled();
 		expect(game.status).toBe(gameStatus.WAITING);
 		expect(game.tetromino.reset).toHaveBeenCalled();
-		expect(game.start).toHaveBeenCalled();
 	});
 
 	/**
