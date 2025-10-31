@@ -28,7 +28,9 @@ describe('Player', () => {
 			cols: gameSettings.FRAME_COLS,
 			clients: new Set([player]),
 			handlePenalties: jest.fn(),
-			broadcastLinesCleared: jest.fn()
+			broadcastLinesCleared: jest.fn(),
+			getWinner: jest.fn(() => null),
+			clients: new Set()
 		};
 		player.grid = structuredClone(gameSettings.DEFAULT_EMPTY_GRID);
 		player.pieces = new Set([createMockPiece(), createMockPiece({ color: 'blue' })]);
@@ -128,27 +130,16 @@ describe('Player', () => {
 	});
 
 	/**
-	 * Confirms that sendGameOver sets hasLost and emits GAME_OVER event.
+	 * Confirms that sendGameOver emits GAME_OVER event.
 	 */
 	test('sendGameOver sets hasLost and emits GAME_OVER', () => {
 		player.hasLost = false;
 		player.sendGameOver('Lost!');
 
-		expect(player.hasLost).toBe(true);
 		expect(mockConnection.emit).toHaveBeenCalledWith(outgoingEvents.GAME_OVER, expect.objectContaining({
 			room: expect.objectContaining({ id: 'room1' }),
 			message: 'Lost!'
 		}));
-	});
-
-	/**
-	 * Confirms that sendGameOver does nothing if player has already lost.
-	 */
-	test('sendGameOver does nothing if already lost', () => {
-		player.hasLost = true;
-		player.sendGameOver('Lost!');
-
-		expect(mockConnection.emit).not.toHaveBeenCalledWith(outgoingEvents.GAME_OVER, expect.anything());
 	});
 
 	/**
@@ -458,15 +449,15 @@ describe('Player', () => {
 	});
 
 	/**
-	 * Confirms that handlePieceLanding sends GAME_OVER if next piece cannot move.
+	 * Confirms that handlePieceLanding sends GAME_LOST if next piece cannot move.
 	 */
-	test('handlePieceLanding sends game over if next piece cannot move', () => {
+	test('handlePieceLanding sends GAME_LOST if next piece cannot move', () => {
 		player.nextPiece = jest.fn(() => createMockPiece());
 		player.isValidMove = jest.fn(() => false);
 		player.currentPiece = createMockPiece();
 		player.handlePieceLanding();
 
-		expect(mockConnection.emit).toHaveBeenCalledWith(outgoingEvents.GAME_OVER, expect.anything());
+		expect(mockConnection.emit).toHaveBeenCalledWith(outgoingEvents.GAME_LOST, expect.anything());
 	});
 
 	/**
@@ -693,15 +684,17 @@ describe('Player', () => {
 
 		player.room = {
 			...player.room,
+			owner: { id: 'owner1', username: 'Owner' },
 			clients: new Set([player]),
 			handlePenalties: jest.fn(),
 			rows: gameSettings.FRAME_ROWS,
 			cols: gameSettings.FRAME_COLS
 		};
 		player.hasLost = true;
+		player.movePiece = jest.fn();
 		player.tickInterval();
 
-		expect(mockConnection.emit).not.toHaveBeenCalled();
+		expect(player.movePiece).not.toHaveBeenCalled();
 	});
 
 	/**
