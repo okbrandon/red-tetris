@@ -11,6 +11,9 @@ const mongo = mongoModule.default;
 
 describe('Mongo singleton wrapper', () => {
 
+	/**
+	 * Reset mocks and mongo state before each test.
+	 */
 	beforeEach(() => {
 		mockClient.connect.mockClear();
 		mockClient.db.mockClear();
@@ -20,6 +23,9 @@ describe('Mongo singleton wrapper', () => {
 		if (mongo.db) mongo.db = null;
 	});
 
+	/**
+	 * Test that singleton instance is returned.
+	 */
 	test('singleton instance is returned if constructed multiple times', () => {
 		const MongoClass = mongoModule.default.constructor;
 		const mongo1 = new MongoClass();
@@ -28,6 +34,9 @@ describe('Mongo singleton wrapper', () => {
 		expect(mongo1).toBe(mongo2);
 	});
 
+	/**
+	 * Test connecting to the database.
+	 */
 	test('connect establishes a connection and returns db', async () => {
 		const db = await mongo.connect();
 
@@ -36,6 +45,9 @@ describe('Mongo singleton wrapper', () => {
 		expect(db).toBe(mockDb);
 	});
 
+	/**
+	 * Test that connect is idempotent.
+	 */
 	test('connect is idempotent and does not reconnect when already connected', async () => {
 		const first = await mongo.connect();
 		const second = await mongo.connect();
@@ -44,12 +56,18 @@ describe('Mongo singleton wrapper', () => {
 		expect(first).toBe(second);
 	});
 
+	/**
+	 * Test getDb behavior.
+	 */
 	test('getDb throws when not connected', () => {
 		mongo.db = null;
 
 		expect(() => mongo.getDb()).toThrow('MongoDB not connected. Call connect() first.');
 	});
 
+	/**
+	 * Test getDb returns the connected db.
+	 */
 	test('getDb returns the connected db', async () => {
 		await mongo.connect();
 		const db = mongo.getDb();
@@ -57,6 +75,9 @@ describe('Mongo singleton wrapper', () => {
 		expect(db).toBe(mockDb);
 	});
 
+	/**
+	 * Test closing the connection.
+	 */
 	test('close closes the client and resets state', async () => {
 		await mongo.connect();
 		await mongo.close();
@@ -66,6 +87,9 @@ describe('Mongo singleton wrapper', () => {
 		expect(mongo.db).toBeNull();
 	});
 
+	/**
+	 * Test closing the connection checks if client exists before closing.
+	 */
 	test('closing the connection checks if client exists before closing', async () => {
 		mongo.client = null;
 		mongo.db = null;
