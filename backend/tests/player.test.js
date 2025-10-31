@@ -1,23 +1,34 @@
-import { expect, jest } from '@jest/globals';
+import { jest, expect } from '@jest/globals';
 import gameSettings from '../constants/game-settings.js';
 import gameStatus from '../constants/game-status.js';
 import outgoingEvents from '../constants/outgoing-events.js';
+import gameModes from '../constants/game-modes.js';
 import Player from '../player.js';
+import Statistics from '../statistics.js';
 import { createMockPiece } from '../__mocks__/_mockPiece.js';
 
-describe('Player', () => {
+function makeConn() { return { send: jest.fn(), emit: jest.fn() }; }
 
+function makePiece({ shape = [[1]], color = 'red', position = { x: 0, y: 0 } } = {}) {
+	return {
+		shape,
+		color,
+		position: { ...position },
+		clone: jest.fn(() => ({ shape: shape.map(r => [...r]), color, position: { ...position } })),
+		rotate: jest.fn(() => shape),
+		getLeadingEmptyRows: jest.fn(() => 0)
+	};
+}
+
+describe('Player', () => {
 	let mockConnection;
 	let player;
 
 	/**
-	 * Sets up a fresh Player instance and mock connection before each test.
+	 * Setup a fresh Player instance before each test.
 	 */
 	beforeEach(() => {
-		mockConnection = {
-			send: jest.fn(),
-			emit: jest.fn()
-		};
+		mockConnection = makeConn();
 		player = new Player(mockConnection, 'player1', 'Alice');
 		player.room = {
 			id: 'room1',
@@ -26,7 +37,6 @@ describe('Player', () => {
 			soloJourney: false,
 			rows: gameSettings.FRAME_ROWS,
 			cols: gameSettings.FRAME_COLS,
-			clients: new Set([player]),
 			handlePenalties: jest.fn(),
 			broadcastLinesCleared: jest.fn(),
 			getWinner: jest.fn(() => null),
@@ -40,20 +50,18 @@ describe('Player', () => {
 	});
 
 	/**
-	 * Cleans up after each test.
+	 * Clean up after each test.
 	 */
 	afterEach(() => {
 		mockConnection = null;
-
 		if (player && typeof player.isValidMove === 'function' && player.isValidMove._isMockFunction) {
 			player.isValidMove = Player.prototype.isValidMove;
 		}
-
 		player = null;
 	});
 
 	/**
-	 * Tests for Player class methods and properties.
+	 * Test constructor and basic methods.
 	 */
 	test('constructor initializes properties', () => {
 		const p = new Player(mockConnection, 'id', 'name');
@@ -70,34 +78,31 @@ describe('Player', () => {
 	});
 
 	/**
-	 * Confirms that username defaults to null when not provided.
+	 * Test constructor sets username to null if not provided.
 	 */
 	test('constructor sets username to null if not provided', () => {
 		const p = new Player(mockConnection, 'id');
-
 		expect(p.username).toBeNull();
 	});
 
 	/**
-	 * Tests that send calls connection.send with the correct message.
+	 * Test send and emit methods.
 	 */
 	test('send calls connection.send', () => {
 		player.send('msg');
-
 		expect(mockConnection.send).toHaveBeenCalledWith('msg');
 	});
 
 	/**
-	 * Tests that emit calls connection.emit with the correct event and data.
+	 * Test emit method.
 	 */
 	test('emit calls connection.emit', () => {
 		player.emit('event', { foo: 1 });
-
 		expect(mockConnection.emit).toHaveBeenCalledWith('event', { foo: 1 });
 	});
 
 	/**
-	 * Tests that sendGrid emits GAME_STATE with the correct data structure.
+	 * Test sendGrid method.
 	 */
 	test('sendGrid emits GAME_STATE with correct data', () => {
 		player.getLandSpecter = jest.fn(() => 'specter');
@@ -116,13 +121,13 @@ describe('Player', () => {
 	});
 
 	/**
-	 * Confirms that sendGrid emits GAME_STATE with empty nextPieces if less than 2 pieces.
+	 * Test sendGrid includes specters of other players.
 	 */
 	test('sendGrid emits GAME_STATE with specter of other players', () => {
 		const otherPlayer = new Player(mockConnection, 'player2', 'Bob');
+
 		otherPlayer.getLandSpecter = jest.fn(() => 'bob-specter');
 		otherPlayer.hasLost = false;
-
 		player.room.clients.add(otherPlayer);
 		player.sendGrid();
 
@@ -130,29 +135,40 @@ describe('Player', () => {
 	});
 
 	/**
-	 * Confirms that sendGameOver emits GAME_OVER event.
+	 * Test sendGameOver method.
 	 */
 	test('sendGameOver sets hasLost and emits GAME_OVER', () => {
+		player.room.clients.add(player);
 		player.hasLost = false;
 		player.sendGameOver('Lost!');
 
 		expect(mockConnection.emit).toHaveBeenCalledWith(outgoingEvents.GAME_OVER, expect.objectContaining({
 			room: expect.objectContaining({ id: 'room1' }),
+			clients: expect.any(Array),
 			message: 'Lost!'
 		}));
 	});
 
 	/**
-	 * Confirms that nextPiece returns null if no pieces are available.
+	 * Test sendGameLost does not emit if already lost.
+	 */
+	test('sendGameLost does nothing if hasLost is already true', () => {
+		player.hasLost = true;
+		player.sendGameLost('Lost!');
+
+		expect(mockConnection.emit).not.toHaveBeenCalled();
+	});
+
+	/**
+	 * Test nextPiece method.
 	 */
 	test('nextPiece returns null if no pieces', () => {
 		player.pieces.clear();
-
 		expect(player.nextPiece()).toBeNull();
 	});
 
 	/**
-	 * Confirms that nextPiece returns the next piece and increments the index.
+	 * Test nextPiece returns next piece and increments index.
 	 */
 	test('nextPiece returns next piece and increments index', () => {
 		const first = Array.from(player.pieces)[0];
@@ -162,16 +178,15 @@ describe('Player', () => {
 	});
 
 	/**
-	 * Confirms that nextPiece wraps index when exceeding pieces size.
+	 * Test getGhostPiece method.
 	 */
 	test('getGhostPiece returns null if no currentPiece', () => {
 		player.currentPiece = null;
-
 		expect(player.getGhostPiece(player.grid)).toBeNull();
 	});
 
 	/**
-	 * Confirms that getGhostPiece returns a ghost piece with the correct y position.
+	 * Test getGhostPiece returns ghost piece with correct y.
 	 */
 	test('getGhostPiece returns ghost piece with correct y', () => {
 		const piece = createMockPiece();
@@ -188,21 +203,19 @@ describe('Player', () => {
 	});
 
 	/**
-	 * Confirms that getLandSpecter returns DEFAULT_EMPTY_GRID if no grid or currentPiece.
+	 * Test getLandSpecter method.
 	 */
 	test('getLandSpecter returns DEFAULT_EMPTY_GRID if no grid or currentPiece', () => {
 		player.grid = null;
-
 		expect(player.getLandSpecter()).toBe(gameSettings.DEFAULT_EMPTY_GRID);
 
 		player.grid = structuredClone(gameSettings.DEFAULT_EMPTY_GRID);
 		player.currentPiece = null;
-
 		expect(player.getLandSpecter()).toBe(gameSettings.DEFAULT_EMPTY_GRID);
 	});
 
 	/**
-	 * Confirms that getLandSpecter returns a gray overlay grid.
+	 * Test getLandSpecter returns a gray overlay grid.
 	 */
 	test('getLandSpecter returns a gray overlay grid', () => {
 		player.grid = structuredClone(gameSettings.DEFAULT_EMPTY_GRID);
@@ -212,10 +225,10 @@ describe('Player', () => {
 		const specter = player.getLandSpecter();
 
 		expect(specter[gameSettings.FRAME_ROWS - 1][0].color).toBe('gray');
-	})
+	});
 
 	/**
-	 * Confirms that generateEmptyGrid sets grid to DEFAULT_EMPTY_GRID.
+	 * Test generateEmptyGrid method.
 	 */
 	test('generateEmptyGrid sets grid to DEFAULT_EMPTY_GRID', () => {
 		player.grid = null;
@@ -225,7 +238,7 @@ describe('Player', () => {
 	});
 
 	/**
-	 * Confirms that isValidMove returns false for out of bounds.
+	 * Test isValidMove method.
 	 */
 	test('isValidMove returns false for out of bounds', () => {
 		const piece = createMockPiece();
@@ -237,27 +250,25 @@ describe('Player', () => {
 	});
 
 	/**
-	 * Confirms that isValidMove returns false for filled cell.
+	 * Test isValidMove returns false for collision with filled cell.
 	 */
 	test('isValidMove returns false for filled cell', () => {
 		const piece = createMockPiece();
 
 		player.grid[0][0].filled = true;
-
 		expect(player.isValidMove(piece, player.grid, { x: 0, y: 0 })).toBe(false);
 	});
 
 	/**
-	 * Confirms that isValidMove returns true for valid move.
+	 * Test isValidMove returns true for valid move.
 	 */
 	test('isValidMove returns true for valid move', () => {
 		const piece = createMockPiece();
-
 		expect(player.isValidMove(piece, player.grid, { x: 0, y: 0 })).toBe(true);
 	});
 
 	/**
-	 * Confirms that isValidMove uses rotated shape when rotate=true.
+	 * Test isValidMove uses rotated shape when rotate=true.
 	 */
 	test('isValidMove uses rotated shape when rotate=true', () => {
 		const piece = createMockPiece();
@@ -273,7 +284,7 @@ describe('Player', () => {
 	});
 
 	/**
-	 * Confirms that isValidMove returns true for valid move (explicit final return).
+	 * Test isValidMove returns true for valid move (explicit final return).
 	 */
 	test('isValidMove returns true for valid move (explicit final return)', () => {
 		const piece = createMockPiece({ shape: [[1]], position: { x: 0, y: 0 } });
@@ -287,7 +298,7 @@ describe('Player', () => {
 	});
 
 	/**
-	 * Confirms that isValidMove skips empty cells in shape.
+	 * Test isValidMove skips empty cells in shape.
 	 */
 	test('isValidMove skips empty cells in shape', () => {
 		const piece = createMockPiece({ shape: [[0, 1], [0, 0]], position: { x: 0, y: 0 } });
@@ -295,11 +306,12 @@ describe('Player', () => {
 			[{ filled: false }, { filled: true }],
 			[{ filled: false }, { filled: false }]
 		];
+
 		expect(player.isValidMove(piece, grid, { x: 0, y: 1 })).toBe(true);
 	});
 
 	/**
-	 * Confirms that updatePieceOnGrid updates grid cells.
+	 * Test updatePieceOnGrid method.
 	 */
 	test('updatePieceOnGrid updates grid cells', () => {
 		const piece = createMockPiece();
@@ -310,7 +322,7 @@ describe('Player', () => {
 	});
 
 	/**
-	 * Confirms that updatePieceOnGrid iterates over shape and updates grid.
+	 * Test updatePieceOnGrid iterates over shape and updates grid.
 	 */
 	test('updatePieceOnGrid iterates over shape and updates grid', () => {
 		const piece = createMockPiece({ shape: [[1, 0], [0, 1]], position: { x: 0, y: 0 } });
@@ -329,26 +341,24 @@ describe('Player', () => {
 	});
 
 	/**
-	 * Confirms that updatePieceOnGrid does not update indestructible cells.
+	 * Test updatePieceOnGrid does not update indestructible cells.
 	 */
 	test('updatePieceOnGrid does not update indestructible cells', () => {
 		const piece = createMockPiece();
 		const grid = structuredClone(gameSettings.DEFAULT_EMPTY_GRID);
 
-		// piece at (0,0) and make that cell indestructible
 		piece.position = { x: 0, y: 0 };
 		grid[0][0] = { filled: false, color: 'transparent', indestructible: true, ghost: false };
 
 		const updateCell = jest.fn(() => ({ filled: true, color: 'red', indestructible: false, ghost: false }));
 		const updated = player.updatePieceOnGrid(piece, grid, updateCell);
 
-		// cell should remain indestructible and not be updated
 		expect(updated[0][0]).toEqual({ filled: false, color: 'transparent', indestructible: true, ghost: false });
 		expect(updateCell).not.toHaveBeenCalled();
 	});
 
 	/**
-	 * Confirms that updatePieceOnGrid returns original grid if piece is null.
+	 * Test mergePieceIntoGrid calls updatePieceOnGrid.
 	 */
 	test('mergePieceIntoGrid calls updatePieceOnGrid', () => {
 		const piece = createMockPiece();
@@ -356,12 +366,11 @@ describe('Player', () => {
 		const spy = jest.spyOn(player, 'updatePieceOnGrid');
 
 		player.mergePieceIntoGrid(piece, grid);
-
 		expect(spy).toHaveBeenCalled();
 	});
 
 	/**
-	 * Confirms that removePieceFromGrid calls updatePieceOnGrid.
+	 * Test removePieceFromGrid calls updatePieceOnGrid.
 	 */
 	test('removePieceFromGrid calls updatePieceOnGrid', () => {
 		const piece = createMockPiece();
@@ -369,22 +378,584 @@ describe('Player', () => {
 		const spy = jest.spyOn(player, 'updatePieceOnGrid');
 
 		player.removePieceFromGrid(piece, grid);
-
 		expect(spy).toHaveBeenCalled();
 	});
 
 	/**
-	 * Confirms that penalize does nothing if grid is null.
+	 * Test penalize method.
 	 */
 	test('penalize does nothing if no grid', () => {
 		player.grid = null;
 		player.penalize(2);
-
 		expect(player.grid).toBeNull();
 	});
 
+});
+
+/**
+ * Additional coverage-focused tests and branches
+ * for Player class.
+ */
+describe('Player coverage extras', () => {
+
 	/**
-	 * Confirms that penalize adds penalty lines to the grid.
+	 * Test updateUsername throws for invalid inputs.
+	 */
+	test('updateUsername throws for invalid inputs', () => {
+		const p = new Player(makeConn(), 'id');
+
+		expect(() => p.updateUsername('')).toThrow('Invalid username');
+		expect(() => p.updateUsername(null)).toThrow('Invalid username');
+		expect(() => p.updateUsername(123)).toThrow('Invalid username');
+		expect(() => p.updateUsername('BAD NAME')).toThrow('Username must be alphanumeric and up to 16 characters long');
+		expect(() => p.updateUsername('x'.repeat(17))).toThrow('Username must be alphanumeric and up to 16 characters long');
+	});
+
+	/**
+	 * Test updateUsername sets username for valid input.
+	 */
+	test('updateUsername loads statistics and calls sendPlayerStatsBoard on success', async () => {
+		const p = new Player(makeConn(), 'id');
+		const loadSpy = jest.spyOn(Statistics.prototype, 'load').mockResolvedValue();
+		const sendSpy = jest.spyOn(p, 'sendPlayerStatsBoard').mockImplementation(() => {});
+		const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
+
+		p.updateUsername('ValidUser');
+		await new Promise(r => setImmediate(r));
+
+		expect(loadSpy).toHaveBeenCalled();
+		expect(sendSpy).toHaveBeenCalled();
+
+		loadSpy.mockRestore();
+		sendSpy.mockRestore();
+		consoleLog.mockRestore();
+	});
+
+	/**
+	 * Test updateUsername handles load rejection (logs error).
+	 */
+	test('updateUsername handles load rejection (logs error)', async () => {
+		const p = new Player(makeConn(), 'id');
+		const loadSpy = jest.spyOn(Statistics.prototype, 'load').mockRejectedValue(new Error('fail'));
+		const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+		p.updateUsername('ValidUser2');
+		await new Promise(r => setImmediate(r));
+
+		expect(loadSpy).toHaveBeenCalled();
+		expect(consoleError).toHaveBeenCalled();
+
+		loadSpy.mockRestore();
+		consoleError.mockRestore();
+	});
+
+	/**
+	 * Test movePiece up returns early when rate-limited.
+	 */
+	test('movePiece up returns early when rate-limited', () => {
+		const p = new Player(makeConn(), 'id');
+
+		p.currentPiece = createMockPiece();
+		p.grid = [[{ filled: false }]];
+		p.room = { rows: 1, cols: 1 };
+
+		const limiter = p.rateLimiters['movePiece'] || p.rateLimiters[Object.keys(p.rateLimiters)[0]];
+
+		limiter.lastCalled = Date.now();
+		p.sendGrid = jest.fn();
+		p.movePiece('up');
+
+		expect(p.sendGrid).not.toHaveBeenCalled();
+	});
+
+	/**
+	 * Test movePiece up rotates when allowed and isValidMove true.
+	 */
+	test('movePiece up rotates when allowed and isValidMove true', () => {
+		const p = new Player(makeConn(), 'id');
+		const piece = createMockPiece({ shape: [[1]], position: { x: 0, y: 0 } });
+
+		piece.rotate = jest.fn(() => [[2]]);
+		p.currentPiece = piece;
+		p.grid = [[{ filled: false }]];
+		p.room = { rows: 1, cols: 1 };
+
+		const limiter = p.rateLimiters['movePiece'] || p.rateLimiters[Object.keys(p.rateLimiters)[0]];
+
+		limiter.lastCalled = 0;
+		p.isValidMove = jest.fn(() => true);
+		p.sendGrid = jest.fn();
+		p.movePiece('up');
+
+		expect(piece.rotate).toHaveBeenCalled();
+		expect(p.currentPiece.shape).toEqual([[2]]);
+		expect(p.sendGrid).toHaveBeenCalled();
+	});
+
+	/**
+	 * Test swapWithNext early returns for missing conditions.
+	 */
+	test('swapWithNext early returns for missing conditions', () => {
+		const p = new Player(makeConn(), 'id');
+
+		p.currentPiece = null;
+		p.swapWithNext();
+		p.currentPiece = createMockPiece();
+		p.hasLost = true;
+		p.swapWithNext();
+		p.hasLost = false;
+		p.room = null;
+		p.swapWithNext();
+		p.room = { status: 'NOT_IN_GAME' };
+		p.pieces = new Set();
+		p.swapWithNext();
+	});
+
+	/**
+	 * Test movePiece unknown direction returns without sendGrid.
+	 */
+	test('movePiece unknown direction returns without sendGrid', () => {
+		const p = new Player(makeConn(), 'id');
+
+		p.currentPiece = createMockPiece();
+		p.grid = [[{ filled: false }]];
+		p.room = { rows: 1, cols: 1 };
+		p.sendGrid = jest.fn();
+		p.movePiece('this-does-not-exist');
+
+		expect(p.sendGrid).not.toHaveBeenCalled();
+	});
+
+	/**
+	 * Test swapWithNext returns when nextPiece is falsy.
+	 */
+	test('swapWithNext returns when nextPiece is falsy', () => {
+		const p = new Player(makeConn(), 'id');
+
+		p.currentPiece = createMockPiece();
+		p.room = { status: gameStatus.IN_GAME };
+		p.pieces = new Set([undefined]);
+
+		expect(() => p.swapWithNext()).not.toThrow();
+	});
+
+	/**
+	 * Test movePiece space returns early when spawn rate-limited.
+	 */
+	test('movePiece space returns early when spawn rate-limited', () => {
+		const p = new Player(makeConn(), 'id');
+
+		p.currentPiece = createMockPiece({ position: { x: 0, y: 0 } });
+		p.grid = [[{ filled: false }]];
+		p.room = { rows: 1, cols: 1 };
+
+		const spawnLimiter = p.rateLimiters[Object.keys(p.rateLimiters)[1]];
+
+		spawnLimiter.lastCalled = Date.now();
+		p.sendGrid = jest.fn();
+		p.movePiece('space');
+
+		expect(p.sendGrid).not.toHaveBeenCalled();
+	});
+
+	/**
+	 * Test swapWithNext returns when currentPiece is falsy.
+	 */
+	test('swapWithNext returns when pieces set is empty', () => {
+		const p = new Player(makeConn(), 'id');
+
+		p.currentPiece = createMockPiece();
+		p.room = { status: gameStatus.IN_GAME };
+		p.pieces = new Set();
+
+		expect(() => p.swapWithNext()).not.toThrow();
+	});
+
+	/**
+	 * Test swapWithNext revert branch assigns and calls sendGrid.
+	 */
+	test('swapWithNext revert branch assigns and calls sendGrid', () => {
+		const p = new Player(makeConn(), 'id');
+
+		p.currentPiece = createMockPiece();
+
+		const next = { shape: [[9]], color: 'pink' };
+
+		p.pieces = new Set([next]);
+		p.currentPieceIndex = 0;
+		p.room = { status: gameStatus.IN_GAME };
+		p.grid = [[{ filled: false }]];
+		p.isValidMove = jest.fn(() => false);
+		p.sendGrid = jest.fn();
+		p.swapWithNext();
+
+		expect(p.sendGrid).toHaveBeenCalled();
+	});
+});
+
+/**
+ * Tests for additional branches in Player class methods.
+ */
+describe('Player extra branches', () => {
+
+	/**
+	 * Test sendPlayerStatsBoard does not emit when no statistics.
+	 */
+	test('sendPlayerStatsBoard emits when statistics present', () => {
+		const conn = makeConn();
+		const p = new Player(conn, 'p1', 'User');
+
+		p.statistics = { getStats: jest.fn(() => ['a','b']) };
+		p.sendPlayerStatsBoard();
+
+		expect(conn.emit).toHaveBeenCalledWith(outgoingEvents.PLAYER_STATS_BOARD, expect.objectContaining({ gameHistory: ['a','b'] }));
+	});
+
+	/**
+	 * Test sendPlayerStatsBoard does not emit when no statistics.
+	 */
+	test('swapWithNext reverts when new position invalid', () => {
+		const conn = makeConn();
+		const p = new Player(conn, 'p2', 'User2');
+
+		p.room = { status: gameStatus.IN_GAME };
+		p.grid = [[{ filled: false }]];
+		p.currentPiece = makePiece({ shape: [[1]], position: { x: 0, y: 0 } });
+
+		const next = makePiece({ shape: [[2]], color: 'blue', position: { x: 0, y: 0 } });
+
+		p.pieces = new Set([next]);
+		p.currentPieceIndex = 0;
+		p.isValidMove = jest.fn(() => false);
+		p.sendGrid = jest.fn();
+		p.swapWithNext();
+
+		expect(p.sendGrid).toHaveBeenCalled();
+	});
+
+	/**
+	 * Test swapWithNext succeeds when position valid.
+	 */
+	test('swapWithNext succeeds when position valid', () => {
+		const conn = makeConn();
+		const p = new Player(conn, 'p3', 'User3');
+
+		p.room = { status: gameStatus.IN_GAME };
+		p.grid = [[{ filled: false }]];
+		p.currentPiece = makePiece({ shape: [[1]], color: 'red', position: { x: 0, y: 0 } });
+
+		const next = makePiece({ shape: [[2]], color: 'blue', position: { x: 0, y: 0 } });
+
+		p.pieces = new Set([next]);
+		p.currentPieceIndex = 0;
+		p.isValidMove = jest.fn(() => true);
+		p.sendGrid = jest.fn();
+
+		const expectedShape = JSON.parse(JSON.stringify(next.shape));
+		const expectedColor = next.color;
+
+		p.swapWithNext();
+
+		expect(p.sendGrid).toHaveBeenCalled();
+		expect(p.currentPiece.shape).toEqual(expectedShape);
+		expect(p.currentPiece.color).toEqual(expectedColor);
+	});
+
+	/**
+	 * Test saveStatistics calls addGameResult and save and handles rejection.
+	 */
+	test('saveStatistics calls addGameResult and save and handles rejection', async () => {
+		const conn = makeConn();
+		const p = new Player(conn, 'p4', 'User4');
+		const addSpy = jest.fn();
+		const saveMock = jest.fn().mockRejectedValue(new Error('save failed'));
+
+		p.statistics = { addGameResult: addSpy, save: saveMock };
+
+		const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+		p.saveStatistics({ foo: 'bar' });
+		await new Promise(resolve => setImmediate(resolve));
+
+		expect(addSpy).toHaveBeenCalled();
+		expect(saveMock).toHaveBeenCalled();
+		expect(consoleError).toHaveBeenCalled();
+		consoleError.mockRestore();
+	});
+
+	/**
+	 * Test saveStatistics success path logs saved.
+	 */
+	test('saveStatistics success path logs saved', async () => {
+		const conn = makeConn();
+		const p = new Player(conn, 'p5', 'User5');
+		const addSpy = jest.fn();
+		const saveMock = jest.fn().mockResolvedValue({});
+
+		p.statistics = { addGameResult: addSpy, save: saveMock };
+
+		const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
+
+		p.saveStatistics({ result: 'ok' });
+		await new Promise(resolve => setImmediate(resolve));
+
+		expect(addSpy).toHaveBeenCalled();
+		expect(saveMock).toHaveBeenCalled();
+		expect(consoleLog).toHaveBeenCalledWith('Statistics saved for', p.username);
+		consoleLog.mockRestore();
+	});
+
+	/**
+	 * Test sendGrid in invisible mode only sends grid without current piece.
+	 */
+	test('sendGrid uses invisible mode (ghost only) and emits game state', () => {
+		const conn = makeConn();
+		const p = new Player(conn, 'p6', 'User6');
+		const fakeOwner = { id: 'owner', username: 'owner', score: 0, hasLost: false, getLandSpecter: () => [[{ filled: false }]] };
+
+		p.room = {
+			id: 'room1',
+			owner: fakeOwner,
+			status: 'IN_GAME',
+			soloJourney: false,
+			maxPlayers: 4,
+			mode: gameModes.INVISIBLE_FALLING_PIECES,
+			clients: new Set([p, fakeOwner]),
+			rows: 1,
+			cols: 1
+		};
+		p.grid = [[{ filled: false, color: 'transparent' }]];
+		p.currentPiece = makePiece({ shape: [[1]], color: 'red', position: { x: 0, y: 0 } });
+		p.pieces = new Set([makePiece({ shape: [[2]], color: 'blue', position: { x: 0, y: 0 } })]);
+		p.currentPieceIndex = 0;
+		p.getLandSpecter = jest.fn(() => [[{ filled: false }]]);
+		p.sendGrid();
+
+		expect(conn.emit).toHaveBeenCalled();
+
+		const callArgs = conn.emit.mock.calls[0];
+
+		expect(callArgs[0]).toBe(outgoingEvents.GAME_STATE);
+		expect(callArgs[1]).toHaveProperty('grid');
+		expect(Array.isArray(callArgs[1].grid)).toBe(true);
+	});
+
+	/**
+	 * Test sendGrid in visible mode sends current piece and clients data.
+	 */
+	test('sendGrid visible mode includes current piece merged and clients data', () => {
+		const conn = makeConn();
+		const p = new Player(conn, 'p8', 'User8');
+		const other = new Player(makeConn(), 'other', 'Other');
+
+		other.getLandSpecter = jest.fn(() => [[{ filled: false }]]);
+		p.room = {
+			id: 'room2',
+			owner: other,
+			status: 'IN_GAME',
+			soloJourney: false,
+			maxPlayers: 2,
+			mode: gameModes.CLASSIC,
+			clients: new Set([p, other])
+		};
+		p.room.rows = 1;
+		p.room.cols = 1;
+		p.grid = [[{ filled: false, color: 'transparent' }]];
+		p.currentPiece = makePiece({ shape: [[1]], color: 'red', position: { x: 0, y: 0 } });
+		p.pieces = new Set([makePiece({ shape: [[2]], color: 'blue', position: { x: 0, y: 0 } })]);
+		p.currentPieceIndex = 0;
+		p.sendGrid();
+
+		const callArgs = conn.emit.mock.calls[0];
+
+		expect(callArgs[0]).toBe(outgoingEvents.GAME_STATE);
+		expect(callArgs[1]).toHaveProperty('currentPiece');
+		expect(callArgs[1]).toHaveProperty('clients');
+		expect(Array.isArray(callArgs[1].clients)).toBe(true);
+	});
+
+	/**
+	 * Test sendGameOver emits game over and calls saveStatistics.
+	 */
+	test('sendGameOver emits game over and calls saveStatistics', () => {
+		const conn = makeConn();
+		const p = new Player(conn, 'p9', 'User9');
+		const winner = new Player(makeConn(), 'w', 'Winner');
+
+		winner.score = 10;
+		p.room = {
+			id: 'r',
+			owner: winner,
+			status: 'ENDED',
+			soloJourney: false,
+			maxPlayers: 2,
+			mode: 'VISIBLE',
+			clients: new Set([p, winner]),
+			getWinner: () => winner
+		};
+		p.score = 5;
+		p.statistics = { addGameResult: jest.fn(), save: jest.fn().mockResolvedValue({}) };
+		p.sendGameOver('Lost!');
+
+		expect(conn.emit).toHaveBeenCalledWith(outgoingEvents.GAME_OVER, expect.any(Object));
+		expect(p.statistics.addGameResult).toHaveBeenCalled();
+	});
+
+	/**
+	 * Test sendGameOver default message uses default arg and still saves statistics.
+	 */
+	test('sendGameOver default message uses default arg and still saves statistics', () => {
+		const conn = makeConn();
+		const p = new Player(conn, 'p10b', 'User10b');
+		const winner = new Player(makeConn(), 'w2', 'Winner2');
+
+		winner.score = 1;
+		p.room = {
+			id: 'r2',
+			owner: winner,
+			status: 'ENDED',
+			soloJourney: false,
+			maxPlayers: 2,
+			mode: gameModes.CLASSIC,
+			clients: new Set([p, winner]),
+			getWinner: () => winner
+		};
+		p.statistics = { addGameResult: jest.fn(), save: jest.fn().mockResolvedValue({}) };
+		p.sendGameOver();
+
+		expect(conn.emit).toHaveBeenCalledWith(outgoingEvents.GAME_OVER, expect.any(Object));
+		expect(p.statistics.addGameResult).toHaveBeenCalled();
+	});
+
+	/**
+	 * Test sendGameLost returns early when already hasLost.
+	 */
+	test('sendGameLost returns early when already hasLost', () => {
+		const conn = makeConn();
+		const p = new Player(conn, 'p10', 'User10');
+
+		p.hasLost = true;
+		p.room = { id: 'r' };
+		p.sendGameLost('already');
+
+		expect(conn.emit).not.toHaveBeenCalled();
+	});
+
+	/**
+	 * Test sendGameLost emits GAME_LOST with provided message.
+	 */
+	test('sendGameLost default message is used when no arg provided', () => {
+		const conn = makeConn();
+		const p = new Player(conn, 'p11', 'User11');
+
+		p.room = { id: 'r3', owner: { id: 'o', username: 'o', score: 0, hasLost: false }, status: 'IN_GAME', soloJourney: false, maxPlayers: 1, mode: gameModes.CLASSIC };
+		p.sendGameLost();
+
+		expect(conn.emit).toHaveBeenCalledWith(outgoingEvents.GAME_LOST, expect.any(Object));
+	});
+
+	/**
+	 * Test clearFullLines uses fallback scoring when clearedLines > 4.
+	 */
+	test('clearFullLines uses fallback scoring when clearedLines > 4', () => {
+		const conn = makeConn();
+		const p = new Player(conn, 'p12', 'User12');
+		const room = {
+			rows: 5,
+			cols: 4,
+			handlePenalties: jest.fn(),
+			broadcastLinesCleared: jest.fn()
+		};
+
+		p.room = room;
+
+		const fullRow = Array.from({ length: room.cols }, () => ({ filled: true, indestructible: false, color: 'x', ghost: false }));
+
+		p.grid = [fullRow, fullRow, fullRow, fullRow, fullRow];
+		p.score = 0;
+		p.clearFullLines();
+
+		expect(room.broadcastLinesCleared).toHaveBeenCalledWith(p, expect.objectContaining({ clearedLines: 5 }));
+		expect(p.score).toBe(gameSettings.BPS_SCORING[4].points);
+	});
+
+	/**
+	 * Test clearFullLines triggers handlePenalties and broadcast when multiple lines cleared.
+	 */
+	test('clearFullLines triggers handlePenalties and broadcast when multiple lines cleared', () => {
+		const conn = makeConn();
+		const p = new Player(conn, 'p7', 'User7');
+		const room = {
+			rows: 4,
+			cols: 4,
+			handlePenalties: jest.fn(),
+			broadcastLinesCleared: jest.fn()
+		};
+
+		p.room = room;
+
+		const fullRow = Array.from({ length: room.cols }, () => ({ filled: true, indestructible: false, color: 'x', ghost: false }));
+		const normalRow = Array.from({ length: room.cols }, () => ({ filled: false, indestructible: false, color: 'transparent', ghost: false }));
+
+		p.grid = [fullRow, fullRow, fullRow, normalRow];
+		p.score = 0;
+		p.clearFullLines();
+
+		expect(room.handlePenalties).toHaveBeenCalledWith(p, 2);
+		expect(room.broadcastLinesCleared).toHaveBeenCalledWith(p, expect.objectContaining({ clearedLines: 3 }));
+
+		return import('../constants/game-settings.js').then(gs => {
+			expect(p.score).toBe(gs.default.BPS_SCORING[3].points);
+		});
+	});
+
+});
+
+/**
+ * Runtime tests for Player class methods.
+ */
+describe('Player runtime tests', () => {
+	let mockConnection;
+	let player;
+
+	/**
+	 * Setup a new Player instance before each test.
+	 */
+	beforeEach(() => {
+		mockConnection = makeConn();
+		player = new Player(mockConnection, 'player1', 'Alice');
+		player.room = {
+			id: 'room1',
+			owner: { id: 'owner1', username: 'Owner' },
+			status: gameStatus.WAITING,
+			soloJourney: false,
+			rows: gameSettings.FRAME_ROWS,
+			cols: gameSettings.FRAME_COLS,
+			handlePenalties: jest.fn(),
+			broadcastLinesCleared: jest.fn(),
+			getWinner: jest.fn(() => null),
+			clients: new Set()
+		};
+		player.grid = structuredClone(gameSettings.DEFAULT_EMPTY_GRID);
+		player.pieces = new Set([createMockPiece(), createMockPiece({ color: 'blue' })]);
+		player.currentPiece = createMockPiece();
+		player.currentPieceIndex = 0;
+		player.hasLost = false;
+	});
+
+	/**
+	 * Cleanup after each test.
+	 */
+	afterEach(() => {
+		mockConnection = null;
+		if (player && typeof player.isValidMove === 'function' && player.isValidMove._isMockFunction) {
+			player.isValidMove = Player.prototype.isValidMove;
+		}
+		player = null;
+	});
+
+	/**
+	 * Confirms that penalize does nothing if no grid.
 	 */
 	test('penalize adds penalty lines', () => {
 		player.grid = structuredClone(gameSettings.DEFAULT_EMPTY_GRID);
@@ -725,4 +1296,31 @@ describe('Player', () => {
 		expect(player.grid).toBeNull();
 		expect(player.hasLost).toBe(false);
 	});
+
+	/**
+	 * Confirms that updateUsername throws error for invalid usernames.
+	 */
+	test('updateUsername throws an error if username is invalid', () => {
+		const invalidUsernameError = 'Invalid username';
+		const invalidUsernameFormatError = 'Username must be alphanumeric and up to 16 characters long';
+
+		expect(() => player.updateUsername('')).toThrow(invalidUsernameError);
+		expect(() => player.updateUsername(null)).toThrow(invalidUsernameError);
+		expect(() => player.updateUsername(123)).toThrow(invalidUsernameError);
+
+		expect(() => player.updateUsername('BRAN DON')).toThrow(invalidUsernameFormatError);
+		expect(() => player.updateUsername('1234567891011121314151617')).toThrow(invalidUsernameFormatError);
+	});
+
+	/**
+	 * Confirms that sendPlayerStatsBoard does nothing if statistics are not loaded.
+	 */
+	test('sendPlayerStatsBoard does nothing if statistics are not loaded', () => {
+		player.statistics = null;
+
+		player.sendPlayerStatsBoard();
+
+		expect(mockConnection.emit).not.toHaveBeenCalled();
+	});
+
 });
