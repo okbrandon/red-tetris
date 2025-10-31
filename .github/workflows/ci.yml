@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   frontend:
-    name: Frontend – lint, format, build
+    name: Frontend - lint, format, build
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -38,7 +38,28 @@ jobs:
         run: npm run build
 
   backend:
-    name: Backend – placeholder
+    name: Backend -
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
     steps:
-      - run: echo "Backend CI will be added later"
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        run: npm ci
+
+      - name: Jest (unit tests and coverage)
+        run: |
+          # Use the same node flag the repo's test script uses (ESM support)
+          node --experimental-vm-modules node_modules/jest/bin/jest.js \
+            --coverage \
+            --coverageThreshold='{"global":{"branches":100,"functions":100,"lines":100,"statements":100}}' \
+            --detectOpenHandles \
+            --silent
