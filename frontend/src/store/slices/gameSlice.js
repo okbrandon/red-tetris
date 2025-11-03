@@ -93,12 +93,25 @@ export const gameSlice = createSlice({
     },
     setLobbySettings: (state, action) => {
       // room_broadcast
-      const { room, owner, you, clients } = action.payload;
-      state.roomName = room || null;
-      state.owner = owner || null;
-      state.roomMode = room.mode || state.roomMode || '';
+      const { room, owner: ownerPayload, you, clients } = action.payload ?? {};
+      const isRoomObject = room && typeof room === 'object';
+      const nextOwner = isRoomObject ? room.owner : ownerPayload || state.owner;
+      const nextRoomName = isRoomObject ? room.id : room;
+      const nextRoomMode = isRoomObject ? room.mode : undefined;
+
+      state.roomName =
+        typeof nextRoomName === 'string'
+          ? nextRoomName
+          : state.roomName || '';
+      state.owner = nextOwner || null;
+      if (typeof nextRoomMode === 'string') {
+        state.roomMode = nextRoomMode;
+      } else {
+        state.roomMode = state.roomMode || '';
+      }
       state.you = you || null;
-      state.isOwner = you && owner && you.id === owner.id;
+      state.isOwner =
+        Boolean(you?.id) && Boolean(nextOwner?.id) && you.id === nextOwner.id;
       if (Array.isArray(clients) && clients.length > 0) {
         if (state.gameStatus && state.gameStatus !== 'waiting') {
           // Build a Map for O(1) client lookup by id

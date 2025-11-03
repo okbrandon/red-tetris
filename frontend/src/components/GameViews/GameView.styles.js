@@ -132,6 +132,25 @@ export const EventLogList = styled.ul`
   display: flex;
   flex-direction: column;
   gap: clamp(0.4rem, 1vw, 0.6rem);
+  max-height: clamp(8rem, 32vh, 12rem);
+  overflow-y: auto;
+  padding-right: 0.2rem;
+
+  scrollbar-width: thin;
+  scrollbar-color: rgba(162, 130, 235, 0.35) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: rgba(162, 130, 235, 0.35);
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
 `;
 
 export const EventLogItem = styled.li`
