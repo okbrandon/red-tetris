@@ -120,7 +120,9 @@ const GamePlayingView = ({
             <PreviewSection>
               <PrimaryPreviewDisplay>
                 <PreviewTitle>On Deck</PreviewTitle>
-                {primaryLabel ? <PreviewMeta>{primaryLabel}</PreviewMeta> : null}
+                {primaryLabel ? (
+                  <PreviewMeta>{primaryLabel}</PreviewMeta>
+                ) : null}
                 <PrimaryPreviewCanvas>
                   <NextPiecePreview
                     piece={primaryPiece}
@@ -145,7 +147,9 @@ const GamePlayingView = ({
                             cellSize={queuePreviewSize}
                           />
                         </QueueCanvas>
-                        {queueLabel ? <QueueLabel>{queueLabel}</QueueLabel> : null}
+                        {queueLabel ? (
+                          <QueueLabel>{queueLabel}</QueueLabel>
+                        ) : null}
                       </QueuePreviewItem>
                     );
                   })}

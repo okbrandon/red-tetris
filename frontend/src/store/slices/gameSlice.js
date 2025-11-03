@@ -100,9 +100,7 @@ export const gameSlice = createSlice({
       const nextRoomMode = isRoomObject ? room.mode : undefined;
 
       state.roomName =
-        typeof nextRoomName === 'string'
-          ? nextRoomName
-          : state.roomName || '';
+        typeof nextRoomName === 'string' ? nextRoomName : state.roomName || '';
       state.owner = nextOwner || null;
       if (typeof nextRoomMode === 'string') {
         state.roomMode = nextRoomMode;
