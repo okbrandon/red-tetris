@@ -6,7 +6,6 @@ import {
   requestStartGame,
   requestRoomModeChange,
 } from '@/store/slices/socketThunks';
-import { getModeDetails } from '@/utils/gameModes';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -105,15 +104,6 @@ const useGameFlow = ({ roomName }) => {
     }
 
     requestRoomModeChange({ mode: newMode });
-    const modeDetails = getModeDetails(newMode);
-    dispatch(
-      showNotification({
-        type: 'info',
-        message: modeDetails
-          ? `Switching lobby to ${modeDetails.title} mode…`
-          : 'Switching lobby mode…',
-      })
-    );
   };
 
   return {
