@@ -15,11 +15,24 @@ import {
   InfoCard,
   InfoLabel,
   ScoreValue,
-  VerticalPreview,
-  PreviewSlot,
+  PreviewSection,
+  PrimaryPreviewDisplay,
+  PreviewTitle,
+  PreviewMeta,
+  PrimaryPreviewCanvas,
+  QueuePreviewStrip,
+  QueuePreviewItem,
+  QueueBadge,
+  QueueCanvas,
+  QueueLabel,
   EmptyQueue,
   EventLogList,
   EventLogItem,
+  EventLogHeader,
+  EventLogScorer,
+  EventLogTimestamp,
+  EventLogMessage,
+  EventLogDetails,
 } from './GameView.styles.js';
 import { resultModalShape } from '../GameResultModal/GameResultModal.propTypes.js';
 
@@ -30,14 +43,47 @@ const GamePlayingView = ({
   nextPieces,
   lineClearLog,
 }) => {
-  const primaryPreviewSize = Math.max(16, Math.floor(CELL_SIZE * 0.6));
-  const queuePreviewSize = Math.max(14, Math.floor(CELL_SIZE * 0.48));
+  const primaryPreviewSize = Math.max(14, Math.floor(CELL_SIZE * 0.48));
+  const queuePreviewSize = Math.max(12, Math.floor(CELL_SIZE * 0.36));
   const isResultModalOpen = Boolean(resultModal?.isOpen);
   const resolvedScore = typeof score === 'number' ? score : 0;
   const upcomingPieces = Array.isArray(nextPieces) ? nextPieces : [];
   const lineClears = Array.isArray(lineClearLog) ? lineClearLog : [];
 
   usePieceControls({ isResultModalOpen });
+
+  const primaryPiece = upcomingPieces[0] ?? null;
+  const queuePieces = upcomingPieces.slice(1, 4);
+
+  const formatPieceLabel = (piece) => {
+    if (!piece) return null;
+    const rawLabel =
+      (typeof piece.displayName === 'string' && piece.displayName.trim()) ||
+      (typeof piece.name === 'string' && piece.name.trim()) ||
+      (typeof piece.type === 'string' && piece.type.trim()) ||
+      null;
+
+    return rawLabel ? rawLabel.toUpperCase() : null;
+  };
+  const primaryLabel = formatPieceLabel(primaryPiece);
+  const formatTimestamp = (rawValue) => {
+    if (rawValue === null || rawValue === undefined) return null;
+    const numericValue =
+      typeof rawValue === 'number' ? rawValue : Number(rawValue);
+    if (!Number.isFinite(numericValue)) return null;
+    const date = new Date(numericValue);
+    if (Number.isNaN(date.getTime())) return null;
+
+    return {
+      label: date.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+      }),
+      dateTime: date.toISOString(),
+    };
+  };
 
   return (
     <Layout>
@@ -70,19 +116,46 @@ const GamePlayingView = ({
 
         <InfoCard aria-label="Upcoming pieces">
           <InfoLabel>Next Pieces</InfoLabel>
-          {upcomingPieces.length ? (
-            <VerticalPreview>
-              {upcomingPieces.slice(0, 3).map((piece, index) => (
-                <PreviewSlot key={piece?.id ?? piece?.name ?? `next-${index}`}>
+          {primaryPiece ? (
+            <PreviewSection>
+              <PrimaryPreviewDisplay>
+                <PreviewTitle>On Deck</PreviewTitle>
+                {primaryLabel ? (
+                  <PreviewMeta>{primaryLabel}</PreviewMeta>
+                ) : null}
+                <PrimaryPreviewCanvas>
                   <NextPiecePreview
-                    piece={piece}
-                    cellSize={
-                      index === 0 ? primaryPreviewSize : queuePreviewSize
-                    }
+                    piece={primaryPiece}
+                    cellSize={primaryPreviewSize}
                   />
-                </PreviewSlot>
-              ))}
-            </VerticalPreview>
+                </PrimaryPreviewCanvas>
+              </PrimaryPreviewDisplay>
+
+              {queuePieces.length ? (
+                <QueuePreviewStrip aria-label="Queued pieces">
+                  {queuePieces.map((piece, index) => {
+                    const queueLabel = formatPieceLabel(piece);
+
+                    return (
+                      <QueuePreviewItem
+                        key={piece?.id ?? piece?.name ?? `queued-${index}`}
+                      >
+                        <QueueBadge>+{index + 1}</QueueBadge>
+                        <QueueCanvas>
+                          <NextPiecePreview
+                            piece={piece}
+                            cellSize={queuePreviewSize}
+                          />
+                        </QueueCanvas>
+                        {queueLabel ? (
+                          <QueueLabel>{queueLabel}</QueueLabel>
+                        ) : null}
+                      </QueuePreviewItem>
+                    );
+                  })}
+                </QueuePreviewStrip>
+              ) : null}
+            </PreviewSection>
           ) : (
             <EmptyQueue>No preview available</EmptyQueue>
           )}
@@ -92,11 +165,40 @@ const GamePlayingView = ({
           <InfoLabel>Line Clears</InfoLabel>
           {lineClears.length ? (
             <EventLogList>
-              {lineClears.map((entry) => (
-                <EventLogItem key={entry.id ?? entry.message}>
-                  {entry.message}
-                </EventLogItem>
-              ))}
+              {lineClears.map((entry) => {
+                const scorerLabel =
+                  typeof entry.scorer === 'string' && entry.scorer.trim()
+                    ? entry.scorer.trim()
+                    : null;
+                const detailsLabel =
+                  typeof entry.details === 'string' && entry.details.trim()
+                    ? entry.details.trim()
+                    : null;
+                const timestamp = formatTimestamp(entry.timestamp);
+
+                return (
+                  <EventLogItem key={entry.id ?? entry.message}>
+                    {scorerLabel || timestamp ? (
+                      <EventLogHeader>
+                        {scorerLabel ? (
+                          <EventLogScorer title={scorerLabel}>
+                            {scorerLabel}
+                          </EventLogScorer>
+                        ) : null}
+                        {timestamp ? (
+                          <EventLogTimestamp dateTime={timestamp.dateTime}>
+                            {timestamp.label}
+                          </EventLogTimestamp>
+                        ) : null}
+                      </EventLogHeader>
+                    ) : null}
+                    <EventLogMessage>{entry.message}</EventLogMessage>
+                    {detailsLabel ? (
+                      <EventLogDetails>{detailsLabel}</EventLogDetails>
+                    ) : null}
+                  </EventLogItem>
+                );
+              })}
             </EventLogList>
           ) : (
             <EmptyQueue>No line clears yet</EmptyQueue>
