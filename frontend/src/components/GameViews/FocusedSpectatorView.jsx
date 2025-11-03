@@ -15,6 +15,11 @@ import {
   EmptyQueue,
   EventLogList,
   EventLogItem,
+  EventLogHeader,
+  EventLogScorer,
+  EventLogTimestamp,
+  EventLogMessage,
+  EventLogDetails,
   SpectatorActions,
   ExitButton,
 } from './GameView.styles.js';
@@ -36,6 +41,24 @@ const FocusedSpectatorView = ({
 
   const lineClears = Array.isArray(lineClearLog) ? lineClearLog : [];
   const hasFocusedPlayer = Boolean(focusedPlayer);
+  const formatTimestamp = (rawValue) => {
+    if (rawValue === null || rawValue === undefined) return null;
+    const numericValue =
+      typeof rawValue === 'number' ? rawValue : Number(rawValue);
+    if (!Number.isFinite(numericValue)) return null;
+    const date = new Date(numericValue);
+    if (Number.isNaN(date.getTime())) return null;
+
+    return {
+      label: date.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+      }),
+      dateTime: date.toISOString(),
+    };
+  };
 
   return (
     <Layout>
@@ -65,11 +88,40 @@ const FocusedSpectatorView = ({
           <InfoLabel>Line Clears</InfoLabel>
           {lineClears.length ? (
             <EventLogList>
-              {lineClears.map((entry) => (
-                <EventLogItem key={entry.id ?? entry.message}>
-                  {entry.message}
-                </EventLogItem>
-              ))}
+              {lineClears.map((entry) => {
+                const scorerLabel =
+                  typeof entry.scorer === 'string' && entry.scorer.trim()
+                    ? entry.scorer.trim()
+                    : null;
+                const detailsLabel =
+                  typeof entry.details === 'string' && entry.details.trim()
+                    ? entry.details.trim()
+                    : null;
+                const timestamp = formatTimestamp(entry.timestamp);
+
+                return (
+                  <EventLogItem key={entry.id ?? entry.message}>
+                    {scorerLabel || timestamp ? (
+                      <EventLogHeader>
+                        {scorerLabel ? (
+                          <EventLogScorer title={scorerLabel}>
+                            {scorerLabel}
+                          </EventLogScorer>
+                        ) : null}
+                        {timestamp ? (
+                          <EventLogTimestamp dateTime={timestamp.dateTime}>
+                            {timestamp.label}
+                          </EventLogTimestamp>
+                        ) : null}
+                      </EventLogHeader>
+                    ) : null}
+                    <EventLogMessage>{entry.message}</EventLogMessage>
+                    {detailsLabel ? (
+                      <EventLogDetails>{detailsLabel}</EventLogDetails>
+                    ) : null}
+                  </EventLogItem>
+                );
+              })}
             </EventLogList>
           ) : (
             <EmptyQueue>No line clears yet</EmptyQueue>
