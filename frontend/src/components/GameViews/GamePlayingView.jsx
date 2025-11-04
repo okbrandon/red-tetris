@@ -16,15 +16,16 @@ import {
   InfoLabel,
   ScoreValue,
   PreviewSection,
-  PrimaryPreviewDisplay,
+  PrimaryPreviewCard,
+  PrimaryPreviewInfo,
   PreviewTitle,
   PreviewMeta,
   PrimaryPreviewCanvas,
-  QueuePreviewStrip,
-  QueuePreviewItem,
-  QueueBadge,
-  QueueCanvas,
-  QueueLabel,
+  QueueList,
+  QueueListItem,
+  QueueIndex,
+  QueuePreview,
+  QueuePieceLabel,
   EmptyQueue,
   EventLogList,
   EventLogItem,
@@ -43,8 +44,8 @@ const GamePlayingView = ({
   nextPieces,
   lineClearLog,
 }) => {
-  const primaryPreviewSize = Math.max(14, Math.floor(CELL_SIZE * 0.48));
-  const queuePreviewSize = Math.max(12, Math.floor(CELL_SIZE * 0.36));
+  const primaryPreviewSize = Math.max(12, Math.floor(CELL_SIZE * 0.38));
+  const queuePreviewSize = Math.max(10, Math.floor(CELL_SIZE * 0.3));
   const isResultModalOpen = Boolean(resultModal?.isOpen);
   const resolvedScore = typeof score === 'number' ? score : 0;
   const upcomingPieces = Array.isArray(nextPieces) ? nextPieces : [];
@@ -118,43 +119,48 @@ const GamePlayingView = ({
           <InfoLabel>Next Pieces</InfoLabel>
           {primaryPiece ? (
             <PreviewSection>
-              <PrimaryPreviewDisplay>
-                <PreviewTitle>On Deck</PreviewTitle>
-                {primaryLabel ? (
-                  <PreviewMeta>{primaryLabel}</PreviewMeta>
-                ) : null}
+              <PrimaryPreviewCard>
+                <PrimaryPreviewInfo>
+                  <PreviewTitle>Up Next</PreviewTitle>
+                  {primaryLabel ? (
+                    <PreviewMeta>{primaryLabel}</PreviewMeta>
+                  ) : null}
+                </PrimaryPreviewInfo>
                 <PrimaryPreviewCanvas>
                   <NextPiecePreview
                     piece={primaryPiece}
                     cellSize={primaryPreviewSize}
                   />
                 </PrimaryPreviewCanvas>
-              </PrimaryPreviewDisplay>
+              </PrimaryPreviewCard>
 
               {queuePieces.length ? (
-                <QueuePreviewStrip aria-label="Queued pieces">
+                <QueueList aria-label="Queued pieces">
                   {queuePieces.map((piece, index) => {
                     const queueLabel = formatPieceLabel(piece);
+                    const key = piece?.id ?? piece?.name ?? `queued-${index}`;
 
                     return (
-                      <QueuePreviewItem
-                        key={piece?.id ?? piece?.name ?? `queued-${index}`}
-                      >
-                        <QueueBadge>+{index + 1}</QueueBadge>
-                        <QueueCanvas>
+                      <QueueListItem key={key}>
+                        <QueueIndex title={`Queued position ${index + 2}`}>
+                          +{index + 1}
+                        </QueueIndex>
+                        <QueuePreview>
                           <NextPiecePreview
                             piece={piece}
                             cellSize={queuePreviewSize}
                           />
-                        </QueueCanvas>
+                        </QueuePreview>
                         {queueLabel ? (
-                          <QueueLabel>{queueLabel}</QueueLabel>
+                          <QueuePieceLabel>{queueLabel}</QueuePieceLabel>
                         ) : null}
-                      </QueuePreviewItem>
+                      </QueueListItem>
                     );
                   })}
-                </QueuePreviewStrip>
-              ) : null}
+                </QueueList>
+              ) : (
+                <EmptyQueue>Queue is clear</EmptyQueue>
+              )}
             </PreviewSection>
           ) : (
             <EmptyQueue>No preview available</EmptyQueue>

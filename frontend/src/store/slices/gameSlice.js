@@ -93,9 +93,9 @@ export const gameSlice = createSlice({
     },
     setLobbySettings: (state, action) => {
       // room_broadcast
-      const { room, owner: ownerPayload, you, clients } = action.payload ?? {};
+      const { room, you, clients } = action.payload ?? {};
       const isRoomObject = room && typeof room === 'object';
-      const nextOwner = isRoomObject ? room.owner : ownerPayload || state.owner;
+      const nextOwner = isRoomObject ? room.owner : state.owner;
       const nextRoomName = isRoomObject ? room.id : room;
       const nextRoomMode = isRoomObject ? room.mode : undefined;
 
