@@ -325,7 +325,7 @@ export const initializeSocket = () => {
     );
     dispatch(setGameStatus({ status: 'waiting' }));
     dispatch(setLobbySettings(payload));
-  })
+  });
 
   return () => {
     cleanup.forEach((fn) => fn());
