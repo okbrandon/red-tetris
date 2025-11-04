@@ -23,6 +23,7 @@ import {
   setPlayerOutcome,
   addLineClearLogEntry,
 } from './gameSlice.js';
+import { setPlayerHistory } from './playerStatsSlice.js';
 import { store } from '../store.js';
 
 let listenersBound = false;
@@ -325,6 +326,17 @@ export const initializeSocket = () => {
     );
     dispatch(setGameStatus({ status: 'waiting' }));
     dispatch(setLobbySettings(payload));
+  });
+
+  addListener(SERVER_EVENTS.PLAYER_STATS_BOARD, (payload) => {
+    dispatch(
+      socketEventReceived({
+        direction: 'incoming',
+        type: SERVER_EVENTS.PLAYER_STATS_BOARD,
+        payload,
+      })
+    );
+    dispatch(setPlayerHistory(payload?.gameHistory ?? []));
   });
 
   return () => {
