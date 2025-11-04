@@ -14,6 +14,7 @@ const useGameResults = () => {
   const { gameStatus, playerOutcome, isResultModalOpen } = useSelector(
     (state) => state.game
   );
+  const username = useSelector((state) => state.user.username);
 
   useEffect(() => {
     if (
@@ -37,11 +38,11 @@ const useGameResults = () => {
   }, [gameStatus, playerOutcome, dispatch, isResultModalOpen]);
 
   useEffect(() => {
-    if (!gameStatus) {
+    if (!gameStatus && username) {
       navigate('/menu');
       console.log('No active game, navigating to menu');
     }
-  }, [gameStatus, navigate]);
+  }, [gameStatus, navigate, username]);
 
   const returnToMenu = () => {
     dispatch(setIsResultModalOpen(false));
