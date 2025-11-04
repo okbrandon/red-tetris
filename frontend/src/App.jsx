@@ -61,7 +61,11 @@ function HandleRoute() {
     const knownPages = ['/', '/menu', '/join'];
     const storedUsername = window.localStorage.getItem('username');
 
-    if (storedUsername && knownPages.includes(currentPath) && storedUsername.length < 17) {
+    if (
+      storedUsername &&
+      knownPages.includes(currentPath) &&
+      storedUsername.length < 17
+    ) {
       updateUsername(storedUsername);
       return;
     }
