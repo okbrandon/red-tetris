@@ -23,6 +23,50 @@ export const Player = styled.li`
     inset 0 0 0 1px rgba(255, 255, 255, 0.05),
     0 8px 20px rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  justify-content: space-between;
+`;
+
+export const PlayerName = styled.span`
+  flex: 1;
+  min-width: 0;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.03em;
+`;
+
+export const OwnerBadge = styled.span`
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem 0.25rem 0.55rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(255, 215, 164, 0.95), #c99bff);
+  color: #1b102c;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  box-shadow: 0 6px 14px rgba(201, 155, 255, 0.28);
+
+  &::before {
+    content: '';
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle at 30% 30%,
+      #fff8dc 10%,
+      #ffd27d 45%,
+      rgba(255, 138, 76, 0.75) 75%
+    );
+    box-shadow: 0 0 8px rgba(255, 214, 145, 0.9);
+  }
 `;
 
 export const ModeSection = styled.div`

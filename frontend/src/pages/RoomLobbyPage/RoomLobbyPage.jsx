@@ -12,6 +12,8 @@ import BackButton from '@/components/Backbutton/BackButton';
 import {
   PlayerList,
   Player,
+  PlayerName,
+  OwnerBadge,
   ModeSection,
   ModeSelector,
   ModeSelectWrapper,
@@ -24,8 +26,7 @@ import useGameFlow from '@/hooks/useGameFlow';
 import { GAME_MODE_OPTIONS, getModeDetails } from '@/utils/gameModes';
 
 const RoomLobbyPage = () => {
-  const username = useSelector((state) => state.user.username);
-  const { players, roomName, isOwner, roomMode } = useSelector(
+  const { players, roomName, isOwner, roomMode, owner } = useSelector(
     (state) => state.game
   );
 
@@ -56,9 +57,7 @@ const RoomLobbyPage = () => {
       <LogoTitle>Lobby</LogoTitle>
 
       <Card>
-        <Subtitle>Welcome, {username}</Subtitle>
         <Subtitle>{`Lobby name: ${roomName}`}</Subtitle>
-        <Subtitle>{`Slots: up to 4 players`}</Subtitle>
 
         <ModeSection>
           <Subtitle id={modeLabelId}>Game mode</Subtitle>
@@ -88,15 +87,28 @@ const RoomLobbyPage = () => {
           </ModeSelector>
           <HintText>
             {isOwner
-              ? 'Choose your challenge, then start the match when everyone is ready.'
-              : 'Waiting for the host to pick the challenge. Get ready!'}
+              ? 'Choose your challenge.'
+              : 'Waiting for the host to pick the challenge.'}
           </HintText>
         </ModeSection>
 
         <PlayerList>
-          {players.map((player, index) => (
-            <Player key={index}>{player.username}</Player>
-          ))}
+          {players.map((player, index) => {
+            const key = player?.id ?? index;
+            const isPlayerOwner =
+              owner?.id && player?.id ? owner.id === player.id : false;
+
+            return (
+              <Player key={key}>
+                <PlayerName>{player.username}</PlayerName>
+                {isPlayerOwner ? (
+                  <OwnerBadge aria-label="Room owner" title="Room owner">
+                    Host
+                  </OwnerBadge>
+                ) : null}
+              </Player>
+            );
+          })}
         </PlayerList>
 
         <StartButton onClick={startMultiplayerGame} disabled={!isOwner}>
