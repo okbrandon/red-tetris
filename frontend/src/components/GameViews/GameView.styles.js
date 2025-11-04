@@ -105,16 +105,23 @@ export const PreviewSection = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(0.45rem, 1.2vw, 0.75rem);
+  gap: clamp(0.6rem, 1.6vw, 1rem);
   width: 100%;
 `;
 
-export const PrimaryPreviewDisplay = styled.div`
+export const PrimaryPreviewCard = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(0.25rem, 0.8vw, 0.45rem);
-  text-align: center;
+  justify-content: center;
+  gap: clamp(0.35rem, 1vw, 0.6rem);
+`;
+
+export const PrimaryPreviewInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
 `;
 
 export const PreviewTitle = styled.span`
@@ -144,61 +151,69 @@ export const PrimaryPreviewCanvas = styled.div`
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  padding: clamp(0.2rem, 0.7vw, 0.4rem);
+  width: clamp(54px, 7.5vw, 68px);
+  height: clamp(54px, 7.5vw, 68px);
+  padding: clamp(0.18rem, 0.5vw, 0.3rem);
   border-radius: 10px;
-  border: 1px solid rgba(162, 130, 235, 0.18);
-  background: rgba(54, 38, 94, 0.18);
+  border: 1px solid rgba(162, 130, 235, 0.24);
+  background: rgba(54, 38, 94, 0.22);
+  box-shadow: inset 0 4px 18px rgba(24, 18, 42, 0.45);
 `;
 
-export const QueuePreviewStrip = styled.div`
+export const QueueList = styled.ul`
+  width: 100%;
+  margin: 0;
+  padding: 0 clamp(0.3rem, 1vw, 0.6rem);
+  list-style: none;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  flex-wrap: wrap;
-  gap: clamp(0.3rem, 0.7vw, 0.45rem);
-  width: 100%;
+  gap: clamp(0.4rem, 1.2vw, 0.7rem);
 `;
 
-export const QueuePreviewItem = styled.div`
+export const QueueListItem = styled.li`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 0.25rem;
-  flex: 0 0 clamp(42px, 6.5vw, 54px);
+  gap: clamp(0.2rem, 0.7vw, 0.35rem);
 `;
 
-export const QueueBadge = styled.span`
+export const QueueIndex = styled.span`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.05rem 0.45rem;
+  min-width: clamp(1.05rem, 1.6vw, 1.35rem);
+  height: clamp(1.05rem, 1.6vw, 1.35rem);
   border-radius: 999px;
-  background: rgba(54, 38, 94, 0.22);
-  border: 1px solid rgba(162, 130, 235, 0.2);
-  font-size: 0.54rem;
-  letter-spacing: 0.12em;
+  border: 1px solid rgba(162, 130, 235, 0.32);
+  background: rgba(33, 25, 58, 0.4);
+  font-size: 0.52rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(199, 191, 234, 0.74);
+  color: rgba(246, 241, 255, 0.7);
 `;
 
-export const QueueCanvas = styled.div`
+export const QueuePreview = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(0.12rem, 0.45vw, 0.24rem);
+  flex-shrink: 0;
+  width: clamp(42px, 6vw, 52px);
+  height: clamp(42px, 6vw, 52px);
+  padding: clamp(0.1rem, 0.35vw, 0.2rem);
   border-radius: 8px;
-  border: 1px solid rgba(162, 130, 235, 0.18);
+  border: 1px solid rgba(162, 130, 235, 0.22);
   background: rgba(54, 38, 94, 0.16);
+  box-shadow: inset 0 3px 12px rgba(20, 15, 36, 0.45);
 `;
 
-export const QueueLabel = styled.span`
-  font-size: 0.54rem;
-  letter-spacing: 0.1em;
+export const QueuePieceLabel = styled.span`
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: rgba(246, 241, 255, 0.68);
   text-align: center;
-  white-space: nowrap;
 `;
 
 export const EmptyQueue = styled.p`
@@ -207,6 +222,7 @@ export const EmptyQueue = styled.p`
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: rgba(199, 191, 234, 0.58);
+  text-align: center;
 `;
 
 export const EventLogList = styled.ul`
