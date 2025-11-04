@@ -9,7 +9,7 @@ export const Board = styled.div`
     inset 0 0 0 1px rgba(255, 255, 255, 0.04),
     0 20px 60px rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(10px) saturate(120%);
-  border-radius: 12px;
+  border-radius: 0.2rem;
   overflow: hidden;
   position: relative;
 `;
