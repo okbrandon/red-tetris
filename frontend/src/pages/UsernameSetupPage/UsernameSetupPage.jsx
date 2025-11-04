@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { updateUsername } from '@/store/slices/userThunks.js';
 import { showNotification } from '@/store/slices/notificationSlice.js';
@@ -15,12 +15,16 @@ import {
 } from './UsernameSetupPage.styles';
 import { resetGameState } from '@/store/slices/gameSlice';
 import { resetUser } from '@/store/slices/userSlice';
-import { resetSocketState } from '@/store/slices/socketSlice';
+import { clearSocketEvent, resetSocketState } from '@/store/slices/socketSlice';
+import { SERVER_EVENTS } from '@/services/socket/events.js';
 
 const UsernameSetupPage = () => {
   const navigate = useNavigate();
   const [name, setName] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pendingName, setPendingName] = useState(null);
   const dispatch = useDispatch();
+  const lastSocketEvent = useSelector((state) => state.socket.lastEvent);
 
   useEffect(() => {
     dispatch(resetGameState());
@@ -29,15 +33,52 @@ const UsernameSetupPage = () => {
     window.localStorage.removeItem('username');
   }, [dispatch]);
 
+  useEffect(() => {
+    if (
+      !isSubmitting ||
+      !pendingName ||
+      !lastSocketEvent ||
+      lastSocketEvent.direction !== 'incoming'
+    ) {
+      return;
+    }
+
+    if (lastSocketEvent.type === SERVER_EVENTS.ERROR) {
+      dispatch(clearSocketEvent());
+      setIsSubmitting(false);
+      setPendingName(null);
+      return;
+    }
+
+    if (lastSocketEvent.type === SERVER_EVENTS.CLIENT_UPDATED) {
+      const serverUsername =
+        typeof lastSocketEvent.payload?.username === 'string'
+          ? lastSocketEvent.payload.username.trim()
+          : null;
+      const welcomedName = serverUsername || pendingName;
+      dispatch(clearSocketEvent());
+      setIsSubmitting(false);
+      setPendingName(null);
+      dispatch(
+        showNotification({
+          type: 'success',
+          message: `Welcome ${welcomedName}!`,
+        })
+      );
+      navigate('/menu');
+    }
+  }, [dispatch, isSubmitting, lastSocketEvent, navigate, pendingName]);
+
   const handleStart = () => {
+    if (isSubmitting) return;
+
     const trimmed = name.trim();
 
     if (trimmed) {
+      dispatch(clearSocketEvent());
+      setPendingName(trimmed);
+      setIsSubmitting(true);
       updateUsername(trimmed);
-      dispatch(
-        showNotification({ type: 'success', message: `Welcome ${trimmed}!` })
-      );
-      navigate('/menu');
     } else {
       dispatch(
         showNotification({
@@ -67,7 +108,10 @@ const UsernameSetupPage = () => {
             }}
           />
 
-          <StartButton onClick={handleStart} disabled={!name.trim()}>
+          <StartButton
+            onClick={handleStart}
+            disabled={!name.trim() || isSubmitting}
+          >
             Start
           </StartButton>
         </FormRow>

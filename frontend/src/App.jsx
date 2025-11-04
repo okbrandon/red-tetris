@@ -46,7 +46,7 @@ function HandleRoute() {
         roomName = rawRoomName.trim();
       }
 
-      if (!usernameFromPath || !roomName) {
+      if (!usernameFromPath || !roomName || usernameFromPath.length > 16) {
         navigate('/', { replace: true });
       } else if (isReload) {
         updateUsername(usernameFromPath);
@@ -61,7 +61,7 @@ function HandleRoute() {
     const knownPages = ['/', '/menu', '/join'];
     const storedUsername = window.localStorage.getItem('username');
 
-    if (storedUsername && knownPages.includes(currentPath)) {
+    if (storedUsername && knownPages.includes(currentPath) && storedUsername.length < 17) {
       updateUsername(storedUsername);
       return;
     }
