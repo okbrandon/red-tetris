@@ -315,6 +315,18 @@ export const initializeSocket = () => {
     );
   });
 
+  addListener(SERVER_EVENTS.GAME_RESTORED, (payload) => {
+    dispatch(
+      socketEventReceived({
+        direction: 'incoming',
+        type: SERVER_EVENTS.GAME_RESTORED,
+        payload,
+      })
+    );
+    dispatch(setGameStatus({ status: 'waiting' }));
+    dispatch(setLobbySettings(payload));
+  })
+
   return () => {
     cleanup.forEach((fn) => fn());
     listenersBound = false;

@@ -3,7 +3,7 @@ export const CLIENT_EVENTS = Object.freeze({
   ROOM_JOIN: 'room-join',
   ROOM_LEAVE: 'room-leave',
   START_GAME: 'start-game',
-  RESTART_GAME: 'restart-game',
+  RESTART_GAME: 'reset-game',
   MOVE_PIECE: 'move-piece',
   ROOM_MODE: 'room-mode',
 });
@@ -20,6 +20,7 @@ export const SERVER_EVENTS = Object.freeze({
   GAME_OVER: 'game-over',
   GAME_LOST: 'game-lost',
   LINES_CLEARED: 'lines-cleared',
+  GAME_RESTORED: 'game-restored',
 });
 
 export const SOCKET_EVENTS = Object.freeze({
