@@ -27,5 +27,6 @@ const playerStatsSlice = createSlice({
   },
 });
 
-export const { setPlayerHistory, resetPlayerHistory } = playerStatsSlice.actions;
+export const { setPlayerHistory, resetPlayerHistory } =
+  playerStatsSlice.actions;
 export default playerStatsSlice.reducer;

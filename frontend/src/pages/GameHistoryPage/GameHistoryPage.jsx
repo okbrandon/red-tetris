@@ -93,8 +93,8 @@ const deriveHistoryEntries = (history) => {
       typeof entry?.room?.mode === 'string' && entry.room.mode.trim()
         ? entry.room.mode.trim()
         : entry?.room?.soloJourney
-        ? 'Solo Journey'
-        : null;
+          ? 'Solo Journey'
+          : null;
 
     const opponentsRaw = Array.isArray(entry?.clients) ? entry.clients : [];
     const filteredOpponents = opponentsRaw.filter((client) => {
@@ -105,10 +105,7 @@ const deriveHistoryEntries = (history) => {
 
     const opponentNames = filteredOpponents
       .map((client) => {
-        if (
-          typeof client.username === 'string' &&
-          client.username.trim()
-        ) {
+        if (typeof client.username === 'string' && client.username.trim()) {
           return client.username.trim();
         }
         if (
