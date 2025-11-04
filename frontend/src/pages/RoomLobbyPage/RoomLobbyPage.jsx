@@ -62,22 +62,24 @@ const RoomLobbyPage = () => {
         <ModeSection>
           <Subtitle id={modeLabelId}>Game mode</Subtitle>
           <ModeSelector>
-            <ModeSelectWrapper>
-              <ModeSelect
-                id={modeSelectId}
-                value={selectedMode}
-                onChange={handleModeChange}
-                disabled={!isOwner}
-                aria-labelledby={modeLabelId}
-                aria-describedby={modeDescriptionId}
-              >
-                {GAME_MODE_OPTIONS.map((mode) => (
-                  <option key={mode.id} value={mode.id}>
-                    {`${mode.title} - ${mode.badge}`}
-                  </option>
-                ))}
-              </ModeSelect>
-            </ModeSelectWrapper>
+            {isOwner && (
+              <ModeSelectWrapper>
+                <ModeSelect
+                  id={modeSelectId}
+                  value={selectedMode}
+                  onChange={handleModeChange}
+                  disabled={!isOwner}
+                  aria-labelledby={modeLabelId}
+                  aria-describedby={modeDescriptionId}
+                >
+                  {GAME_MODE_OPTIONS.map((mode) => (
+                    <option key={mode.id} value={mode.id}>
+                      {`${mode.title} - ${mode.badge}`}
+                    </option>
+                  ))}
+                </ModeSelect>
+              </ModeSelectWrapper>
+            )}
             <ModeDetailCard aria-live="polite" id={modeDescriptionId}>
               <ModeDetailTitle>{previewMode.title}</ModeDetailTitle>
               <ModeDetailDescription>
