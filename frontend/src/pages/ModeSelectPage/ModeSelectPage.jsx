@@ -40,6 +40,10 @@ const ModeSelectPage = () => {
     joinSoloRoom(modeId);
   };
 
+  const handleViewHistory = () => {
+    navigate('/history');
+  };
+
   return (
     <Wrapper>
       <BackButton onClick={handleBack} />
@@ -86,6 +90,12 @@ const ModeSelectPage = () => {
                 aria-label="Join an existing room or create one"
               >
                 Multiplayer Journey
+              </StartButton>
+              <StartButton
+                onClick={handleViewHistory}
+                aria-label="View your recent games"
+              >
+                Recent Games
               </StartButton>
             </ButtonGrid>
           </>

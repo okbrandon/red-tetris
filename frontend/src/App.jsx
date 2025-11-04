@@ -13,6 +13,7 @@ import ArenaRouter from './pages/Arena/ArenaRouter/ArenaRouter';
 import { useEffect, useRef } from 'react';
 import { updateUsername } from './store/slices/userThunks';
 import { requestRoomJoin } from './store/slices/socketThunks';
+import GameHistoryPage from '@/pages/GameHistoryPage/GameHistoryPage';
 
 function HandleRoute() {
   const navigate = useNavigate();
@@ -58,7 +59,7 @@ function HandleRoute() {
       return;
     }
 
-    const knownPages = ['/', '/menu', '/join'];
+    const knownPages = ['/', '/menu', '/join', '/history'];
     const storedUsername = window.localStorage.getItem('username');
 
     if (
@@ -85,6 +86,7 @@ function App() {
         <Route path="/" element={<UsernameSetupPage />} />
         <Route path="/menu" element={<ModeSelectPage />} />
         <Route path="/join" element={<RoomAccessPage />} />
+        <Route path="/history" element={<GameHistoryPage />} />
         <Route path="/:room/:player_name" element={<ArenaRouter />} />
       </Routes>
     </Router>

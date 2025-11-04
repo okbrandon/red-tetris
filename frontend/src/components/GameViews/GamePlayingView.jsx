@@ -69,9 +69,24 @@ const GamePlayingView = ({
   const primaryLabel = formatPieceLabel(primaryPiece);
   const formatTimestamp = (rawValue) => {
     if (rawValue === null || rawValue === undefined) return null;
-    const numericValue =
-      typeof rawValue === 'number' ? rawValue : Number(rawValue);
+    let numericValue = null;
+
+    if (rawValue instanceof Date) {
+      numericValue = rawValue.getTime();
+    } else if (typeof rawValue === 'number') {
+      numericValue = rawValue;
+    } else if (typeof rawValue === 'string') {
+      const parsed = Date.parse(rawValue);
+      if (Number.isNaN(parsed)) return null;
+      numericValue = parsed;
+    } else {
+      const coerced = Number(rawValue);
+      if (!Number.isFinite(coerced)) return null;
+      numericValue = coerced;
+    }
+
     if (!Number.isFinite(numericValue)) return null;
+
     const date = new Date(numericValue);
     if (Number.isNaN(date.getTime())) return null;
 
