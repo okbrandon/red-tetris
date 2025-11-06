@@ -493,6 +493,122 @@ describe('Player coverage extras', () => {
 	});
 
 	/**
+	 * Test movePiece up rotates piece when near walls.
+	 */
+	test('movePiece up rotates piece when near walls and isValidMove true', () => {
+		const p = new Player(makeConn(), 'id');
+		const piece = createMockPiece({ shape: [[0, 1], [0, 1]], position: { x: 0, y: 0 } });
+
+		piece.rotate = jest.fn(() => [[1, 0], [1, 0]]);
+		p.currentPiece = piece;
+		p.grid = [[{ filled: false }, { filled: false }], [{ filled: false }, { filled: false }]];
+		p.room = { rows: 2, cols: 2 };
+
+		const limiter = p.rateLimiters['movePiece'] || p.rateLimiters[Object.keys(p.rateLimiters)[0]];
+
+		limiter.lastCalled = 0;
+		p.isValidMove = jest.fn()
+			.mockReturnValueOnce(false)
+			.mockReturnValue(true);
+		p.sendGrid = jest.fn();
+		p.movePiece('up');
+
+		expect(piece.rotate).toHaveBeenCalled();
+		expect(p.currentPiece.shape).toEqual([[1, 0], [1, 0]]);
+		expect(p.currentPiece.position.x).toBe(1);
+		expect(p.sendGrid).toHaveBeenCalled();
+	});
+
+	/**
+	 * When rotation produces an invalid placement and the piece is not near
+	 * a wall, no wall-kick attempts should be made and the piece should
+	 * remain unrotated.
+	 */
+	test('movePiece up does not rotate when rotate invalid and not near wall', () => {
+		const p = new Player(makeConn(), 'id');
+		const originalShape = [[1, 1]];
+		const piece = createMockPiece({ shape: originalShape, position: { x: 2, y: 0 } });
+
+		piece.rotate = jest.fn(() => [[1, 1]]);
+		p.currentPiece = piece;
+		p.grid = [[{ filled: false }, { filled: false }, { filled: false }, { filled: false }]];
+		p.room = { rows: 1, cols: 6 };
+
+		const limiter = p.rateLimiters['movePiece'] || p.rateLimiters[Object.keys(p.rateLimiters)[0]];
+
+		limiter.lastCalled = 0;
+		p.isValidMove = jest.fn(() => false);
+		p.sendGrid = jest.fn();
+		p.movePiece('up');
+
+		expect(piece.rotate).toHaveBeenCalled();
+		expect(p.currentPiece.shape).toEqual(originalShape);
+		expect(p.currentPiece.position.x).toBe(2);
+		expect(p.sendGrid).toHaveBeenCalled();
+	});
+
+	/**
+	 * When rotation fails at the original position and the piece is near a wall,
+	 * but no shifted positions are valid, rotation should not be applied.
+	 */
+	test('movePiece up does not rotate when wall-kick fails', () => {
+		const p = new Player(makeConn(), 'id');
+		const originalShape = [[0, 1], [0, 1]];
+		const piece = createMockPiece({ shape: originalShape, position: { x: 0, y: 0 } });
+
+		piece.rotate = jest.fn(() => [[1, 0], [1, 0]]);
+		p.currentPiece = piece;
+		p.grid = [[{ filled: false }, { filled: false }], [{ filled: false }, { filled: false }]];
+		p.room = { rows: 2, cols: 2 };
+
+		const limiter = p.rateLimiters['movePiece'] || p.rateLimiters[Object.keys(p.rateLimiters)[0]];
+
+		limiter.lastCalled = 0;
+		p.isValidMove = jest.fn(() => false);
+		p.sendGrid = jest.fn();
+		p.movePiece('up');
+
+		expect(piece.rotate).toHaveBeenCalled();
+		expect(p.currentPiece.shape).toEqual(originalShape);
+		expect(p.currentPiece.position.x).toBe(0);
+		expect(p.sendGrid).toHaveBeenCalled();
+	});
+
+	/**
+	 * Cover branch where rotatedShape[0] is not an Array (e.g., Uint8Array rows)
+	 * so the rotatedWidth calculation uses the alternate branch, and also
+	 * cover the direction = -1 path when position.x >= 1.
+	 */
+	test('movePiece up uses alternate rotatedWidth branch and wall-kick left', () => {
+		const p = new Player(makeConn(), 'id');
+		const piece = createMockPiece({ shape: [[0, 1], [0, 1]], position: { x: 2, y: 0 } });
+
+		const rotatedShape = [Uint8Array.from([1, 0]), Uint8Array.from([1, 0])];
+		piece.rotate = jest.fn(() => rotatedShape);
+		p.currentPiece = piece;
+		p.grid = [
+			[{ filled: false }, { filled: false }, { filled: false }],
+			[{ filled: false }, { filled: false }, { filled: false }]
+		];
+		p.room = { rows: 2, cols: 3 };
+
+		const limiter = p.rateLimiters['movePiece'] || p.rateLimiters[Object.keys(p.rateLimiters)[0]];
+		limiter.lastCalled = 0;
+
+		p.isValidMove = jest.fn()
+			.mockReturnValueOnce(false)
+			.mockReturnValueOnce(true);
+
+		p.sendGrid = jest.fn();
+		p.movePiece('up');
+
+		expect(piece.rotate).toHaveBeenCalled();
+		expect(p.currentPiece.shape).toBe(rotatedShape);
+		expect(p.currentPiece.position.x).toBe(1);
+		expect(p.sendGrid).toHaveBeenCalled();
+	});
+
+	/**
 	 * Test swapWithNext early returns for missing conditions.
 	 */
 	test('swapWithNext early returns for missing conditions', () => {

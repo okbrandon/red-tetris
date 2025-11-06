@@ -556,9 +556,28 @@ class Player {
 
 		if (rotate) {
 			const rotatedShape = this.currentPiece.rotate();
+			const rotatedWidth = Array.isArray(rotatedShape[0]) ? rotatedShape[0].length : rotatedShape.length;
+			const isNearWall = position.x < 1 || position.x + rotatedWidth > this.room.cols - 1;
 
-			if (this.isValidMove(this.currentPiece, this.grid, position, true)) {
+			const tempPieceWithRotatedShape = { ...this.currentPiece, shape: rotatedShape };
+
+			if (this.isValidMove(tempPieceWithRotatedShape, this.grid, position)) {
 				this.currentPiece.shape = rotatedShape;
+			} else {
+				if (isNearWall) {
+					const direction = position.x < 1 ? 1 : -1;
+
+					for (let shifter = 1; shifter <= 3; shifter++) {
+						const shiftX = direction * shifter;
+						const shiftedPosition = { x: position.x + shiftX, y: position.y };
+
+						if (this.isValidMove(tempPieceWithRotatedShape, this.grid, shiftedPosition)) {
+							this.currentPiece.shape = rotatedShape;
+							this.currentPiece.position.x += shiftX;
+							break;
+						}
+					}
+				}
 			}
 		}
 		else if (hardDrop) {
