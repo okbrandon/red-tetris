@@ -67,7 +67,7 @@ const resolveColorFromPiece = (piece, palette, fallbackKey = 1) => {
     if (paletteMatch) return paletteMatch;
     return piece.color;
   }
-  return palette[fallbackKey] ?? palette.default ?? 'rgba(0,0,0,0)';
+  return palette[fallbackKey];
 };
 
 export const createPreviewData = (piece) => {

@@ -28,23 +28,26 @@ export const GAME_RESULT_VARIANTS = Object.freeze({
 const DEFAULT_VARIANT_KEY = 'info';
 const DEFAULT_FALLBACK_MESSAGE = 'Game Over';
 
-const resolveVariantKey = (outcome) => {
+const resolveVariantKey = (outcome, variants = GAME_RESULT_VARIANTS) => {
   const key = typeof outcome === 'string' ? outcome : outcome?.outcome;
-  if (key && Object.prototype.hasOwnProperty.call(GAME_RESULT_VARIANTS, key)) {
+  if (key && Object.prototype.hasOwnProperty.call(variants, key)) {
     return key;
   }
   return DEFAULT_VARIANT_KEY;
 };
 
-export const deriveGameResultState = ({
-  outcome,
-  isOwner = false,
-  isGameOver = false,
-  canSpectate = false,
-  onSpectate,
-} = {}) => {
-  const variantKey = resolveVariantKey(outcome);
-  const variant = GAME_RESULT_VARIANTS[variantKey];
+export const deriveGameResultState = (
+  {
+    outcome,
+    isOwner = false,
+    isGameOver = false,
+    canSpectate = false,
+    onSpectate,
+  } = {},
+  variants = GAME_RESULT_VARIANTS
+) => {
+  const variantKey = resolveVariantKey(outcome, variants);
+  const variant = variants[variantKey] ?? variants[DEFAULT_VARIANT_KEY] ?? {};
 
   const message =
     outcome?.message ?? variant.defaultMessage ?? DEFAULT_FALLBACK_MESSAGE;
