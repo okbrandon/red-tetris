@@ -15,6 +15,22 @@ export default defineConfig({
     globals: true,
     setupFiles: './src/setupTests.js',
     css: true,
+    coverage: {
+      provider: 'v8',
+      reports: ['text', 'html', 'lcov'],
+      reportOnFailure: true,
+      include: [
+        'src/**/**/*.{js,jsx}',
+      ],
+      thresholds: {
+        global: {
+          branches: 100,
+          functions: 100,
+          lines: 100,
+          statements: 100,
+        },
+      },
+    },
   },
   resolve: {
     alias: {
