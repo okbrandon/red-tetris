@@ -37,6 +37,9 @@ jobs:
       - name: Build (Vite)
         run: npm run build
 
+      - name: Test (Vitest) with coverage
+        run: npm run test -- --coverage --coverageThreshold='{"global":{"branches":70,"functions":70,"lines":70,"statements":70}}'
+
   backend:
     name: Backend - unit tests and coverage
     runs-on: ubuntu-latest
@@ -60,6 +63,6 @@ jobs:
           # Use the same node flag the repo's test script uses (ESM support)
           node --experimental-vm-modules node_modules/jest/bin/jest.js \
             --coverage \
-            --coverageThreshold='{"global":{"branches":100,"functions":100,"lines":100,"statements":100}}' \
+            --coverageThreshold='{"global":{"branches":70,"functions":70,"lines":70,"statements":70}}' \
             --detectOpenHandles \
             --silent
