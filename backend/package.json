@@ -1,17 +1,21 @@
 {
   "name": "backend",
-  "version": "0.0.0",
-  "private": true,
+  "version": "1.0.0",
+  "main": "main.js",
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node main.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --watchAll --detectOpenHandles --silent"
   },
+  "keywords": [],
+  "author": "",
+  "type": "module",
+  "license": "ISC",
+  "description": "",
   "dependencies": {
-    "cookie-parser": "~1.4.4",
-    "debug": "~2.6.9",
-    "express": "~4.16.1",
-    "http-errors": "~1.6.3",
-    "morgan": "~1.9.1",
-    "pug": "2.0.0-beta11",
+    "mongodb": "^6.20.0",
     "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
   }
 }

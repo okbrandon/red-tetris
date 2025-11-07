@@ -7,11 +7,51 @@ services:
     networks:
       - public
     environment:
-      - DEBUG=backend:*
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_HOST: ${MONGO_HOST}
+      MONGO_PORT: ${MONGO_PORT}
+    depends_on:
+      - mongodb
     ports:
       - "3000:3000"
 
+  mongodb:
+    image: mongo:8.0.15-noble
+    container_name: red-tetris-mongodb
+    restart: always
+    networks:
+      - public
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    command: mongod --quiet
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_SOCKET_URL: ${VITE_SOCKET_URL}
+    container_name: red-tetris-frontend
+    restart: always
+    networks:
+      - public
+    environment:
+      VITE_HOST_NAME: ${VITE_HOST_NAME}
+      VITE_SOCKET_URL: ${VITE_SOCKET_URL}
+    ports:
+      - "8080:80"
 
 networks:
   public:
     driver: bridge
+
+volumes:
+  mongo-data:
+    driver: local
