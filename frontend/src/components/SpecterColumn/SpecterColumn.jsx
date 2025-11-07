@@ -103,7 +103,9 @@ const SpecterColumn = ({
           ))}
         </SpecterGrid>
       ) : (
-        <EmptyNotice>Waiting for challengers...</EmptyNotice>
+        <SpecterGrid aria-label="Opponent boards">
+          <EmptyNotice>Waiting for challengers...</EmptyNotice>
+        </SpecterGrid>
       )}
     </SpecterColumnContainer>
   );
