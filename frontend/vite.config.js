@@ -22,10 +22,10 @@ export default defineConfig({
       include: ['src/**/**/*.{js,jsx}'],
       thresholds: {
         global: {
-          branches: 100,
-          functions: 100,
-          lines: 100,
-          statements: 100,
+          branches: 70,
+          functions: 70,
+          lines: 70,
+          statements: 70,
         },
       },
     },

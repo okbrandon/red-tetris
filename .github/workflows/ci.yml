@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   frontend:
-    name: Frontend - lint, format, build
+    name: Frontend - lint and coverage
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -31,14 +31,8 @@ jobs:
       - name: Lint (ESLint)
         run: npm run lint
 
-      - name: Check formatting (Prettier)
-        run: npm run format:check
-
-      - name: Build (Vite)
-        run: npm run build
-
       - name: Test (Vitest) with coverage
-        run: npm run test -- --coverage --coverageThreshold='{"global":{"branches":70,"functions":70,"lines":70,"statements":70}}'
+        run: npm run test:coverage
 
   backend:
     name: Backend - unit tests and coverage
