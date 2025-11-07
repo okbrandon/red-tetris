@@ -102,7 +102,9 @@ describe('GamePlayingView', () => {
       />
     );
 
-    expect(mockUsePieceControls).toHaveBeenCalledWith({ isResultModalOpen: false });
+    expect(mockUsePieceControls).toHaveBeenCalledWith({
+      isResultModalOpen: false,
+    });
 
     expect(screen.getByText('Game in Progress')).toBeInTheDocument();
     expect(screen.getByLabelText('Score overview')).toHaveTextContent('321');
@@ -116,8 +118,12 @@ describe('GamePlayingView', () => {
     expect(screen.getAllByText(/BETA|GAMMA/)).toHaveLength(2);
     expect(screen.queryByText('DELTA')).not.toBeInTheDocument();
 
-    expect(screen.getByLabelText('Upcoming pieces')).not.toHaveTextContent('No preview available');
-    expect(screen.getByLabelText('Line clear log')).not.toHaveTextContent('No line clears yet');
+    expect(screen.getByLabelText('Upcoming pieces')).not.toHaveTextContent(
+      'No preview available'
+    );
+    expect(screen.getByLabelText('Line clear log')).not.toHaveTextContent(
+      'No line clears yet'
+    );
 
     expect(screen.getByText('Perfect clear')).toBeInTheDocument();
     expect(screen.getByText('Combo chain')).toBeInTheDocument();
@@ -125,7 +131,9 @@ describe('GamePlayingView', () => {
     expect(screen.getByText('Score only header')).toBeInTheDocument();
     expect(screen.getByText('Chain extended')).toBeInTheDocument();
 
-    const timestampNode = document.querySelector('[datetime="2024-01-01T00:00:00.000Z"]');
+    const timestampNode = document.querySelector(
+      '[datetime="2024-01-01T00:00:00.000Z"]'
+    );
     expect(timestampNode).not.toBeNull();
     expect(timestampNode?.textContent).toMatch(/\d{2}:\d{2}:\d{2}/);
 
@@ -151,7 +159,9 @@ describe('GamePlayingView', () => {
       />
     );
 
-    expect(mockUsePieceControls).toHaveBeenCalledWith({ isResultModalOpen: true });
+    expect(mockUsePieceControls).toHaveBeenCalledWith({
+      isResultModalOpen: true,
+    });
 
     expect(screen.getByText('No preview available')).toBeInTheDocument();
     expect(screen.getByText('No line clears yet')).toBeInTheDocument();
@@ -241,7 +251,9 @@ describe('GamePlayingView', () => {
       expect(convertedTimestamp).not.toBeNull();
       expect(convertedTimestamp?.textContent).toMatch(/\d{2}:\d{2}:\d{2}/);
 
-      const headerlessEntry = screen.getByText('Headerless entry').closest('li');
+      const headerlessEntry = screen
+        .getByText('Headerless entry')
+        .closest('li');
       expect(headerlessEntry?.querySelector('time')).toBeNull();
       expect(headerlessEntry?.querySelector('[title]')).toBeNull();
     } finally {

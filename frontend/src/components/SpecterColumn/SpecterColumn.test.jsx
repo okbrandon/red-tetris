@@ -3,15 +3,12 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const {
-  deriveCardScaleMock,
-  estimateOpponentCellSizeMock,
-  mockTetrisGrid,
-} = vi.hoisted(() => ({
-  deriveCardScaleMock: vi.fn(),
-  estimateOpponentCellSizeMock: vi.fn(),
-  mockTetrisGrid: vi.fn(() => <div data-testid="specter-grid" />),
-}));
+const { deriveCardScaleMock, estimateOpponentCellSizeMock, mockTetrisGrid } =
+  vi.hoisted(() => ({
+    deriveCardScaleMock: vi.fn(),
+    estimateOpponentCellSizeMock: vi.fn(),
+    mockTetrisGrid: vi.fn(() => <div data-testid="specter-grid" />),
+  }));
 
 vi.mock('@/utils/arenaSizing', () => ({
   __esModule: true,
@@ -38,7 +35,10 @@ vi.mock('./SpecterColumn.styles', async (importOriginal) => {
   return {
     __esModule: true,
     ...actual,
-    SpecterColumnContainer: wrapWithTestId(actual.SpecterColumnContainer, 'specter-column'),
+    SpecterColumnContainer: wrapWithTestId(
+      actual.SpecterColumnContainer,
+      'specter-column'
+    ),
     SpecterGrid: wrapWithTestId(actual.SpecterGrid, 'specter-grid-wrapper'),
     SpecterCard: wrapWithTestId(actual.SpecterCard, 'specter-card'),
     SpecterBadge: wrapWithTestId(actual.SpecterBadge, 'specter-badge'),
@@ -49,7 +49,9 @@ vi.mock('./SpecterColumn.styles', async (importOriginal) => {
 
 vi.mock('@/pages/Arena/MultiArenaPage/MultiArenaPage.styles', () => ({
   __esModule: true,
-  SectionLabel: ({ children }) => <h2 data-testid="section-label">{children}</h2>,
+  SectionLabel: ({ children }) => (
+    <h2 data-testid="section-label">{children}</h2>
+  ),
 }));
 
 import SpecterColumn from './SpecterColumn.jsx';
@@ -73,7 +75,9 @@ describe('SpecterColumn', () => {
 
     expect(deriveCardScaleMock).toHaveBeenCalledWith(0);
     expect(estimateOpponentCellSizeMock).toHaveBeenCalledWith(0);
-    expect(screen.getByTestId('section-label').textContent.trim()).toBe('Opponents');
+    expect(screen.getByTestId('section-label').textContent.trim()).toBe(
+      'Opponents'
+    );
     expect(screen.getByText('Waiting for challengers...')).toBeInTheDocument();
   });
 
@@ -81,7 +85,11 @@ describe('SpecterColumn', () => {
     const opponents = [
       { id: 'alpha', username: 'Player One', specter: [[{ filled: true }]] },
       { id: 'beta', username: 'Player Two', specter: [[{ filled: false }]] },
-      { username: 'Player Three', name: 'Fallback', specter: [[{ filled: true }]] },
+      {
+        username: 'Player Three',
+        name: 'Fallback',
+        specter: [[{ filled: true }]],
+      },
     ];
     const setSelectedId = vi.fn();
 
@@ -156,7 +164,9 @@ describe('SpecterColumn', () => {
     expect(card.dataset.active).toBe('false');
     expect(card.getAttribute('role')).toBeNull();
 
-    expect(screen.getByTestId('specter-name').textContent).toBe('Fallback Name');
+    expect(screen.getByTestId('specter-name').textContent).toBe(
+      'Fallback Name'
+    );
   });
 
   it('falls back through opponent identifiers when generating keys', () => {
@@ -176,7 +186,9 @@ describe('SpecterColumn', () => {
 
     expect(deriveCardScaleMock).toHaveBeenCalledWith(opponents.length);
     expect(estimateOpponentCellSizeMock).toHaveBeenCalledWith(opponents.length);
-    expect(screen.getAllByTestId('specter-card')).toHaveLength(opponents.length);
+    expect(screen.getAllByTestId('specter-card')).toHaveLength(
+      opponents.length
+    );
     expect(mockTetrisGrid).toHaveBeenCalledTimes(opponents.length);
   });
 });

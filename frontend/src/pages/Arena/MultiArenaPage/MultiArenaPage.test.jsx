@@ -42,7 +42,9 @@ const baseResultModal = {
 const leaveRoomMock = vi.fn();
 
 const setState = (gameState) => {
-  useSelectorMock.mockImplementation((selector) => selector({ game: gameState }));
+  useSelectorMock.mockImplementation((selector) =>
+    selector({ game: gameState })
+  );
 };
 
 describe('MultiArenaPage', () => {
@@ -66,7 +68,9 @@ describe('MultiArenaPage', () => {
       lineClearLog: [{ id: 1, message: 'line' }],
     });
 
-    render(<MultiArena resultModal={baseResultModal} leaveRoom={leaveRoomMock} />);
+    render(
+      <MultiArena resultModal={baseResultModal} leaveRoom={leaveRoomMock} />
+    );
 
     expect(spectatorArenaMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -91,7 +95,9 @@ describe('MultiArenaPage', () => {
       lineClearLog: [],
     });
 
-    render(<MultiArena resultModal={baseResultModal} leaveRoom={leaveRoomMock} />);
+    render(
+      <MultiArena resultModal={baseResultModal} leaveRoom={leaveRoomMock} />
+    );
 
     expect(screen.getByTestId('playing-view')).toBeInTheDocument();
     expect(specterColumnMock).toHaveBeenLastCalledWith(
@@ -124,7 +130,9 @@ describe('MultiArenaPage', () => {
       lineClearLog: [{ id: 2, message: 'double' }],
     });
 
-    render(<MultiArena resultModal={baseResultModal} leaveRoom={leaveRoomMock} />);
+    render(
+      <MultiArena resultModal={baseResultModal} leaveRoom={leaveRoomMock} />
+    );
 
     expect(specterColumnMock).toHaveBeenLastCalledWith(
       expect.objectContaining({ opponents })

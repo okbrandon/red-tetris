@@ -19,9 +19,7 @@ export default defineConfig({
       provider: 'v8',
       reports: ['text', 'html', 'lcov'],
       reportOnFailure: true,
-      include: [
-        'src/**/**/*.{js,jsx}',
-      ],
+      include: ['src/**/**/*.{js,jsx}'],
       thresholds: {
         global: {
           branches: 100,

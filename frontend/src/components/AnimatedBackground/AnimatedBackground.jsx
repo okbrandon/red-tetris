@@ -255,8 +255,12 @@ const PIECES = PIECE_DEFINITIONS.map((piece) => {
 });
 
 // eslint-disable-next-line react-refresh/only-export-components
-export { getShapeCoordinates, computeDimensions, createPieceStyle, createTileStyle };
-
+export {
+  getShapeCoordinates,
+  computeDimensions,
+  createPieceStyle,
+  createTileStyle,
+};
 
 const AnimatedBackground = () => (
   <Background>

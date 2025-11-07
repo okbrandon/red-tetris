@@ -44,7 +44,9 @@ vi.mock('../SoloArenaPage/SoloArenaPage', () => ({
 }));
 
 const setState = (gameState) => {
-  useSelectorMock.mockImplementation((selector) => selector({ game: gameState }));
+  useSelectorMock.mockImplementation((selector) =>
+    selector({ game: gameState })
+  );
 };
 
 describe('ArenaRouter', () => {
@@ -54,7 +56,7 @@ describe('ArenaRouter', () => {
 
   it('renders the room lobby while waiting for players', () => {
     setState({ gameStatus: 'waiting' });
-  gameResultsFactoryMock.mockReturnValue({});
+    gameResultsFactoryMock.mockReturnValue({});
 
     render(<ArenaRouter />);
 

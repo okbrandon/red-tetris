@@ -55,14 +55,14 @@ describe('NextPiecePreview', () => {
     const filled = cells.filter((cell) => cell.dataset.filled === 'true');
     expect(filled).toHaveLength(4);
     expect(filled.every((cell) => cell.dataset.size === '20')).toBe(true);
-    expect(filled.every((cell) => cell.dataset.color === 'rgba(191,90,242,1)')).toBe(
-      true
-    );
+    expect(
+      filled.every((cell) => cell.dataset.color === 'rgba(191,90,242,1)')
+    ).toBe(true);
 
     const styles = filled.map((cell) => window.getComputedStyle(cell));
-    expect(styles.every((style) => style.backgroundImage.includes('linear-gradient'))).toBe(
-      true
-    );
+    expect(
+      styles.every((style) => style.backgroundImage.includes('linear-gradient'))
+    ).toBe(true);
     expect(styles.every((style) => style.borderRadius !== '0px')).toBe(true);
   });
 
@@ -78,7 +78,9 @@ describe('NextPiecePreview', () => {
 
     const styles = cells.map((cell) => window.getComputedStyle(cell));
     expect(
-      styles.every((style) => !style.backgroundImage.includes('linear-gradient'))
+      styles.every(
+        (style) => !style.backgroundImage.includes('linear-gradient')
+      )
     ).toBe(true);
   });
 });

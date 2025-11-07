@@ -81,7 +81,9 @@ describe('FocusedSpectatorView', () => {
       );
 
       expect(screen.getByText('Spectating Alice')).toBeInTheDocument();
-      expect(screen.getByText('Keep an eye on their score surge.')).toBeInTheDocument();
+      expect(
+        screen.getByText('Keep an eye on their score surge.')
+      ).toBeInTheDocument();
       expect(screen.getByText('88')).toBeInTheDocument();
       expect(screen.getByText('Triple line clear')).toBeInTheDocument();
       expect(screen.getByText('Back-to-back Tetris')).toBeInTheDocument();
@@ -110,7 +112,9 @@ describe('FocusedSpectatorView', () => {
     );
 
     expect(screen.getByText('Spectating')).toBeInTheDocument();
-    expect(screen.getByText('Select a player to begin spectating.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Select a player to begin spectating.')
+    ).toBeInTheDocument();
     expect(screen.getByText('0')).toBeInTheDocument();
     expect(screen.getByText('No line clears yet')).toBeInTheDocument();
   });
@@ -145,7 +149,9 @@ describe('FocusedSpectatorView', () => {
     expect(screen.getByText('Spectating Jordan')).toBeInTheDocument();
     expect(screen.getByText('45')).toBeInTheDocument();
 
-    const timestamp = document.querySelector('time[datetime="1970-01-01T00:00:00.000Z"]');
+    const timestamp = document.querySelector(
+      'time[datetime="1970-01-01T00:00:00.000Z"]'
+    );
     expect(timestamp).not.toBeNull();
     expect(timestamp?.textContent).toMatch(/\d{2}:\d{2}:\d{2}/);
 

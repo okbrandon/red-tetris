@@ -53,13 +53,7 @@ describe('TetrisGrid', () => {
     normalizeGridMock.mockReturnValue(normalized);
 
     render(
-      <TetrisGrid
-        grid={gridInput}
-        rows={1}
-        cols={3}
-        cellSize={22}
-        showGrid
-      />
+      <TetrisGrid grid={gridInput} rows={1} cols={3} cellSize={22} showGrid />
     );
 
     expect(normalizeGridMock).toHaveBeenCalledWith(

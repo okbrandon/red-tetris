@@ -80,7 +80,9 @@ describe('GameResultModal', () => {
     );
 
     expect(screen.getByText('Waiting for host...')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /restart game/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /restart game/i })
+    ).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /spectate match/i }));
     expect(onSpectate).toHaveBeenCalledTimes(1);

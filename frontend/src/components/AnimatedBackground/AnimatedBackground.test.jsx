@@ -50,18 +50,22 @@ describe('AnimatedBackground', () => {
     expect(getCssVariable(firstPiece, '--x')).toBe('-48vw');
     expect(getCssVariable(firstPiece, '--dur')).toBe('26s');
 
-    const firstPieceTiles = firstPiece.querySelectorAll('[data-testid="animated-tile"]');
+    const firstPieceTiles = firstPiece.querySelectorAll(
+      '[data-testid="animated-tile"]'
+    );
     expect(firstPieceTiles).toHaveLength(4);
     expect(firstPieceTiles[0].style.left).toBe('0px');
     expect(firstPieceTiles[1].style.left).toBe('14px');
 
-    const farRightPiece = pieces.find((element) =>
-      getCssVariable(element, '--x') === '46vw'
+    const farRightPiece = pieces.find(
+      (element) => getCssVariable(element, '--x') === '46vw'
     );
     expect(farRightPiece).toBeDefined();
     expect(getCssVariable(farRightPiece, '--scale')).toBe('0.85');
 
-    const totalTiles = container.querySelectorAll('[data-testid="animated-tile"]').length;
+    const totalTiles = container.querySelectorAll(
+      '[data-testid="animated-tile"]'
+    ).length;
     expect(totalTiles).toBeGreaterThan(0);
   });
 

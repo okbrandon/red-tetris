@@ -49,7 +49,9 @@ describe('Notification', () => {
 
   it('renders an alert for error notifications and supports dismissal', () => {
     mockUseNotification.mockReturnValue({ isOpen: true, shouldRender: true });
-    selectorState = { notification: { message: 'System failure', type: 'error' } };
+    selectorState = {
+      notification: { message: 'System failure', type: 'error' },
+    };
 
     render(<Notification />);
 
@@ -58,7 +60,9 @@ describe('Notification', () => {
     expect(screen.getByText('error')).toBeInTheDocument();
     expect(screen.getByText('System failure')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: /dismiss notification/i }));
+    fireEvent.click(
+      screen.getByRole('button', { name: /dismiss notification/i })
+    );
 
     expect(hideNotificationMock).toHaveBeenCalledTimes(1);
     expect(dispatchSpy).toHaveBeenCalledWith({ type: 'notification/hide' });
@@ -88,6 +92,8 @@ describe('Notification', () => {
     expect(window.getComputedStyle(label).color).toBe('rgb(96, 165, 250)');
 
     const shell = container.firstChild;
-    expect(window.getComputedStyle(shell).borderLeftColor).toBe('rgb(96, 165, 250)');
+    expect(window.getComputedStyle(shell).borderLeftColor).toBe(
+      'rgb(96, 165, 250)'
+    );
   });
 });

@@ -196,20 +196,21 @@ const GamePlayingView = ({
                     ? entry.details.trim()
                     : null;
                 const timestamp = formatTimestamp(entry.timestamp);
-                const headerNode = scorerLabel || timestamp ? (
-                  <EventLogHeader>
-                    {scorerLabel ? (
-                      <EventLogScorer title={scorerLabel}>
-                        {scorerLabel}
-                      </EventLogScorer>
-                    ) : null}
-                    {timestamp ? (
-                      <EventLogTimestamp dateTime={timestamp.dateTime}>
-                        {timestamp.label}
-                      </EventLogTimestamp>
-                    ) : null}
-                  </EventLogHeader>
-                ) : null;
+                const headerNode =
+                  scorerLabel || timestamp ? (
+                    <EventLogHeader>
+                      {scorerLabel ? (
+                        <EventLogScorer title={scorerLabel}>
+                          {scorerLabel}
+                        </EventLogScorer>
+                      ) : null}
+                      {timestamp ? (
+                        <EventLogTimestamp dateTime={timestamp.dateTime}>
+                          {timestamp.label}
+                        </EventLogTimestamp>
+                      ) : null}
+                    </EventLogHeader>
+                  ) : null;
                 const renderMessage = () => (
                   <EventLogMessage>{entry.message}</EventLogMessage>
                 );
