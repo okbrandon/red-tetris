@@ -420,13 +420,18 @@ class Player {
 
 		const isPenaltyRow = row => row.every(cell => cell.indestructible);
 
-		const newPenalties = Array.from({ length: penalties }, createPenaltyLine);
-		const existingPenalties = this.grid.filter(isPenaltyRow);
-		const normalRows = this.grid
-			.filter(row => !isPenaltyRow(row))
-			.slice(0, Math.max(0, rows - newPenalties.length - existingPenalties.length));
+		const gridForCalc = this.currentPiece
+			? this.removePieceFromGrid(this.currentPiece, structuredClone(this.grid))
+			: structuredClone(this.grid);
 
-		this.grid = [...normalRows, ...existingPenalties, ...newPenalties].slice(-rows);
+		const newPenalties = Array.from({ length: penalties }, createPenaltyLine);
+		const existingPenalties = gridForCalc.filter(isPenaltyRow);
+		const normalRows = gridForCalc.filter(row => !isPenaltyRow(row));
+
+		const keepCount = Math.max(0, rows - newPenalties.length - existingPenalties.length);
+		const keptNormalRows = keepCount === 0 ? [] : normalRows.slice(-keepCount);
+
+		this.grid = [...keptNormalRows, ...existingPenalties, ...newPenalties].slice(-rows);
 	}
 
 	/**
