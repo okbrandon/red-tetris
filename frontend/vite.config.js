@@ -20,15 +20,7 @@ export default defineConfig({
       reports: ['text', 'html', 'lcov'],
       reportOnFailure: true,
       include: [
-        // Remove everything and keep only the src folder.
-        // For now, until merged to dev, we limit to specific
-        // folders to avoid incomplete coverage reports.
-        'src/hooks/**/*.{js,jsx}',
-        'src/utils/**/*.{js,jsx}',
-        'src/services/**/*.{js,jsx}',
-        'src/providers/**/*.{js,jsx}',
-        'src/store/**/*.{js,jsx}',
-        // 'src/**/**/*.{js,jsx}',
+        'src/**/**/*.{js,jsx}',
       ],
       thresholds: {
         global: {

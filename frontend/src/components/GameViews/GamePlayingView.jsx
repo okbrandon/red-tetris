@@ -196,27 +196,41 @@ const GamePlayingView = ({
                     ? entry.details.trim()
                     : null;
                 const timestamp = formatTimestamp(entry.timestamp);
+                const headerNode = scorerLabel || timestamp ? (
+                  <EventLogHeader>
+                    {scorerLabel ? (
+                      <EventLogScorer title={scorerLabel}>
+                        {scorerLabel}
+                      </EventLogScorer>
+                    ) : null}
+                    {timestamp ? (
+                      <EventLogTimestamp dateTime={timestamp.dateTime}>
+                        {timestamp.label}
+                      </EventLogTimestamp>
+                    ) : null}
+                  </EventLogHeader>
+                ) : null;
+                const renderMessage = () => (
+                  <EventLogMessage>{entry.message}</EventLogMessage>
+                );
+                const detailsNode = detailsLabel ? (
+                  <EventLogDetails>{detailsLabel}</EventLogDetails>
+                ) : null;
+
+                if (!detailsNode) {
+                  return (
+                    <EventLogItem key={entry.id ?? entry.message}>
+                      {headerNode}
+                      {renderMessage()}
+                    </EventLogItem>
+                  );
+                }
 
                 return (
                   <EventLogItem key={entry.id ?? entry.message}>
-                    {scorerLabel || timestamp ? (
-                      <EventLogHeader>
-                        {scorerLabel ? (
-                          <EventLogScorer title={scorerLabel}>
-                            {scorerLabel}
-                          </EventLogScorer>
-                        ) : null}
-                        {timestamp ? (
-                          <EventLogTimestamp dateTime={timestamp.dateTime}>
-                            {timestamp.label}
-                          </EventLogTimestamp>
-                        ) : null}
-                      </EventLogHeader>
-                    ) : null}
-                    <EventLogMessage>{entry.message}</EventLogMessage>
-                    {detailsLabel ? (
-                      <EventLogDetails>{detailsLabel}</EventLogDetails>
-                    ) : null}
+                    {headerNode}
+                    {renderMessage()}
+                    {detailsNode}
                   </EventLogItem>
                 );
               })}
