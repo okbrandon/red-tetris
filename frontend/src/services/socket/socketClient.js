@@ -1,71 +1,93 @@
 import { io } from 'socket.io-client';
 import { SOCKET_URL } from './events.js';
 
-class SocketClient {
-  constructor() {
-    this.socket = null;
-    this.listenersRegistered = false;
-  }
+const createSocketClient = () => {
+  let socket = null;
+  let listenersRegistered = false;
 
-  connect(options = {}) {
-    if (!this.socket) {
-      this.socket = io(SOCKET_URL, {
+  const ensureSocket = (options = {}) => {
+    if (!socket) {
+      socket = io(SOCKET_URL, {
         autoConnect: false,
         transports: ['websocket'],
         ...options,
       });
     }
 
-    if (!this.socket.connected) {
-      this.socket.connect();
+    return socket;
+  };
+
+  const connect = (options = {}) => {
+    const activeSocket = ensureSocket(options);
+    if (!activeSocket.connected) {
+      activeSocket.connect();
     }
+    return activeSocket;
+  };
 
-    return this.socket;
-  }
-
-  disconnect(reason) {
-    if (!this.socket) return;
-    if (this.socket.connected) {
-      this.socket.disconnect();
+  const disconnect = (reason) => {
+    if (!socket) return;
+    if (socket.connected) {
+      socket.disconnect();
     }
     if (reason === 'dispose') {
-      this.socket.removeAllListeners();
-      this.socket = null;
-      this.listenersRegistered = false;
+      socket.removeAllListeners();
+      socket = null;
+      listenersRegistered = false;
     }
-  }
+  };
 
-  isConnected() {
-    return Boolean(this.socket?.connected);
-  }
+  const isConnected = () => Boolean(socket?.connected);
 
-  on(event, handler) {
-    if (!this.socket) this.connect();
-    this.socket.on(event, handler);
-    return () => this.off(event, handler);
-  }
+  const off = (event, handler) => {
+    if (!socket) return;
+    socket.off(event, handler);
+  };
 
-  once(event, handler) {
-    if (!this.socket) this.connect();
-    this.socket.once(event, handler);
-    return () => this.off(event, handler);
-  }
+  const on = (event, handler) => {
+    connect();
+    socket.on(event, handler);
+    return () => off(event, handler);
+  };
 
-  off(event, handler) {
-    if (!this.socket) return;
-    this.socket.off(event, handler);
-  }
+  const once = (event, handler) => {
+    connect();
+    socket.once(event, handler);
+    return () => off(event, handler);
+  };
 
-  emit(event, payload) {
-    if (!this.socket) this.connect();
-    this.socket.emit(event, payload);
-  }
+  const emit = (event, payload) => {
+    connect();
+    socket.emit(event, payload);
+  };
 
-  getId() {
-    return this.socket?.id ?? null;
-  }
-}
+  const getId = () => socket?.id ?? null;
 
-const socketClient = new SocketClient();
+  return {
+    connect,
+    disconnect,
+    isConnected,
+    on,
+    once,
+    off,
+    emit,
+    getId,
+    get socket() {
+      return socket;
+    },
+    set socket(value) {
+      socket = value;
+    },
+    get listenersRegistered() {
+      return listenersRegistered;
+    },
+    set listenersRegistered(value) {
+      listenersRegistered = value;
+    },
+  };
+};
+
+const socketClient = createSocketClient();
 
 export default socketClient;
+export { createSocketClient };
