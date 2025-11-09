@@ -30,6 +30,25 @@ The project is still evolving, but the gameplay loop, lobby flow, stats storage,
 - **Persistent player history** stored in MongoDB via [`backend/statistics.js`](backend/statistics.js), surfaced in the `/history` page through Redux slices.
 - **Automation-friendly tooling**: GitHub Actions CI, Makefile helpers, Docker Compose stack, and release automation with `standard-version`.
 
+## Screenshots
+**Home & onboarding**
+![Screenshot of the Red Tetris landing page showing the username prompt and animated background](docs/assets/home-page.png)
+
+**Solo Journey selection**
+![Screenshot of the Solo Journey difficulty selector](docs/assets/solo-journey-select.png)
+
+**Lobby setup**
+![Screenshot of the multiplayer lobby creation view](docs/assets/lobby-room.png)
+
+**Multiplayer arena**
+![Screenshot of a multiplayer match with opponent specter boards](docs/assets/multiplayer-game.png)
+
+**In-game HUD**
+![Screenshot of the in-game board, next queue, and controls](docs/assets/in-game.png)
+
+**Recent games history**
+![Screenshot of the recent games panel with stored MongoDB statistics](docs/assets/recent-games.png)
+
 ## Architecture
 ```
 .
