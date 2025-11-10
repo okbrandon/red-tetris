@@ -2,7 +2,7 @@
  * @fileoverview Manages player statistics, including loading, saving, and updating game history.
  */
 
-import mongo from './mongo.js';
+import database from './database.js';
 
 class Statistics {
 
@@ -19,12 +19,25 @@ class Statistics {
 	 * Loads the player's statistics from the database.
 	 */
 	async load() {
-		const db = await mongo.connect();
-		const collection = db.collection('statistics');
-		const data = await collection.findOne({ username: this.username });
+		const pool = await database.connect();
+		const { rows } = await pool.query(
+			'SELECT game_history FROM statistics WHERE username = $1',
+			[this.username]
+		);
 
-		if (data) {
-			this.gameHistory = data.gameHistory || [];
+		if (rows.length > 0) {
+			const history = rows[0].game_history ?? [];
+			let parsedHistory = history;
+			if (typeof history === 'string') {
+				try {
+					parsedHistory = JSON.parse(history);
+				} catch {
+					parsedHistory = [];
+				}
+			}
+			this.gameHistory = Array.isArray(parsedHistory) ? parsedHistory : [];
+		} else {
+			this.gameHistory = [];
 		}
 	}
 
@@ -32,19 +45,16 @@ class Statistics {
 	 * Saves the player's statistics to the database.
 	 */
 	async save() {
-		const db = await mongo.connect();
-		const collection = db.collection('statistics');
+		const pool = await database.connect();
 
 		console.log('Saving statistics for', this.username, this.gameHistory);
 
-		await collection.updateOne(
-			{ username: this.username },
-			{
-				$set: {
-					gameHistory: this.gameHistory
-				}
-			},
-			{ upsert: true }
+		await pool.query(
+			`INSERT INTO statistics (username, game_history, updated_at)
+			 VALUES ($1, $2::jsonb, NOW())
+			 ON CONFLICT (username)
+			 DO UPDATE SET game_history = EXCLUDED.game_history, updated_at = NOW()`,
+			[this.username, JSON.stringify(this.gameHistory)]
 		);
 	}
 
