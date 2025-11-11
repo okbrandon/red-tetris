@@ -1,3 +1,20 @@
+# Changelog
+
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+## [1.1.0](https://github.com/okbrandon/red-tetris/compare/v1.0.1...v1.1.0) (2025-11-11)
+
+
+### Features
+
+* **docs:** add screenshots to README for better visualization ([e3e8542](https://github.com/okbrandon/red-tetris/commit/e3e8542e41e540a3a77dc6b43cd5e55e6810f3f1))
+
+### Bug Fixes
+
+* use functional programming only in the frontend ([#158](https://github.com/okbrandon/red-tetris/issues/158)) ([b7e7879](https://github.com/okbrandon/red-tetris/commit/b7e7879c12df0d12374b21f866c20e64625da8cb))
+* migrate from MongoDB to PostgreSQL for player statistics management ([#159](https://github.com/okbrandon/red-tetris/pull/159)) ([db96125](https://github.com/okbrandon/red-tetris/commit/db96125b9c278016b002957687ef4c287bb0d7b4))
+* **ci:** update frontend CI job for lint and coverage
+
 ## [1.0.1](https://github.com/okbrandon/red-tetris/compare/v1.0.0...v1.0.1) (2025-11-07)
 
 ### Features
