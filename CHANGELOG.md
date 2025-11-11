@@ -1,16 +1,14 @@
-# Changelog
+## [1.0.1](https://github.com/okbrandon/red-tetris/compare/v1.0.0...v1.0.1) (2025-11-07)
 
-All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+### Features
+* **readme:** update project overview and structure ([7d5a286](https://github.com/okbrandon/red-tetris/commit/7d5a2865711d007855f6ce2c9977811f0b035da3))
 
-## 1.0.1 (2025-11-07)
+### Bug Fixes
 
-### Changed
-- Updated HTML document title in `index.html`.
-- CI configuration improvements.
-- Completed README.md
+* **html:** update document title to 'red-tetris' ([f1766ae](https://github.com/okbrandon/red-tetris/commit/f1766ae06c7db9e8ff50b112207c941b76a9f6f0))
+* **cli:** remove CLI implementation and package files ([631dffc](https://github.com/okbrandon/red-tetris/commit/631dffc1b9702be85b669f60d7ef036e37f34206))
 
-### Removed
-- Deleted `CLI/` folder (internal-only; no user impact).
+## [1.0.0](https://github.com/okbrandon/red-tetris/compare/7d7bb5113a792bf8b6d0ca3afe477a5ebab30ff1...v1.0.0) (2025-11-07)
 
 ### Features
 
@@ -22,6 +20,7 @@ All notable changes to this project will be documented in this file. See [standa
 * **frontend:** added menu page with join / host options (Closes [#21](https://github.com/okbrandon/red-tetris/issues/21)) ([#22](https://github.com/okbrandon/red-tetris/issues/22)) ([c137a4d](https://github.com/okbrandon/red-tetris/commit/c137a4d8e6e8d487f3050fd3d84b4604ef7829c4))
 * **frontend:** configure NGINX for external access ([#118](https://github.com/okbrandon/red-tetris/issues/118)) ([7c80a69](https://github.com/okbrandon/red-tetris/commit/7c80a69359904320d3819f47e677e9754a6335b8))
 * **frontend:** falling tetrominoes implementation (Closes [#3](https://github.com/okbrandon/red-tetris/issues/3), Closes [#4](https://github.com/okbrandon/red-tetris/issues/4), Closes [#5](https://github.com/okbrandon/red-tetris/issues/5)) ([#20](https://github.com/okbrandon/red-tetris/issues/20)) ([15a6c42](https://github.com/okbrandon/red-tetris/commit/15a6c4284ce5aa008209e43d34729dc22a29ae8a))
+* **frontend:** fix errors on leaving games (Closes [#57](https://github.com/okbrandon/red-tetris/issues/57)) ([#60](https://github.com/okbrandon/red-tetris/issues/60)) ([e3dfa56](https://github.com/okbrandon/red-tetris/commit/e3dfa565adeee2900c710fbee9e71fe44bc4662c))
 * **frontend:** game page UI and UX enhancement ([#54](https://github.com/okbrandon/red-tetris/issues/54)) ([f88ff30](https://github.com/okbrandon/red-tetris/commit/f88ff309c7516f2f8d30c22324322e76849f916c)), closes [#14](https://github.com/okbrandon/red-tetris/issues/14) [#1](https://github.com/okbrandon/red-tetris/issues/1) [#17](https://github.com/okbrandon/red-tetris/issues/17) [#2](https://github.com/okbrandon/red-tetris/issues/2) [#18](https://github.com/okbrandon/red-tetris/issues/18) [#3](https://github.com/okbrandon/red-tetris/issues/3) [#4](https://github.com/okbrandon/red-tetris/issues/4) [#5](https://github.com/okbrandon/red-tetris/issues/5) [#20](https://github.com/okbrandon/red-tetris/issues/20) [#21](https://github.com/okbrandon/red-tetris/issues/21) [#22](https://github.com/okbrandon/red-tetris/issues/22) [#26](https://github.com/okbrandon/red-tetris/issues/26) [#27](https://github.com/okbrandon/red-tetris/issues/27) [#28](https://github.com/okbrandon/red-tetris/issues/28) [#37](https://github.com/okbrandon/red-tetris/issues/37) [#38](https://github.com/okbrandon/red-tetris/issues/38) [#41](https://github.com/okbrandon/red-tetris/issues/41) [#42](https://github.com/okbrandon/red-tetris/issues/42) [#44](https://github.com/okbrandon/red-tetris/issues/44) [#46](https://github.com/okbrandon/red-tetris/issues/46) [#37](https://github.com/okbrandon/red-tetris/issues/37) [#38](https://github.com/okbrandon/red-tetris/issues/38) [#41](https://github.com/okbrandon/red-tetris/issues/41) [#42](https://github.com/okbrandon/red-tetris/issues/42)
 * **frontend:** implement multiplayer UI components ([#28](https://github.com/okbrandon/red-tetris/issues/28)) ([6a51c7a](https://github.com/okbrandon/red-tetris/commit/6a51c7a9629cae1a20bd3f4bac815184f634a615))
 * **frontend:** socketio communication implementation ([#47](https://github.com/okbrandon/red-tetris/issues/47)) ([a85dd4b](https://github.com/okbrandon/red-tetris/commit/a85dd4bf42606e64f7bba7db314ce882109fcc14))
@@ -57,7 +56,6 @@ All notable changes to this project will be documented in this file. See [standa
 * **username:** enforce username length limit and handle socket events ([#149](https://github.com/okbrandon/red-tetris/issues/149)) ([1cd987a](https://github.com/okbrandon/red-tetris/commit/1cd987a31477af9e8b0d22aafb2b36a6b6f0e952))
 * **user:** update username on page refresh ([#88](https://github.com/okbrandon/red-tetris/issues/88)) ([e8a4496](https://github.com/okbrandon/red-tetris/commit/e8a4496da3ca05d2fdadaca661164aa4f403424c))
 
-
 ### Bug Fixes
 
 * **backend:** enable CORS for Socket.IO server ([#37](https://github.com/okbrandon/red-tetris/issues/37)) ([3c79ae9](https://github.com/okbrandon/red-tetris/commit/3c79ae908696569f94561022d34902c27d44d9ed))
@@ -79,3 +77,4 @@ All notable changes to this project will be documented in this file. See [standa
 * **tetromino:** correct default vertical position of piece ([#75](https://github.com/okbrandon/red-tetris/issues/75)) ([f2b1144](https://github.com/okbrandon/red-tetris/commit/f2b1144ee3ea02f31990120af95bf521d8f21fb5))
 * **tetromino:** correct piece shapes and colors ([#69](https://github.com/okbrandon/red-tetris/issues/69)) ([221adea](https://github.com/okbrandon/red-tetris/commit/221adea1000f65713e6e1bd6d567ccbbbbb7544a))
 * **tetromino:** correct tetromino shapes and default position ([#73](https://github.com/okbrandon/red-tetris/issues/73)) ([5391355](https://github.com/okbrandon/red-tetris/commit/5391355e983921326e21e329a3368fc8331db5fa))
+* use functional programming only in the frontend ([#158](https://github.com/okbrandon/red-tetris/issues/158)) ([b7e7879](https://github.com/okbrandon/red-tetris/commit/b7e7879c12df0d12374b21f866c20e64625da8cb))
