@@ -1,59 +1,47 @@
 import { jest, expect } from '@jest/globals';
 
-jest.unstable_mockModule('mongodb', async () => {
-    return await import('../__mocks__/_mockMongo.js');
-});
+const mockPool = {
+    query: jest.fn()
+};
 
-const { mockClient, mockDb } = await import('../__mocks__/_mockMongo.js');
+const connectMock = jest.fn(async () => mockPool);
 
-const mongoModule = await import('../mongo.js');
-const mongo = mongoModule.default;
+jest.unstable_mockModule('../database.js', async () => ({
+    default: {
+        connect: connectMock
+    }
+}));
 
 const StatisticsModule = await import('../statistics.js');
 const Statistics = StatisticsModule.default;
 
 describe('Statistics', () => {
 
-	/**
-	 * Reset mocks and mongo state before each test.
-	 */
     beforeEach(() => {
-        mockClient.connect.mockClear();
-
-        if (mongo.client) mongo.client = null;
-        if (mongo.db) mongo.db = null;
-
-        mockDb.collection = jest.fn(() => ({
-            findOne: jest.fn(async () => null),
-            updateOne: jest.fn(async () => ({ upsertedId: null }))
-        }));
+        connectMock.mockClear();
+        mockPool.query.mockReset();
+        mockPool.query.mockResolvedValue({ rows: [] });
     });
 
-	/**
-	 * Test loading statistics from the database.
-	 */
-    test('load sets gameHistory when document exists', async () => {
+    test('load sets gameHistory when row exists', async () => {
         const fakeHistory = [{ score: 10 }];
-        const collection = {
-            findOne: jest.fn(async () => ({ username: 'bob', gameHistory: fakeHistory }))
-        };
-
-        mockDb.collection = jest.fn(() => collection);
+        mockPool.query.mockResolvedValueOnce({
+            rows: [{ game_history: fakeHistory }]
+        });
 
         const stats = new Statistics('bob');
         await stats.load();
 
-        expect(mockClient.connect).toHaveBeenCalled();
-        expect(collection.findOne).toHaveBeenCalledWith({ username: 'bob' });
-        expect(stats.gameHistory).toBe(fakeHistory);
+        expect(connectMock).toHaveBeenCalled();
+        expect(mockPool.query).toHaveBeenCalledWith(
+            'SELECT game_history FROM statistics WHERE username = $1',
+            ['bob']
+        );
+        expect(stats.gameHistory).toEqual(fakeHistory);
     });
 
-	/**
-	 * Test loading statistics when no document is found.
-	 */
-    test('load leaves gameHistory empty when no document found', async () => {
-        const collection = { findOne: jest.fn(async () => null) };
-        mockDb.collection = jest.fn(() => collection);
+    test('load leaves gameHistory empty when no record found', async () => {
+        mockPool.query.mockResolvedValueOnce({ rows: [] });
 
         const stats = new Statistics('alice');
         await stats.load();
@@ -61,47 +49,35 @@ describe('Statistics', () => {
         expect(stats.gameHistory).toEqual([]);
     });
 
-	/**
-	 * Test saving statistics to the database.
-	 */
-    test('save calls updateOne with upsert', async () => {
-        const updateMock = jest.fn(async () => ({}));
-        const collection = { updateOne: updateMock };
-        mockDb.collection = jest.fn(() => collection);
-
+    test('save performs upsert with JSON payload', async () => {
         const stats = new Statistics('carol');
         stats.gameHistory = [{ winner: 'carol' }];
 
         await stats.save();
 
-        expect(updateMock).toHaveBeenCalledWith(
-            { username: 'carol' },
-            { $set: { gameHistory: stats.gameHistory } },
-            { upsert: true }
+        expect(connectMock).toHaveBeenCalled();
+        expect(mockPool.query).toHaveBeenCalledWith(
+            expect.stringContaining('INSERT INTO statistics'),
+            ['carol', JSON.stringify(stats.gameHistory)]
         );
     });
 
-	/**
-	 * Test loading document without gameHistory field.
-	 */
-    test('load handles document without gameHistory (falls back to empty array)', async () => {
-        const collection = { findOne: jest.fn(async () => ({ username: 'frank' })) };
-        mockDb.collection = jest.fn(() => collection);
+    test('load handles row without game_history field', async () => {
+        mockPool.query.mockResolvedValueOnce({ rows: [{ username: 'frank' }] });
 
         const stats = new Statistics('frank');
         await stats.load();
 
-        expect(collection.findOne).toHaveBeenCalledWith({ username: 'frank' });
+        expect(mockPool.query).toHaveBeenCalledWith(
+            'SELECT game_history FROM statistics WHERE username = $1',
+            ['frank']
+        );
         expect(stats.gameHistory).toEqual([]);
     });
 
-	/**
-	 * Test saving statistics propagates errors from updateOne.
-	 */
-    test('save propagates errors from updateOne (rejects)', async () => {
+    test('save propagates query errors', async () => {
         const error = new Error('update failed');
-        const collection = { updateOne: jest.fn(async () => { throw error; }) };
-        mockDb.collection = jest.fn(() => collection);
+        mockPool.query.mockRejectedValueOnce(error);
 
         const stats = new Statistics('grace');
         stats.gameHistory = [{ winner: 'grace' }];
@@ -109,9 +85,6 @@ describe('Statistics', () => {
         await expect(stats.save()).rejects.toThrow('update failed');
     });
 
-	/**
-	 * Test addGameResult and getStats behavior.
-	 */
     test('addGameResult and getStats behave correctly', () => {
         const stats = new Statistics('dan');
 
@@ -124,9 +97,6 @@ describe('Statistics', () => {
         expect(lastTwo).toEqual([{ score: 3 }, { score: 2 }]);
     });
 
-	/**
-	 * Test getStats without argument uses default (last 5 reversed).
-	 */
     test('getStats without argument uses default (last 5 reversed)', () => {
         const stats = new Statistics('hank');
 

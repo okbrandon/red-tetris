@@ -12,7 +12,7 @@ import outgoingEvents from "./constants/outgoing-events.js";
 import gameStatus from "./constants/game-status.js";
 import gameSettings from "./constants/game-settings.js";
 import gameModes from "./constants/game-modes.js";
-import mongo from "./mongo.js";
+import database from "./database.js";
 
 const PORT = process.env.PORT || 3000;
 
@@ -418,15 +418,15 @@ io.on("connection", (socket) => {
 
 
 /**
- * Starts the HTTP server. Connects to MongoDB first.
+ * Starts the HTTP server. Connects to PostgreSQL first.
  */
-mongo.connect()
+database.connect()
 	.then(() => {
 		httpServer.listen(PORT, () => {
 			console.log(`Server running at http://localhost:${PORT}/`);
 		});
 	})
 	.catch((err) => {
-		console.error('[MongoDB] Connection failed:', err);
+		console.error('[PostgreSQL] Connection failed:', err);
 		process.exit(1);
 	});

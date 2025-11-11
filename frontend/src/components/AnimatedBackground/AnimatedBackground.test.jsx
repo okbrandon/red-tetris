@@ -28,9 +28,8 @@ beforeAll(async () => {
   await vi.importActual('./AnimatedBackground.styles.js');
 });
 
-import AnimatedBackground, {
-  getShapeCoordinates,
-} from './AnimatedBackground.jsx';
+import AnimatedBackground from './AnimatedBackground.jsx';
+import { getShapeCoordinates } from './helpers.js';
 
 const getCssVariable = (element, name) => element.style.getPropertyValue(name);
 
