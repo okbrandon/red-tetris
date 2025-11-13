@@ -40,6 +40,8 @@ vi.mock('./SpecterColumn.styles', async (importOriginal) => {
       'specter-column'
     ),
     SpecterGrid: wrapWithTestId(actual.SpecterGrid, 'specter-grid-wrapper'),
+    SpecterMarquee: wrapWithTestId(actual.SpecterMarquee, 'specter-marquee'),
+    SpecterScroller: wrapWithTestId(actual.SpecterScroller, 'specter-scroller'),
     SpecterCard: wrapWithTestId(actual.SpecterCard, 'specter-card'),
     SpecterBadge: wrapWithTestId(actual.SpecterBadge, 'specter-badge'),
     SpecterName: wrapWithTestId(actual.SpecterName, 'specter-name'),
@@ -140,6 +142,31 @@ describe('SpecterColumn', () => {
 
     fireEvent.click(cards[2]);
     expect(setSelectedId).toHaveBeenLastCalledWith(null);
+  });
+
+  it('provides marquee containers for scrolling the specter list', () => {
+    const opponents = new Array(5).fill(0).map((_, index) => ({
+      id: `p-${index}`,
+      username: `User-${index}`,
+      specter: [[{ filled: Boolean(index % 2) }]],
+    }));
+
+    render(
+      <SpecterColumn
+        opponents={opponents}
+        isInteractive={false}
+        selectedId={null}
+        setSelectedId={vi.fn()}
+      />
+    );
+
+    const scroller = screen.getByTestId('specter-scroller');
+    const marquee = screen.getByTestId('specter-marquee');
+
+    expect(scroller).toBeInTheDocument();
+    expect(marquee).toBeInTheDocument();
+    expect(scroller.dataset.animated).toBe('false');
+    expect(marquee.dataset.animated).toBe('false');
   });
 
   it('renders static opponent cards when interactivity is disabled', () => {
