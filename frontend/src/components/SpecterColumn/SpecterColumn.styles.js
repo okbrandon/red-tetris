@@ -21,6 +21,29 @@ export const SpecterGrid = styled.div`
   justify-items: center;
 `;
 
+export const SpecterScroller = styled.div`
+  position: relative;
+  display: grid;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 90%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(0, 0, 0, 0.9) 1%,
+    rgba(0, 0, 0, 0.9) 95%,
+    transparent
+  );
+`;
+
+export const SpecterMarquee = styled(SpecterGrid)`
+  position: relative;
+  padding-right: clamp(0.4rem, 0.9vw, 0.6rem);
+`;
+
 export const SpecterCard = styled.div`
   width: 100%;
   max-width: 240px;

@@ -21,6 +21,7 @@ import {
   ModeDetailCard,
   ModeDetailTitle,
   ModeDetailDescription,
+  PlayerListContainer,
 } from './RoomLobbyPage.styles';
 import useGameFlow from '@/hooks/useGameFlow';
 import { GAME_MODE_OPTIONS, getModeDetails } from '@/utils/gameModes';
@@ -94,24 +95,26 @@ const RoomLobbyPage = () => {
           </HintText>
         </ModeSection>
 
-        <PlayerList>
-          {players.map((player, index) => {
-            const key = player?.id ?? index;
-            const isPlayerOwner =
-              owner?.id && player?.id ? owner.id === player.id : false;
+        <PlayerListContainer aria-live="polite">
+          <PlayerList>
+            {players.map((player, index) => {
+              const key = player?.id ?? index;
+              const isPlayerOwner =
+                owner?.id && player?.id ? owner.id === player.id : false;
 
-            return (
-              <Player key={key}>
-                <PlayerName>{player.username}</PlayerName>
-                {isPlayerOwner ? (
-                  <OwnerBadge aria-label="Room owner" title="Room owner">
-                    Host
-                  </OwnerBadge>
-                ) : null}
-              </Player>
-            );
-          })}
-        </PlayerList>
+              return (
+                <Player key={key}>
+                  <PlayerName>{player.username}</PlayerName>
+                  {isPlayerOwner ? (
+                    <OwnerBadge aria-label="Room owner" title="Room owner">
+                      Host
+                    </OwnerBadge>
+                  ) : null}
+                </Player>
+              );
+            })}
+          </PlayerList>
+        </PlayerListContainer>
 
         <StartButton onClick={startMultiplayerGame} disabled={!isOwner}>
           {isOwner ? 'Start Game' : 'Waiting for host'}
