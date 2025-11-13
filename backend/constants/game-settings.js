@@ -29,9 +29,9 @@ const DEFAULT_EMPTY_GRID = Array.from({ length: FRAME_ROWS }, () => Array(FRAME_
 	}));
 
 /**
- * @constant {number} MAX_PLAYERS_PER_ROOM - The maximum number of players allowed in a game room (default is 4).
+ * @constant {number} MAX_PLAYERS_PER_ROOM - The maximum number of players allowed in a game room (default is 12).
  */
-const MAX_PLAYERS_PER_ROOM = 4;
+const MAX_PLAYERS_PER_ROOM = 12;
 
 /**
  * @constant {string} TAG_SINGLEPLAYER - The tag used for singleplayer game IDs.
