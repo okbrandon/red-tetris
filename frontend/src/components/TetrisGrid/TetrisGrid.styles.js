@@ -21,6 +21,33 @@ const heavyDropShake = keyframes`
   }
 `;
 
+const lockedShimmer = keyframes`
+  0% {
+    opacity: 0.9;
+    transform: translate3d(var(--locked-x, 0px), var(--locked-y, 0px), 0)
+      scale(1);
+    box-shadow: 0 0 0 rgba(255, 255, 255, 0.45);
+  }
+  28% {
+    opacity: 1;
+    transform: translate3d(var(--locked-x, 0px), var(--locked-y, 0px), 0)
+      scale(1.05);
+    box-shadow: 0 0 14px rgba(255, 255, 255, 0.6);
+  }
+  62% {
+    opacity: 0.65;
+    transform: translate3d(var(--locked-x, 0px), var(--locked-y, 0px), 0)
+      scale(1.08);
+    box-shadow: 0 0 18px rgba(255, 255, 255, 0.35);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--locked-x, 0px), var(--locked-y, 0px), 0)
+      scale(1.12);
+    box-shadow: 0 0 0 rgba(255, 255, 255, 0.18);
+  }
+`;
+
 export const Board = styled.div`
   display: grid;
   place-content: center;
@@ -98,4 +125,39 @@ export const ActivePieceCell = styled.div`
   box-shadow:
     0 0 12px var(--piece-shadow, rgba(0, 0, 0, 0.45)),
     inset 0 0 1px rgba(255, 255, 255, 0.25);
+`;
+
+export const LockedPieceLayer = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+`;
+
+export const LockedPieceCell = styled.div`
+  position: absolute;
+  width: ${({ $size }) => $size}px;
+  height: ${({ $size }) => $size}px;
+  pointer-events: none;
+  border-radius: 4px;
+  background: linear-gradient(
+    145deg,
+    var(--locked-color, rgba(191, 90, 242, 1)) 0%,
+    rgba(255, 255, 255, 0.95) 160%
+  );
+  box-shadow:
+    0 0 12px var(--locked-shadow, rgba(255, 255, 255, 0.45)),
+    inset 0 0 1px rgba(255, 255, 255, 0.35);
+  transform: translate3d(var(--locked-x, 0px), var(--locked-y, 0px), 0)
+    scale(1);
+  animation: ${lockedShimmer} 620ms ease-out forwards;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    opacity: 0.65;
+    transform: translate3d(var(--locked-x, 0px), var(--locked-y, 0px), 0)
+      scale(1);
+  }
 `;

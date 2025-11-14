@@ -225,20 +225,55 @@ describe('TetrisGrid', () => {
   });
 
   it('applies a board shake when the active piece signature changes', async () => {
-    const gridInput = [[{ raw: true }]];
-    const normalized = [
+    const gridInput = [
+      [{ raw: true }],
+      [{ raw: true }],
+    ];
+    const initialNormalized = [
       [
         {
           filled: false,
           ghost: false,
           indestructible: false,
-          color: 'rgba(10,10,10,1)',
-          shadowColor: 'rgba(0,0,0,0.1)',
+          color: 'rgba(10,10,10,0.1)',
+          shadowColor: 'rgba(0,0,0,0.05)',
+        },
+      ],
+      [
+        {
+          filled: false,
+          ghost: false,
+          indestructible: false,
+          color: 'rgba(10,10,10,0.1)',
+          shadowColor: 'rgba(0,0,0,0.05)',
         },
       ],
     ];
 
-    normalizeGridMock.mockReturnValue(normalized);
+    const lockedNormalized = [
+      [
+        {
+          filled: false,
+          ghost: false,
+          indestructible: false,
+          color: 'rgba(10,10,10,0.1)',
+          shadowColor: 'rgba(0,0,0,0.05)',
+        },
+      ],
+      [
+        {
+          filled: true,
+          ghost: false,
+          indestructible: false,
+          color: '#abc',
+          shadowColor: '#def',
+        },
+      ],
+    ];
+
+    normalizeGridMock
+      .mockImplementationOnce(() => initialNormalized)
+      .mockImplementation(() => lockedNormalized);
     normalizeActivePieceMock.mockImplementation((piece) => {
       if (!piece) return null;
       return {
@@ -252,7 +287,7 @@ describe('TetrisGrid', () => {
     const { rerender } = render(
       <TetrisGrid
         grid={gridInput}
-        rows={1}
+        rows={2}
         cols={1}
         cellSize={30}
         currentPiece={{ id: 'piece-1', position: { x: 0, y: 0 } }}
@@ -265,7 +300,7 @@ describe('TetrisGrid', () => {
     rerender(
       <TetrisGrid
         grid={gridInput}
-        rows={1}
+        rows={2}
         cols={1}
         cellSize={30}
         currentPiece={{ id: 'piece-2', position: { x: 0, y: 0 } }}
@@ -276,11 +311,28 @@ describe('TetrisGrid', () => {
       expect(board.dataset.shake).toBe('true');
     });
 
+    const highlightLayer = await waitFor(() =>
+      screen.getByTestId('locked-piece-highlight')
+    );
+    const highlightCells = highlightLayer.querySelectorAll(
+      '[data-highlight-cell="true"]'
+    );
+    expect(highlightCells.length).toBeGreaterThan(0);
+    const firstHighlight = highlightCells[0];
+    expect(firstHighlight.style.getPropertyValue('--locked-y')).toBe('30px');
+
     await waitFor(
       () => {
         expect(board.dataset.shake).toBeUndefined();
       },
       { timeout: 600 }
+    );
+
+    await waitFor(
+      () => {
+        expect(screen.queryByTestId('locked-piece-highlight')).toBeNull();
+      },
+      { timeout: 900 }
     );
   });
 });
