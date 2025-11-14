@@ -150,8 +150,7 @@ export const LockedPieceCell = styled.div`
   box-shadow:
     0 0 12px var(--locked-shadow, rgba(255, 255, 255, 0.45)),
     inset 0 0 1px rgba(255, 255, 255, 0.35);
-  transform: translate3d(var(--locked-x, 0px), var(--locked-y, 0px), 0)
-    scale(1);
+  transform: translate3d(var(--locked-x, 0px), var(--locked-y, 0px), 0) scale(1);
   animation: ${lockedShimmer} 620ms ease-out forwards;
 
   @media (prefers-reduced-motion: reduce) {
