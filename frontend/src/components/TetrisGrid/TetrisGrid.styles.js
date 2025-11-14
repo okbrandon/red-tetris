@@ -41,3 +41,29 @@ export const Cell = styled.div`
       : 'none';
   }};
 `;
+
+export const ActivePieceLayer = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  will-change: transform;
+  transition: ${({ $animate }) =>
+    $animate ? 'transform 120ms cubic-bezier(0.37, 0, 0.63, 1)' : 'none'};
+`;
+
+export const ActivePieceCell = styled.div`
+  position: absolute;
+  width: ${({ $size }) => $size}px;
+  height: ${({ $size }) => $size}px;
+  pointer-events: none;
+  border-radius: 3px;
+  background: linear-gradient(
+    145deg,
+    var(--piece-color, rgba(191, 90, 242, 1)) 0%,
+    rgba(255, 255, 255, 0.9) 140%
+  );
+  box-shadow:
+    0 0 12px var(--piece-shadow, rgba(0, 0, 0, 0.45)),
+    inset 0 0 1px rgba(255, 255, 255, 0.25);
+`;
