@@ -40,6 +40,7 @@ import { resultModalShape } from '../GameResultModal/GameResultModal.propTypes.j
 const GamePlayingView = ({
   resultModal,
   grid,
+  currentPiece,
   score,
   nextPieces,
   lineClearLog,
@@ -105,7 +106,7 @@ const GamePlayingView = ({
     <Layout>
       <BoardArea>
         <BoardFrame>
-          <TetrisGrid showGrid grid={grid} />
+          <TetrisGrid showGrid grid={grid} currentPiece={currentPiece} />
           {isResultModalOpen && (
             <GameResultModal
               outcome={resultModal.outcome}
@@ -248,6 +249,18 @@ const GamePlayingView = ({
 GamePlayingView.propTypes = {
   resultModal: resultModalShape.isRequired,
   grid: propTypes.arrayOf(propTypes.array).isRequired,
+  currentPiece: propTypes.shape({
+    id: propTypes.oneOfType([propTypes.number, propTypes.string]),
+    uuid: propTypes.oneOfType([propTypes.number, propTypes.string]),
+    name: propTypes.string,
+    type: propTypes.string,
+    color: propTypes.string,
+    position: propTypes.shape({
+      x: propTypes.number,
+      y: propTypes.number,
+    }),
+    shape: propTypes.arrayOf(propTypes.arrayOf(propTypes.number)),
+  }),
   score: propTypes.number,
   nextPieces: propTypes.arrayOf(propTypes.object),
   lineClearLog: propTypes.arrayOf(

@@ -12,8 +12,16 @@ import { resultModalShape } from '@/components/GameResultModal/GameResultModal.p
 import GamePlayingView from '@/components/GameViews/GamePlayingView.jsx';
 
 const MultiArena = ({ resultModal, leaveRoom }) => {
-  const { you, players, grid, spectator, score, nextPieces, lineClearLog } =
-    useSelector((state) => state.game);
+  const {
+    you,
+    players,
+    grid,
+    spectator,
+    score,
+    nextPieces,
+    lineClearLog,
+    currentPiece,
+  } = useSelector((state) => state.game);
 
   const opponents = useMemo(() => {
     if (!Array.isArray(players)) return [];
@@ -39,6 +47,7 @@ const MultiArena = ({ resultModal, leaveRoom }) => {
         <MainColumn>
           <GamePlayingView
             grid={grid}
+            currentPiece={currentPiece}
             resultModal={resultModal}
             score={score}
             nextPieces={nextPieces}

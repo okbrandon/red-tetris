@@ -4,7 +4,7 @@ import { resultModalShape } from '@/components/GameResultModal/GameResultModal.p
 import GamePlayingView from '@/components/GameViews/GamePlayingView';
 
 const SoloArena = ({ resultModal }) => {
-  const { grid, score, nextPieces, lineClearLog } = useSelector(
+  const { grid, score, nextPieces, lineClearLog, currentPiece } = useSelector(
     (state) => state.game
   );
 
@@ -12,6 +12,7 @@ const SoloArena = ({ resultModal }) => {
     <ArenaContainer>
       <GamePlayingView
         grid={grid}
+        currentPiece={currentPiece}
         resultModal={resultModal}
         score={score}
         nextPieces={nextPieces}
