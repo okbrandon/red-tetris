@@ -120,9 +120,10 @@ const TetrisGrid = ({
           }))
         : [];
 
-      const resolvedCells = Array.isArray(overrideCells) && overrideCells.length
-        ? overrideCells
-        : baseCells;
+      const resolvedCells =
+        Array.isArray(overrideCells) && overrideCells.length
+          ? overrideCells
+          : baseCells;
 
       const cells = resolvedCells.filter(
         ({ x, y }) =>
@@ -155,16 +156,19 @@ const TetrisGrid = ({
     [cols, rows]
   );
 
-  useEffect(() => () => {
-    if (shakeTimeoutRef.current) {
-      clearTimeout(shakeTimeoutRef.current);
-      shakeTimeoutRef.current = null;
-    }
-    if (highlightTimeoutRef.current) {
-      clearTimeout(highlightTimeoutRef.current);
-      highlightTimeoutRef.current = null;
-    }
-  }, []);
+  useEffect(
+    () => () => {
+      if (shakeTimeoutRef.current) {
+        clearTimeout(shakeTimeoutRef.current);
+        shakeTimeoutRef.current = null;
+      }
+      if (highlightTimeoutRef.current) {
+        clearTimeout(highlightTimeoutRef.current);
+        highlightTimeoutRef.current = null;
+      }
+    },
+    []
+  );
 
   const normalizedGrid = useMemo(() => {
     const base = normalizeGrid(grid, rows, cols, BASE_TETRIS_COLORS);

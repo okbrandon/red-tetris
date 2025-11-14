@@ -225,10 +225,7 @@ describe('TetrisGrid', () => {
   });
 
   it('applies a board shake when the active piece signature changes', async () => {
-    const gridInput = [
-      [{ raw: true }],
-      [{ raw: true }],
-    ];
+    const gridInput = [[{ raw: true }], [{ raw: true }]];
     const initialNormalized = [
       [
         {
