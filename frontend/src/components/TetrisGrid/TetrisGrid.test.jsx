@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { palette, normalizeGridMock, normalizeActivePieceMock, setAlphaMock } =
@@ -222,5 +222,65 @@ describe('TetrisGrid', () => {
     const jumpLayer = screen.getByTestId('active-piece-layer');
     expect(jumpLayer.dataset.animate).toBe('false');
     expect(jumpLayer.style.transform).toBe('translate3d(60px, 90px, 0)');
+  });
+
+  it('applies a board shake when the active piece signature changes', async () => {
+    const gridInput = [[{ raw: true }]];
+    const normalized = [
+      [
+        {
+          filled: false,
+          ghost: false,
+          indestructible: false,
+          color: 'rgba(10,10,10,1)',
+          shadowColor: 'rgba(0,0,0,0.1)',
+        },
+      ],
+    ];
+
+    normalizeGridMock.mockReturnValue(normalized);
+    normalizeActivePieceMock.mockImplementation((piece) => {
+      if (!piece) return null;
+      return {
+        blocks: [[0, 0]],
+        position: piece.position ?? { x: 0, y: 0 },
+        color: '#abc',
+        shadowColor: '#def',
+      };
+    });
+
+    const { rerender } = render(
+      <TetrisGrid
+        grid={gridInput}
+        rows={1}
+        cols={1}
+        cellSize={30}
+        currentPiece={{ id: 'piece-1', position: { x: 0, y: 0 } }}
+      />
+    );
+
+    const board = screen.getByRole('grid');
+    expect(board.dataset.shake).toBeUndefined();
+
+    rerender(
+      <TetrisGrid
+        grid={gridInput}
+        rows={1}
+        cols={1}
+        cellSize={30}
+        currentPiece={{ id: 'piece-2', position: { x: 0, y: 0 } }}
+      />
+    );
+
+    await waitFor(() => {
+      expect(board.dataset.shake).toBe('true');
+    });
+
+    await waitFor(
+      () => {
+        expect(board.dataset.shake).toBeUndefined();
+      },
+      { timeout: 600 }
+    );
   });
 });

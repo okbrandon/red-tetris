@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   BASE_TETRIS_COLORS,
@@ -17,6 +17,7 @@ import {
 } from './TetrisGrid.styles.js';
 
 const MAX_SMOOTH_DELTA = 1;
+const SHAKE_DURATION_MS = 260;
 
 const getPieceSignature = (piece) => {
   if (!piece || typeof piece !== 'object') return null;
@@ -43,6 +44,38 @@ const TetrisGrid = ({
     () => normalizeActivePiece(currentPiece, BASE_TETRIS_COLORS),
     [currentPiece]
   );
+
+  const boardRef = useRef(null);
+  const shakeTimeoutRef = useRef(null);
+
+  const triggerBoardImpact = useCallback(() => {
+    const boardElement = boardRef.current;
+    if (!boardElement) return;
+
+    if (shakeTimeoutRef.current) {
+      clearTimeout(shakeTimeoutRef.current);
+      shakeTimeoutRef.current = null;
+    }
+
+    boardElement.removeAttribute('data-shake');
+    void boardElement.offsetWidth;
+
+    boardElement.setAttribute('data-shake', 'true');
+
+    shakeTimeoutRef.current = setTimeout(() => {
+      if (!('isConnected' in boardElement) || boardElement.isConnected) {
+        boardElement.removeAttribute('data-shake');
+      }
+      shakeTimeoutRef.current = null;
+    }, SHAKE_DURATION_MS);
+  }, []);
+
+  useEffect(() => () => {
+    if (shakeTimeoutRef.current) {
+      clearTimeout(shakeTimeoutRef.current);
+      shakeTimeoutRef.current = null;
+    }
+  }, []);
 
   const normalizedGrid = useMemo(() => {
     const base = normalizeGrid(grid, rows, cols, BASE_TETRIS_COLORS);
@@ -85,6 +118,7 @@ const TetrisGrid = ({
     if (previous && previous.signature !== null && signature !== null) {
       const isDifferentSignature = previous.signature !== signature;
       if (isDifferentSignature) {
+        triggerBoardImpact();
         setShouldAnimate(false);
       } else {
         const dx = activePiece.position.x - previous.position.x;
@@ -114,7 +148,7 @@ const TetrisGrid = ({
       blockCount: activePiece.blocks?.length ?? 0,
       signature,
     };
-  }, [activePiece, currentPiece]);
+  }, [activePiece, currentPiece, triggerBoardImpact]);
 
   const boardStyle = useMemo(
     () => ({
@@ -136,6 +170,7 @@ const TetrisGrid = ({
       aria-rowcount={rows}
       aria-colcount={cols}
       style={boardStyle}
+      ref={boardRef}
     >
       {normalizedGrid.map((row, y) =>
         row.map((cell, x) => (
