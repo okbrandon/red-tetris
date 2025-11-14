@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   BASE_TETRIS_COLORS,
@@ -14,9 +14,43 @@ import {
   ActivePieceLayer,
   Board,
   Cell,
+  LockedPieceCell,
+  LockedPieceLayer,
 } from './TetrisGrid.styles.js';
 
 const MAX_SMOOTH_DELTA = 1;
+const SHAKE_DURATION_MS = 260;
+const HIGHLIGHT_DURATION_MS = 680;
+
+const snapshotGrid = (grid) =>
+  grid?.map((row) =>
+    row.map((cell) => ({
+      filled: Boolean(cell?.filled),
+      ghost: Boolean(cell?.ghost),
+    }))
+  ) ?? null;
+
+const detectNewlyFilledCells = (previousSnapshot, currentGrid) => {
+  if (!previousSnapshot) return [];
+  const cells = [];
+  for (let y = 0; y < currentGrid.length; y += 1) {
+    const currentRow = currentGrid[y];
+    const prevRow = previousSnapshot[y] ?? [];
+    if (!Array.isArray(currentRow)) continue;
+
+    for (let x = 0; x < currentRow.length; x += 1) {
+      const currentCell = currentRow[x];
+      if (!currentCell) continue;
+      const prevCell = prevRow[x];
+      const wasFilled = Boolean(prevCell?.filled);
+      const isFilled = Boolean(currentCell.filled) && !currentCell.ghost;
+      if (isFilled && !wasFilled) {
+        cells.push({ x, y });
+      }
+    }
+  }
+  return cells;
+};
 
 const getPieceSignature = (piece) => {
   if (!piece || typeof piece !== 'object') return null;
@@ -43,6 +77,94 @@ const TetrisGrid = ({
     () => normalizeActivePiece(currentPiece, BASE_TETRIS_COLORS),
     [currentPiece]
   );
+
+  const boardRef = useRef(null);
+  const shakeTimeoutRef = useRef(null);
+  const highlightTimeoutRef = useRef(null);
+  const previousGridSnapshotRef = useRef(null);
+
+  const triggerBoardImpact = useCallback(() => {
+    const boardElement = boardRef.current;
+    if (!boardElement) return;
+
+    if (shakeTimeoutRef.current) {
+      clearTimeout(shakeTimeoutRef.current);
+      shakeTimeoutRef.current = null;
+    }
+
+    boardElement.removeAttribute('data-shake');
+    void boardElement.offsetWidth;
+
+    boardElement.setAttribute('data-shake', 'true');
+
+    shakeTimeoutRef.current = setTimeout(() => {
+      if (!('isConnected' in boardElement) || boardElement.isConnected) {
+        boardElement.removeAttribute('data-shake');
+      }
+      shakeTimeoutRef.current = null;
+    }, SHAKE_DURATION_MS);
+  }, []);
+
+  const [lockedHighlight, setLockedHighlight] = useState(null);
+
+  const triggerLockedPieceHighlight = useCallback(
+    (pieceSnapshot, overrideCells = null) => {
+      if (!pieceSnapshot) return;
+      const { blocks, position, color, shadowColor, signature } = pieceSnapshot;
+      if (!position) return;
+
+      const baseCells = Array.isArray(blocks)
+        ? blocks.map(([blockX, blockY]) => ({
+            x: position.x + blockX,
+            y: position.y + blockY,
+          }))
+        : [];
+
+      const resolvedCells = Array.isArray(overrideCells) && overrideCells.length
+        ? overrideCells
+        : baseCells;
+
+      const cells = resolvedCells.filter(
+        ({ x, y }) =>
+          Number.isInteger(x) &&
+          Number.isInteger(y) &&
+          x >= 0 &&
+          x < cols &&
+          y >= 0 &&
+          y < rows
+      );
+
+      if (!cells.length) return;
+
+      setLockedHighlight({
+        cells,
+        color: color ?? BASE_TETRIS_COLORS.default,
+        shadowColor: shadowColor ?? 'rgba(255,255,255,0.65)',
+        signature: signature ?? `locked-${Date.now()}`,
+      });
+
+      if (highlightTimeoutRef.current) {
+        clearTimeout(highlightTimeoutRef.current);
+      }
+
+      highlightTimeoutRef.current = setTimeout(() => {
+        setLockedHighlight(null);
+        highlightTimeoutRef.current = null;
+      }, HIGHLIGHT_DURATION_MS);
+    },
+    [cols, rows]
+  );
+
+  useEffect(() => () => {
+    if (shakeTimeoutRef.current) {
+      clearTimeout(shakeTimeoutRef.current);
+      shakeTimeoutRef.current = null;
+    }
+    if (highlightTimeoutRef.current) {
+      clearTimeout(highlightTimeoutRef.current);
+      highlightTimeoutRef.current = null;
+    }
+  }, []);
 
   const normalizedGrid = useMemo(() => {
     const base = normalizeGrid(grid, rows, cols, BASE_TETRIS_COLORS);
@@ -81,10 +203,17 @@ const TetrisGrid = ({
 
     const signature = getPieceSignature(currentPiece);
     const previous = previousPieceRef.current;
+    const previousGridSnapshot = previousGridSnapshotRef.current;
 
     if (previous && previous.signature !== null && signature !== null) {
       const isDifferentSignature = previous.signature !== signature;
       if (isDifferentSignature) {
+        const overrideCells = detectNewlyFilledCells(
+          previousGridSnapshot,
+          normalizedGrid
+        );
+        triggerLockedPieceHighlight(previous, overrideCells);
+        triggerBoardImpact();
         setShouldAnimate(false);
       } else {
         const dx = activePiece.position.x - previous.position.x;
@@ -112,9 +241,22 @@ const TetrisGrid = ({
     previousPieceRef.current = {
       position: { ...activePiece.position },
       blockCount: activePiece.blocks?.length ?? 0,
+      blocks: activePiece.blocks?.map(([x, y]) => [x, y]) ?? [],
+      color: activePiece.color,
+      shadowColor: activePiece.shadowColor,
       signature,
     };
-  }, [activePiece, currentPiece]);
+  }, [
+    activePiece,
+    currentPiece,
+    normalizedGrid,
+    triggerBoardImpact,
+    triggerLockedPieceHighlight,
+  ]);
+
+  useEffect(() => {
+    previousGridSnapshotRef.current = snapshotGrid(normalizedGrid);
+  }, [normalizedGrid]);
 
   const boardStyle = useMemo(
     () => ({
@@ -136,6 +278,7 @@ const TetrisGrid = ({
       aria-rowcount={rows}
       aria-colcount={cols}
       style={boardStyle}
+      ref={boardRef}
     >
       {normalizedGrid.map((row, y) =>
         row.map((cell, x) => (
@@ -157,6 +300,23 @@ const TetrisGrid = ({
           />
         ))
       )}
+      {lockedHighlight ? (
+        <LockedPieceLayer data-testid="locked-piece-highlight">
+          {lockedHighlight.cells.map(({ x, y }) => (
+            <LockedPieceCell
+              key={`${lockedHighlight.signature}-${x}-${y}`}
+              data-highlight-cell="true"
+              $size={cellSize}
+              style={{
+                '--locked-x': `${x * cellSize}px`,
+                '--locked-y': `${y * cellSize}px`,
+                '--locked-color': lockedHighlight.color,
+                '--locked-shadow': lockedHighlight.shadowColor,
+              }}
+            />
+          ))}
+        </LockedPieceLayer>
+      ) : null}
       {activePiece ? (
         <ActivePieceLayer
           data-testid="active-piece-layer"
