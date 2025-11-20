@@ -322,9 +322,12 @@ class Player {
 				const gridX = position.x + x;
 				const gridY = position.y + y;
 
-				if (gridX < 0 || gridX >= cols || gridY < 0 || gridY >= rows) {
+				if (gridX < 0 || gridX >= cols || gridY >= rows) {
 					return false;
 				}
+
+				if (gridY < 0)
+					continue;
 
 				if (grid[gridY][gridX]?.filled) {
 					return false;
@@ -489,6 +492,32 @@ class Player {
 	}
 
 	/**
+	 * Finds the highest valid spawn position for a new piece.
+	 * @param {Piece} piece - The piece to position.
+	 * @param {Array<Array<Object>>} grid - The game grid to test against.
+	 * @returns {{x: number, y: number}|null} - The first valid position from the top.
+	 */
+	findSpawnPosition(piece, grid) {
+		if (!piece || !grid)
+			return null;
+
+		const spawnX = piece.position.x;
+		const leadingEmptyRows = piece.getLeadingEmptyRows();
+		const baseSpawnY = piece.position.y - leadingEmptyRows;
+		const spawnAttempts = 3;
+
+		for (let attempt = 0; attempt < spawnAttempts; attempt++) {
+			const candidateY = baseSpawnY - attempt;
+			const candidate = { x: spawnX, y: candidateY };
+
+			if (this.isValidMove(piece, grid, candidate))
+				return candidate;
+		}
+
+		return null;
+	}
+
+	/**
 	 * Handles what happens when a piece lands.
 	 */
 	handlePieceLanding() {
@@ -496,16 +525,18 @@ class Player {
 			return;
 
 		const nextPiece = this.nextPiece();
-		const offsetY = nextPiece.getLeadingEmptyRows();
 		const rateLimiter = this.rateLimiters[incomingEvents.PIECE_SPAWN];
 
 		this.clearFullLines();
-		if (!this.isValidMove(nextPiece, this.grid, nextPiece.position)) {
+
+		const spawnPosition = this.findSpawnPosition(nextPiece, this.grid);
+
+		if (!spawnPosition) {
 			this.sendGameLost('No space for next piece');
 			return;
 		}
 
-		nextPiece.position.y -= offsetY;
+		nextPiece.position = { ...spawnPosition };
 		this.currentPiece = nextPiece;
 
 		if (this.isValidMove(this.currentPiece, this.grid, this.currentPiece.position)) {
