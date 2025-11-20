@@ -245,7 +245,7 @@ describe('Player', () => {
 
 		expect(player.isValidMove(piece, player.grid, { x: -1, y: 0 })).toBe(false);
 		expect(player.isValidMove(piece, player.grid, { x: 100, y: 0 })).toBe(false);
-		expect(player.isValidMove(piece, player.grid, { x: 0, y: -1 })).toBe(false);
+		expect(player.isValidMove(piece, player.grid, { x: 0, y: -1 })).toBe(true);
 		expect(player.isValidMove(piece, player.grid, { x: 0, y: 100 })).toBe(false);
 	});
 
@@ -1174,6 +1174,7 @@ describe('Player runtime tests', () => {
 		player.nextPiece = jest.fn(() => next);
 
 		player.isValidMove = jest.fn()
+			.mockImplementationOnce(() => false)
 			.mockImplementationOnce(() => true)
 			.mockImplementationOnce(() => false);
 
@@ -1186,6 +1187,40 @@ describe('Player runtime tests', () => {
 		expect(player.currentPiece).toBe(next);
 		expect(player.mergePieceIntoGrid).not.toHaveBeenCalledWith(next, expect.anything());
 		expect(player.sendGrid).toHaveBeenCalled();
+	});
+
+	/**
+	 * Ensures the next piece spawns at the highest available row when space is limited.
+	 */
+	test('handlePieceLanding finds highest valid spawn position', () => {
+		const currentPiece = createMockPiece();
+		const next = createMockPiece({
+			shape: [[1], [1]],
+			position: { x: 0, y: 1 }
+		});
+
+		next.getLeadingEmptyRows = jest.fn(() => 0);
+		player.currentPiece = currentPiece;
+		player.nextPiece = jest.fn(() => next);
+		player.sendGrid = jest.fn();
+
+		player.grid[1][0] = {
+			filled: true,
+			color: 'red',
+			indestructible: false,
+			ghost: false
+		};
+
+		const mergeSpy = jest.spyOn(player, 'mergePieceIntoGrid');
+
+		player.handlePieceLanding();
+
+		expect(next.position.y).toBe(-1);
+		expect(player.currentPiece).toBe(next);
+		expect(mergeSpy).toHaveBeenCalledWith(next, expect.any(Array));
+		expect(mockConnection.emit).not.toHaveBeenCalledWith(outgoingEvents.GAME_LOST, expect.anything());
+
+		mergeSpy.mockRestore();
 	});
 
 	/**
