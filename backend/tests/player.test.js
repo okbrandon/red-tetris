@@ -20,6 +20,26 @@ function makePiece({ shape = [[1]], color = 'red', position = { x: 0, y: 0 } } =
 	};
 }
 
+function makeRoom(overrides = {}) {
+	return {
+		id: 'room1',
+		owner: { id: 'owner1', username: 'Owner', score: 0, hasLost: false },
+		status: gameStatus.WAITING,
+		soloJourney: false,
+		rows: gameSettings.FRAME_ROWS,
+		cols: gameSettings.FRAME_COLS,
+		handlePenalties: jest.fn(),
+		broadcastLinesCleared: jest.fn(),
+		getWinner: jest.fn(() => null),
+		clients: new Set(),
+		cancelPlayerTick: jest.fn(),
+		schedulePlayerTick: jest.fn(),
+		maxPlayers: gameSettings.MAX_PLAYERS_PER_ROOM,
+		mode: gameModes.CLASSIC,
+		...overrides
+	};
+}
+
 describe('Player', () => {
 	let mockConnection;
 	let player;
@@ -30,18 +50,7 @@ describe('Player', () => {
 	beforeEach(() => {
 		mockConnection = makeConn();
 		player = new Player(mockConnection, 'player1', 'Alice');
-		player.room = {
-			id: 'room1',
-			owner: { id: 'owner1', username: 'Owner' },
-			status: gameStatus.WAITING,
-			soloJourney: false,
-			rows: gameSettings.FRAME_ROWS,
-			cols: gameSettings.FRAME_COLS,
-			handlePenalties: jest.fn(),
-			broadcastLinesCleared: jest.fn(),
-			getWinner: jest.fn(() => null),
-			clients: new Set()
-		};
+		player.room = makeRoom();
 		player.grid = structuredClone(gameSettings.DEFAULT_EMPTY_GRID);
 		player.pieces = new Set([createMockPiece(), createMockPiece({ color: 'blue' })]);
 		player.currentPiece = createMockPiece();
@@ -457,7 +466,7 @@ describe('Player coverage extras', () => {
 
 		p.currentPiece = createMockPiece();
 		p.grid = [[{ filled: false }]];
-		p.room = { rows: 1, cols: 1 };
+		p.room = makeRoom({ rows: 1, cols: 1 });
 
 		const limiter = p.rateLimiters['movePiece'] || p.rateLimiters[Object.keys(p.rateLimiters)[0]];
 
@@ -478,7 +487,7 @@ describe('Player coverage extras', () => {
 		piece.rotate = jest.fn(() => [[2]]);
 		p.currentPiece = piece;
 		p.grid = [[{ filled: false }]];
-		p.room = { rows: 1, cols: 1 };
+		p.room = makeRoom({ rows: 1, cols: 1 });
 
 		const limiter = p.rateLimiters['movePiece'] || p.rateLimiters[Object.keys(p.rateLimiters)[0]];
 
@@ -502,7 +511,7 @@ describe('Player coverage extras', () => {
 		piece.rotate = jest.fn(() => [[1, 0], [1, 0]]);
 		p.currentPiece = piece;
 		p.grid = [[{ filled: false }, { filled: false }], [{ filled: false }, { filled: false }]];
-		p.room = { rows: 2, cols: 2 };
+		p.room = makeRoom({ rows: 2, cols: 2 });
 
 		const limiter = p.rateLimiters['movePiece'] || p.rateLimiters[Object.keys(p.rateLimiters)[0]];
 
@@ -532,7 +541,7 @@ describe('Player coverage extras', () => {
 		piece.rotate = jest.fn(() => [[1, 1]]);
 		p.currentPiece = piece;
 		p.grid = [[{ filled: false }, { filled: false }, { filled: false }, { filled: false }]];
-		p.room = { rows: 1, cols: 6 };
+		p.room = makeRoom({ rows: 1, cols: 6 });
 
 		const limiter = p.rateLimiters['movePiece'] || p.rateLimiters[Object.keys(p.rateLimiters)[0]];
 
@@ -559,7 +568,7 @@ describe('Player coverage extras', () => {
 		piece.rotate = jest.fn(() => [[1, 0], [1, 0]]);
 		p.currentPiece = piece;
 		p.grid = [[{ filled: false }, { filled: false }], [{ filled: false }, { filled: false }]];
-		p.room = { rows: 2, cols: 2 };
+		p.room = makeRoom({ rows: 2, cols: 2 });
 
 		const limiter = p.rateLimiters['movePiece'] || p.rateLimiters[Object.keys(p.rateLimiters)[0]];
 
@@ -590,7 +599,7 @@ describe('Player coverage extras', () => {
 			[{ filled: false }, { filled: false }, { filled: false }],
 			[{ filled: false }, { filled: false }, { filled: false }]
 		];
-		p.room = { rows: 2, cols: 3 };
+		p.room = makeRoom({ rows: 2, cols: 3 });
 
 		const limiter = p.rateLimiters['movePiece'] || p.rateLimiters[Object.keys(p.rateLimiters)[0]];
 		limiter.lastCalled = 0;
@@ -622,7 +631,7 @@ describe('Player coverage extras', () => {
 		p.hasLost = false;
 		p.room = null;
 		p.swapWithNext();
-		p.room = { status: 'NOT_IN_GAME' };
+		p.room = makeRoom({ status: 'NOT_IN_GAME' });
 		p.pieces = new Set();
 		p.swapWithNext();
 	});
@@ -635,7 +644,7 @@ describe('Player coverage extras', () => {
 
 		p.currentPiece = createMockPiece();
 		p.grid = [[{ filled: false }]];
-		p.room = { rows: 1, cols: 1 };
+		p.room = makeRoom({ rows: 1, cols: 1 });
 		p.sendGrid = jest.fn();
 		p.movePiece('this-does-not-exist');
 
@@ -649,7 +658,7 @@ describe('Player coverage extras', () => {
 		const p = new Player(makeConn(), 'id');
 
 		p.currentPiece = createMockPiece();
-		p.room = { status: gameStatus.IN_GAME };
+		p.room = makeRoom({ status: gameStatus.IN_GAME });
 		p.pieces = new Set([undefined]);
 
 		expect(() => p.swapWithNext()).not.toThrow();
@@ -663,7 +672,7 @@ describe('Player coverage extras', () => {
 
 		p.currentPiece = createMockPiece({ position: { x: 0, y: 0 } });
 		p.grid = [[{ filled: false }]];
-		p.room = { rows: 1, cols: 1 };
+		p.room = makeRoom({ rows: 1, cols: 1 });
 
 		const spawnLimiter = p.rateLimiters[Object.keys(p.rateLimiters)[1]];
 
@@ -681,7 +690,7 @@ describe('Player coverage extras', () => {
 		const p = new Player(makeConn(), 'id');
 
 		p.currentPiece = createMockPiece();
-		p.room = { status: gameStatus.IN_GAME };
+		p.room = makeRoom({ status: gameStatus.IN_GAME });
 		p.pieces = new Set();
 
 		expect(() => p.swapWithNext()).not.toThrow();
@@ -699,7 +708,7 @@ describe('Player coverage extras', () => {
 
 		p.pieces = new Set([next]);
 		p.currentPieceIndex = 0;
-		p.room = { status: gameStatus.IN_GAME };
+		p.room = makeRoom({ status: gameStatus.IN_GAME });
 		p.grid = [[{ filled: false }]];
 		p.isValidMove = jest.fn(() => false);
 		p.sendGrid = jest.fn();
@@ -734,7 +743,7 @@ describe('Player extra branches', () => {
 		const conn = makeConn();
 		const p = new Player(conn, 'p2', 'User2');
 
-		p.room = { status: gameStatus.IN_GAME };
+		p.room = makeRoom({ status: gameStatus.IN_GAME });
 		p.grid = [[{ filled: false }]];
 		p.currentPiece = makePiece({ shape: [[1]], position: { x: 0, y: 0 } });
 
@@ -756,7 +765,7 @@ describe('Player extra branches', () => {
 		const conn = makeConn();
 		const p = new Player(conn, 'p3', 'User3');
 
-		p.room = { status: gameStatus.IN_GAME };
+		p.room = makeRoom({ status: gameStatus.IN_GAME });
 		p.grid = [[{ filled: false }]];
 		p.currentPiece = makePiece({ shape: [[1]], color: 'red', position: { x: 0, y: 0 } });
 
@@ -829,8 +838,7 @@ describe('Player extra branches', () => {
 		const p = new Player(conn, 'p6', 'User6');
 		const fakeOwner = { id: 'owner', username: 'owner', score: 0, hasLost: false, getLandSpecter: () => [[{ filled: false }]] };
 
-		p.room = {
-			id: 'room1',
+		p.room = makeRoom({
 			owner: fakeOwner,
 			status: 'IN_GAME',
 			soloJourney: false,
@@ -839,7 +847,7 @@ describe('Player extra branches', () => {
 			clients: new Set([p, fakeOwner]),
 			rows: 1,
 			cols: 1
-		};
+		});
 		p.grid = [[{ filled: false, color: 'transparent' }]];
 		p.currentPiece = makePiece({ shape: [[1]], color: 'red', position: { x: 0, y: 0 } });
 		p.pieces = new Set([makePiece({ shape: [[2]], color: 'blue', position: { x: 0, y: 0 } })]);
@@ -865,15 +873,15 @@ describe('Player extra branches', () => {
 		const other = new Player(makeConn(), 'other', 'Other');
 
 		other.getLandSpecter = jest.fn(() => [[{ filled: false }]]);
-		p.room = {
+		p.room = makeRoom({
 			id: 'room2',
 			owner: other,
 			status: 'IN_GAME',
 			soloJourney: false,
-			maxPlayers: 2,
+			maxPlayers: 4,
 			mode: gameModes.CLASSIC,
 			clients: new Set([p, other])
-		};
+		});
 		p.room.rows = 1;
 		p.room.cols = 1;
 		p.grid = [[{ filled: false, color: 'transparent' }]];
@@ -899,7 +907,7 @@ describe('Player extra branches', () => {
 		const winner = new Player(makeConn(), 'w', 'Winner');
 
 		winner.score = 10;
-		p.room = {
+		p.room = makeRoom({
 			id: 'r',
 			owner: winner,
 			status: 'ENDED',
@@ -908,7 +916,7 @@ describe('Player extra branches', () => {
 			mode: 'VISIBLE',
 			clients: new Set([p, winner]),
 			getWinner: () => winner
-		};
+		});
 		p.score = 5;
 		p.statistics = { addGameResult: jest.fn(), save: jest.fn().mockResolvedValue({}) };
 		p.sendGameOver('Lost!');
@@ -926,7 +934,7 @@ describe('Player extra branches', () => {
 		const winner = new Player(makeConn(), 'w2', 'Winner2');
 
 		winner.score = 1;
-		p.room = {
+		p.room = makeRoom({
 			id: 'r2',
 			owner: winner,
 			status: 'ENDED',
@@ -935,7 +943,7 @@ describe('Player extra branches', () => {
 			mode: gameModes.CLASSIC,
 			clients: new Set([p, winner]),
 			getWinner: () => winner
-		};
+		});
 		p.statistics = { addGameResult: jest.fn(), save: jest.fn().mockResolvedValue({}) };
 		p.sendGameOver();
 
@@ -951,7 +959,7 @@ describe('Player extra branches', () => {
 		const p = new Player(conn, 'p10', 'User10');
 
 		p.hasLost = true;
-		p.room = { id: 'r' };
+		p.room = makeRoom({ id: 'r' });
 		p.sendGameLost('already');
 
 		expect(conn.emit).not.toHaveBeenCalled();
@@ -964,7 +972,7 @@ describe('Player extra branches', () => {
 		const conn = makeConn();
 		const p = new Player(conn, 'p11', 'User11');
 
-		p.room = { id: 'r3', owner: { id: 'o', username: 'o', score: 0, hasLost: false }, status: 'IN_GAME', soloJourney: false, maxPlayers: 1, mode: gameModes.CLASSIC };
+		p.room = makeRoom({ id: 'r3', owner: { id: 'o', username: 'o', score: 0, hasLost: false }, status: 'IN_GAME', soloJourney: false, maxPlayers: 1, mode: gameModes.CLASSIC });
 		p.sendGameLost();
 
 		expect(conn.emit).toHaveBeenCalledWith(outgoingEvents.GAME_LOST, expect.any(Object));
@@ -976,12 +984,12 @@ describe('Player extra branches', () => {
 	test('clearFullLines uses fallback scoring when clearedLines > 4', () => {
 		const conn = makeConn();
 		const p = new Player(conn, 'p12', 'User12');
-		const room = {
+		const room = makeRoom({
 			rows: 5,
 			cols: 4,
 			handlePenalties: jest.fn(),
 			broadcastLinesCleared: jest.fn()
-		};
+		});
 
 		p.room = room;
 
@@ -1040,18 +1048,7 @@ describe('Player runtime tests', () => {
 	beforeEach(() => {
 		mockConnection = makeConn();
 		player = new Player(mockConnection, 'player1', 'Alice');
-		player.room = {
-			id: 'room1',
-			owner: { id: 'owner1', username: 'Owner' },
-			status: gameStatus.WAITING,
-			soloJourney: false,
-			rows: gameSettings.FRAME_ROWS,
-			cols: gameSettings.FRAME_COLS,
-			handlePenalties: jest.fn(),
-			broadcastLinesCleared: jest.fn(),
-			getWinner: jest.fn(() => null),
-			clients: new Set()
-		};
+		player.room = makeRoom();
 		player.grid = structuredClone(gameSettings.DEFAULT_EMPTY_GRID);
 		player.pieces = new Set([createMockPiece(), createMockPiece({ color: 'blue' })]);
 		player.currentPiece = createMockPiece();
@@ -1404,14 +1401,9 @@ describe('Player runtime tests', () => {
 
 		expect(mockConnection.emit).not.toHaveBeenCalled();
 
-		player.room = {
-			...player.room,
-			owner: { id: 'owner1', username: 'Owner' },
-			clients: new Set([player]),
-			handlePenalties: jest.fn(),
-			rows: gameSettings.FRAME_ROWS,
-			cols: gameSettings.FRAME_COLS
-		};
+		player.room = makeRoom({
+			clients: new Set([player])
+		});
 		player.hasLost = true;
 		player.movePiece = jest.fn();
 		player.tickInterval();
