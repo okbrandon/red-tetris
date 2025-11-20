@@ -332,4 +332,67 @@ describe('TetrisGrid', () => {
       { timeout: 900 }
     );
   });
+
+  it('does not shake when the piece signature changes without newly locked cells', async () => {
+    const gridInput = [[{ raw: true }], [{ raw: true }]];
+    const stableNormalized = [
+      [
+        {
+          filled: false,
+          ghost: false,
+          indestructible: false,
+          color: 'rgba(10,10,10,0.1)',
+          shadowColor: 'rgba(0,0,0,0.05)',
+        },
+      ],
+      [
+        {
+          filled: false,
+          ghost: false,
+          indestructible: false,
+          color: 'rgba(10,10,10,0.1)',
+          shadowColor: 'rgba(0,0,0,0.05)',
+        },
+      ],
+    ];
+
+    normalizeGridMock.mockReturnValue(stableNormalized);
+    normalizeActivePieceMock.mockImplementation((piece) => {
+      if (!piece) return null;
+      return {
+        blocks: [[0, 0]],
+        position: piece.position ?? { x: 0, y: 0 },
+        color: '#abc',
+        shadowColor: '#def',
+      };
+    });
+
+    const { rerender } = render(
+      <TetrisGrid
+        grid={gridInput}
+        rows={2}
+        cols={1}
+        cellSize={30}
+        currentPiece={{ id: 'piece-1', position: { x: 0, y: 0 } }}
+      />
+    );
+
+    const board = screen.getByRole('grid');
+    expect(board.dataset.shake).toBeUndefined();
+
+    rerender(
+      <TetrisGrid
+        grid={gridInput}
+        rows={2}
+        cols={1}
+        cellSize={30}
+        currentPiece={{ id: 'piece-2', position: { x: 0, y: 0 } }}
+      />
+    );
+
+    await waitFor(() => {
+      expect(board.dataset.shake).toBeUndefined();
+      expect(screen.queryByTestId('locked-piece-highlight')).toBeNull();
+    });
+  });
 });

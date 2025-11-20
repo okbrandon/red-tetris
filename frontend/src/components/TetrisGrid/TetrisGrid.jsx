@@ -212,12 +212,16 @@ const TetrisGrid = ({
     if (previous && previous.signature !== null && signature !== null) {
       const isDifferentSignature = previous.signature !== signature;
       if (isDifferentSignature) {
-        const overrideCells = detectNewlyFilledCells(
+        const newlyLockedCells = detectNewlyFilledCells(
           previousGridSnapshot,
           normalizedGrid
         );
-        triggerLockedPieceHighlight(previous, overrideCells);
-        triggerBoardImpact();
+
+        if (newlyLockedCells.length > 0) {
+          triggerLockedPieceHighlight(previous, newlyLockedCells);
+          triggerBoardImpact();
+        }
+
         setShouldAnimate(false);
       } else {
         const dx = activePiece.position.x - previous.position.x;
