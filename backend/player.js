@@ -193,6 +193,8 @@ class Player {
 
 		console.log('Client ' + this.username + ' has lost. (' + message + ')');
 		this.hasLost = true;
+		if (this.room)
+			this.room.cancelPlayerTick(this);
 		this.emit(outgoingEvents.GAME_LOST, {
 			room: {
 				id: this.room.id,
@@ -544,6 +546,9 @@ class Player {
 		}
 
 		rateLimiter.lastCalled = Date.now();
+		if (this.room && typeof this.room.schedulePlayerTick === 'function') {
+			this.room.schedulePlayerTick(this);
+		}
 		this.sendGrid();
 	}
 
