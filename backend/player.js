@@ -546,9 +546,8 @@ class Player {
 		}
 
 		rateLimiter.lastCalled = Date.now();
-		if (this.room && typeof this.room.schedulePlayerTick === 'function') {
+		if (this.room)
 			this.room.schedulePlayerTick(this);
-		}
 		this.sendGrid();
 	}
 
