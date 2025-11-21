@@ -182,6 +182,14 @@ const LINES_CLEARED = 'lines-cleared';
  */
 const PLAYER_STATS_BOARD = 'player-stats-board';
 
+/**
+ * @constant {string} AVAILABLE_ROOMS - Sent to provide the client with a list of available rooms.
+ *
+ * @description This event is sent by the server to the client to inform them about the current list
+ * of available game rooms that they can join.
+ */
+const AVAILABLE_ROOMS = 'available-rooms';
+
 export default {
 	ERROR,
 	CLIENT_UPDATED,
@@ -195,5 +203,6 @@ export default {
 	GAME_RESTORED,
 	GAME_LOST,
 	LINES_CLEARED,
-	PLAYER_STATS_BOARD
+	PLAYER_STATS_BOARD,
+	AVAILABLE_ROOMS
 };

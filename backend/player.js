@@ -236,6 +236,38 @@ class Player {
 	}
 
 	/**
+	 * Sends the list of available rooms to the player.
+	 * @param {Map<string, Game>} rooms - Map of room ID to Room instances.
+	 */
+	sendAvailableRooms(rooms) {
+		const roomCollection = rooms instanceof Map
+			? Array.from(rooms.values())
+			: Array.isArray(rooms)
+				? rooms
+				: null;
+
+		if (!roomCollection)
+			throw new Error('Invalid rooms collection');
+
+		const availableRooms = roomCollection
+			.filter(room => !room.soloJourney && room.status === gameStatus.WAITING)
+			.map(room => ({
+				id: room.id,
+				owner: {
+					id: room.owner.id,
+					username: room.owner.username
+				},
+				currentPlayers: room.clients.size,
+				maxPlayers: room.maxPlayers,
+				mode: room.mode
+			}));
+
+		this.emit(outgoingEvents.AVAILABLE_ROOMS, {
+			rooms: availableRooms
+		});
+	}
+
+	/**
 	 * Retrieves the next piece from the queue.
 	 * @returns {Piece|null} - The next piece or null if no pieces are available.
 	 */
