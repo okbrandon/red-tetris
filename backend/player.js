@@ -102,7 +102,7 @@ class Player {
 			username: client.username,
 			hasLost: client.hasLost,
 			score: client.score,
-			specter: client.getLandSpecter()
+			specter: this.hasLost ? client.grid : client.getLandSpecter()
 		}));
 
 		this.emit(outgoingEvents.GAME_STATE, {
