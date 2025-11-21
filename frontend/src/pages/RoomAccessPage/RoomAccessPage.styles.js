@@ -75,14 +75,14 @@ export const RoomButton = styled.button`
   align-items: flex-start;
   gap: 0.45rem;
   cursor: pointer;
-  transition: transform 0.15s ease, border-color 0.15s ease,
-    background 0.15s ease;
+  transition: border-color 0.15s ease, background 0.15s ease,
+    box-shadow 0.15s ease;
 
   &:hover,
   &:focus-visible {
     border-color: #b79cff;
     background: rgba(60, 24, 125, 0.85);
-    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(25, 10, 65, 0.45);
   }
 
   &:focus-visible {
