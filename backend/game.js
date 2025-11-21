@@ -269,7 +269,7 @@ class Game {
 			this.playerTickSchedule.delete(client.id);
 			return;
 		}
-		if (this.status !== gameStatus.IN_GAME || client.hasLost) {
+		if (this.status !== gameStatus.IN_GAME) {
 			this.playerTickSchedule.delete(client.id);
 			return;
 		}
@@ -307,7 +307,7 @@ class Game {
 			const clients = [...this.clients];
 
 			for (const client of clients) {
-				if (!client || client.hasLost)
+				if (!client)
 					continue;
 
 				let nextTickAt = this.playerTickSchedule.get(client.id);
@@ -324,13 +324,13 @@ class Game {
 
 				setImmediate(async () => {
 					try {
-						if (!this.clients.has(client) || client.hasLost || this.status !== gameStatus.IN_GAME)
+						if (!this.clients.has(client) || this.status !== gameStatus.IN_GAME)
 							return;
 						console.log('[' + this.id + '] PLAYER ' + client.username + ' GAME TICK (' + this.ticks + ')');
 						await Promise.resolve().then(() => client.tickInterval());
 					} finally {
 						this.playersProcessingTick.delete(client.id);
-						if (this.status === gameStatus.IN_GAME && this.clients.has(client) && !client.hasLost) {
+						if (this.status === gameStatus.IN_GAME && this.clients.has(client)) {
 							this.schedulePlayerTick(client);
 						} else {
 							this.playerTickSchedule.delete(client.id);
