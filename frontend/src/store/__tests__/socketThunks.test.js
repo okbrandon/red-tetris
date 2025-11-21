@@ -9,7 +9,11 @@ import {
   connectSucceeded,
   socketEventReceived,
 } from '../slices/socketSlice.js';
-import { setGameStatus, setPlayerOutcome } from '../slices/gameSlice.js';
+import {
+  setGameStatus,
+  setPlayerOutcome,
+  setAvailableRooms,
+} from '../slices/gameSlice.js';
 import { showNotification } from '../slices/notificationSlice.js';
 import { setPlayerHistory } from '../slices/playerStatsSlice.js';
 
@@ -162,6 +166,16 @@ describe('socket thunks', () => {
         ([action]) =>
           action.type === setGameStatus.type &&
           action.payload.status === 'in-game'
+      )
+    ).toBe(true);
+
+    trigger(SERVER_EVENTS.AVAILABLE_ROOMS, [
+      { id: 'alpha', owner: { username: 'owner' }, currentPlayers: 1, maxPlayers: 4 },
+      { id: 42 },
+    ]);
+    expect(
+      dispatch.mock.calls.some(
+        ([action]) => action.type === setAvailableRooms.type
       )
     ).toBe(true);
 

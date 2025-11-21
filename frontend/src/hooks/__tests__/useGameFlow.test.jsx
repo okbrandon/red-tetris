@@ -150,6 +150,26 @@ describe('useGameFlow', () => {
     );
   });
 
+  it('supports selecting an explicit room when joining multiplayer', () => {
+    const { result } = renderHook(() => useGameFlow({ roomName: ' default ' }));
+
+    mockDispatch.mockClear();
+    requestRoomJoin.mockClear();
+
+    result.current.joinMultiplayerRoom(' ChosenRoom ');
+
+    expect(requestRoomJoin).toHaveBeenCalledWith({
+      roomName: 'ChosenRoom',
+      soloJourney: false,
+    });
+    expect(mockDispatch).toHaveBeenCalledWith(
+      showNotification({
+        type: 'success',
+        message: 'Joining lobby ChosenRoom…',
+      })
+    );
+  });
+
   it('prevents non-owners from starting multiplayer games', () => {
     mockState.game.isOwner = false;
 

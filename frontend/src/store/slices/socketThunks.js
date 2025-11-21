@@ -22,6 +22,7 @@ import {
   setGameMode,
   setPlayerOutcome,
   addLineClearLogEntry,
+  setAvailableRooms,
 } from './gameSlice.js';
 import { setPlayerHistory } from './playerStatsSlice.js';
 import { store } from '../store.js';
@@ -337,6 +338,17 @@ export const initializeSocket = () => {
       })
     );
     dispatch(setPlayerHistory(payload?.gameHistory ?? []));
+  });
+
+  addListener(SERVER_EVENTS.AVAILABLE_ROOMS, (payload) => {
+    dispatch(
+      socketEventReceived({
+        direction: 'incoming',
+        type: SERVER_EVENTS.AVAILABLE_ROOMS,
+        payload,
+      })
+    );
+    dispatch(setAvailableRooms(payload));
   });
 
   return () => {

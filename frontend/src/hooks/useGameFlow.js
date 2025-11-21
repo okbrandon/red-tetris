@@ -50,8 +50,11 @@ const useGameFlow = ({ roomName }) => {
     );
   };
 
-  const joinMultiplayerRoom = () => {
-    const trimmedRoomName = roomName.trim();
+  const joinMultiplayerRoom = (targetRoomName) => {
+    const candidate =
+      typeof targetRoomName === 'string' ? targetRoomName : roomName;
+    const trimmedRoomName =
+      typeof candidate === 'string' ? candidate.trim() : '';
     if (!trimmedRoomName) {
       dispatch(
         showNotification({
