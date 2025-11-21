@@ -72,6 +72,7 @@ const TetrisGrid = ({
   rows = DEFAULT_BOARD_ROWS,
   cols = DEFAULT_BOARD_COLS,
   cellSize = CELL_SIZE,
+  hideActivePiece = false,
 }) => {
   const activePiece = useMemo(
     () => normalizeActivePiece(currentPiece, BASE_TETRIS_COLORS),
@@ -325,7 +326,7 @@ const TetrisGrid = ({
           ))}
         </LockedPieceLayer>
       ) : null}
-      {activePiece ? (
+      {activePiece && !hideActivePiece ? (
         <ActivePieceLayer
           data-testid="active-piece-layer"
           data-animate={shouldAnimate ? 'true' : 'false'}
@@ -372,6 +373,7 @@ TetrisGrid.propTypes = {
   }),
   showGrid: PropTypes.bool,
   cellSize: PropTypes.number,
+  hideActivePiece: PropTypes.bool,
 };
 
 export default TetrisGrid;

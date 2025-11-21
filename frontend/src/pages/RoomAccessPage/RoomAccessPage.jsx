@@ -101,7 +101,8 @@ const RoomAccessPage = () => {
                       <RoomMetaRow>
                         <span>Owner: {ownerName}</span>
                         <span>
-                          {room?.currentPlayers ?? 0}/{room?.maxPlayers ?? 0} players
+                          {room?.currentPlayers ?? 0}/{room?.maxPlayers ?? 0}{' '}
+                          players
                         </span>
                       </RoomMetaRow>
                     </RoomButton>

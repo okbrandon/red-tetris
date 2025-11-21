@@ -10,6 +10,7 @@ import {
 import SpecterColumn from '@/components/SpecterColumn/SpecterColumn.jsx';
 import { resultModalShape } from '@/components/GameResultModal/GameResultModal.propTypes.js';
 import GamePlayingView from '@/components/GameViews/GamePlayingView.jsx';
+import { INVISIBLE_FALLING_PIECES_MODE } from '@/utils/gameModes.js';
 
 const MultiArena = ({ resultModal, leaveRoom }) => {
   const {
@@ -21,6 +22,8 @@ const MultiArena = ({ resultModal, leaveRoom }) => {
     nextPieces,
     lineClearLog,
     currentPiece,
+    roomMode,
+    hideCurrentPiece,
   } = useSelector((state) => state.game);
 
   const opponents = useMemo(() => {
@@ -40,6 +43,10 @@ const MultiArena = ({ resultModal, leaveRoom }) => {
     );
   }
 
+  const hideActivePiece = Boolean(
+    hideCurrentPiece ?? roomMode === INVISIBLE_FALLING_PIECES_MODE
+  );
+
   return (
     <ArenaContainer>
       <ArenaLayout>
@@ -52,6 +59,7 @@ const MultiArena = ({ resultModal, leaveRoom }) => {
             score={score}
             nextPieces={nextPieces}
             lineClearLog={lineClearLog}
+            hideActivePiece={hideActivePiece}
           />
         </MainColumn>
       </ArenaLayout>
