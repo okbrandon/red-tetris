@@ -1,3 +1,5 @@
+export const INVISIBLE_FALLING_PIECES_MODE = 'invisible-falling-pieces';
+
 export const SOLO_MODE_OPTIONS = [
   {
     id: 'classic',
@@ -14,7 +16,7 @@ export const SOLO_MODE_OPTIONS = [
       'Pieces fall twice as fast right from the start. Keep up or get buried.',
   },
   {
-    id: 'invisible-falling-pieces',
+  id: INVISIBLE_FALLING_PIECES_MODE,
     title: 'Invisible Pieces',
     badge: 'Mind Game',
     description:

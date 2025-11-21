@@ -34,6 +34,9 @@ describe('SoloArenaPage', () => {
           score: 42,
           nextPieces: ['I'],
           lineClearLog: [{ id: 1, message: 'Tetris!' }],
+          currentPiece: { id: 'piece' },
+          roomMode: 'classic',
+          hideCurrentPiece: false,
         },
       })
     );
@@ -54,6 +57,8 @@ describe('SoloArenaPage', () => {
         resultModal: baseResultModal,
         nextPieces: ['I'],
         lineClearLog: [{ id: 1, message: 'Tetris!' }],
+        currentPiece: { id: 'piece' },
+        hideActivePiece: false,
       })
     );
   });

@@ -44,6 +44,7 @@ const GamePlayingView = ({
   score,
   nextPieces,
   lineClearLog,
+  hideActivePiece = false,
 }) => {
   const primaryPreviewSize = Math.max(12, Math.floor(CELL_SIZE * 0.38));
   const queuePreviewSize = Math.max(10, Math.floor(CELL_SIZE * 0.3));
@@ -106,7 +107,12 @@ const GamePlayingView = ({
     <Layout>
       <BoardArea>
         <BoardFrame>
-          <TetrisGrid showGrid grid={grid} currentPiece={currentPiece} />
+          <TetrisGrid
+            showGrid
+            grid={grid}
+            currentPiece={currentPiece}
+            hideActivePiece={hideActivePiece}
+          />
           {isResultModalOpen && (
             <GameResultModal
               outcome={resultModal.outcome}
@@ -269,6 +275,7 @@ GamePlayingView.propTypes = {
       message: propTypes.string.isRequired,
     })
   ),
+  hideActivePiece: propTypes.bool,
 };
 
 export default GamePlayingView;

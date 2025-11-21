@@ -224,6 +224,41 @@ describe('TetrisGrid', () => {
     expect(jumpLayer.style.transform).toBe('translate3d(60px, 90px, 0)');
   });
 
+  it('skips rendering the active piece layer when hideActivePiece is true', () => {
+    normalizeGridMock.mockReturnValue([
+      [
+        {
+          filled: false,
+          ghost: false,
+          indestructible: false,
+          color: 'rgba(10,10,10,1)',
+          shadowColor: 'rgba(0,0,0,0.1)',
+        },
+      ],
+    ]);
+
+    normalizeActivePieceMock.mockReturnValue({
+      blocks: [[0, 0]],
+      position: { x: 0, y: 0 },
+      color: '#abc',
+      shadowColor: '#def',
+    });
+
+    render(
+      <TetrisGrid
+        grid={[[{ raw: true }]]}
+        rows={1}
+        cols={1}
+        cellSize={30}
+        currentPiece={{ id: 'hidden' }}
+        hideActivePiece
+      />
+    );
+
+    expect(normalizeActivePieceMock).toHaveBeenCalled();
+    expect(screen.queryByTestId('active-piece-layer')).toBeNull();
+  });
+
   it('applies a board shake when the active piece signature changes', async () => {
     const gridInput = [[{ raw: true }], [{ raw: true }]];
     const initialNormalized = [

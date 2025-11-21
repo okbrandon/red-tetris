@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { INVISIBLE_FALLING_PIECES_MODE } from '@/utils/gameModes.js';
 
 export const SOLO_ROOM_NAME = 'solo-local';
 const MAX_LINE_CLEAR_LOG_SIZE = 6;
@@ -19,6 +20,7 @@ const createInitialState = () => ({
   grid: [[]],
   nextPieces: [],
   currentPiece: null,
+  hideCurrentPiece: false,
   spectator: {
     eligible: false,
     active: false,
@@ -37,6 +39,7 @@ export const gameSlice = createSlice({
       const mode = action.payload;
 
       state.mode = action.payload;
+      state.hideCurrentPiece = false;
       if (mode === 'solo') {
         state.players = [];
         state.score = 0;
@@ -47,12 +50,19 @@ export const gameSlice = createSlice({
       const { room, you, grid, currentPiece, nextPieces, clients } =
         action.payload ?? {};
 
+      const nextRoomMode =
+        (typeof room?.mode === 'string' && room.mode) || state.roomMode || '';
+      const hideCurrentPiece =
+        nextRoomMode === INVISIBLE_FALLING_PIECES_MODE;
+
       if (room) {
         state.mode = room.soloJourney ? 'solo' : 'multiplayer';
         state.roomName = room.id || state.roomName || '';
         state.owner = room.owner || state.owner;
-        state.roomMode = room.mode || state.roomMode || '';
       }
+
+      state.roomMode = nextRoomMode;
+      state.hideCurrentPiece = hideCurrentPiece;
       state.you = you || null;
       state.currentPiece = currentPiece || null;
       state.grid = grid || [[]];
@@ -108,6 +118,7 @@ export const gameSlice = createSlice({
       } else {
         state.roomMode = state.roomMode || '';
       }
+      state.hideCurrentPiece = state.roomMode === INVISIBLE_FALLING_PIECES_MODE;
       state.you = you || null;
       state.isOwner =
         Boolean(you?.id) && Boolean(nextOwner?.id) && you.id === nextOwner.id;
