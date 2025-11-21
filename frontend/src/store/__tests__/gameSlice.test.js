@@ -10,6 +10,7 @@ import reducer, {
   setIsResultModalOpen,
   addLineClearLogEntry,
   resetGameState,
+  setAvailableRooms,
 } from '../slices/gameSlice.js';
 
 const createState = () => reducer(undefined, { type: '@@INIT' });
@@ -248,6 +249,28 @@ describe('gameSlice reducers', () => {
     const mutated = reducer(createState(), setGameMode('solo'));
     const reset = reducer(mutated, resetGameState());
     expect(reset).toEqual(createState());
+  });
+
+  it('stores and sanitises available rooms from the server', () => {
+    const base = createState();
+    const rooms = [
+      { id: 'alpha', owner: { username: 'alice' } },
+      null,
+      { id: 42 },
+      { id: 'beta' },
+    ];
+
+    const populated = reducer(base, setAvailableRooms(rooms));
+    expect(populated.availableRooms).toEqual([
+      { id: 'alpha', owner: { username: 'alice' } },
+      { id: 'beta' },
+    ]);
+
+    const nested = reducer(base, setAvailableRooms({ rooms }));
+    expect(nested.availableRooms).toEqual(populated.availableRooms);
+
+    const cleared = reducer(populated, setAvailableRooms('not-array'));
+    expect(cleared.availableRooms).toEqual([]);
   });
 
   it('gracefully handles partial game state updates', () => {

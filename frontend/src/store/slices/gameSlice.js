@@ -26,6 +26,7 @@ const createInitialState = () => ({
   players: [],
   isResultModalOpen: false,
   lineClearLog: [],
+  availableRooms: null,
 });
 
 export const gameSlice = createSlice({
@@ -161,6 +162,17 @@ export const gameSlice = createSlice({
         MAX_LINE_CLEAR_LOG_SIZE
       );
     },
+    setAvailableRooms: (state, action) => {
+      const rawRooms = Array.isArray(action.payload)
+        ? action.payload
+        : Array.isArray(action.payload?.rooms)
+        ? action.payload.rooms
+        : [];
+      const rooms = rawRooms.filter(
+        (room) => room && typeof room === 'object' && typeof room.id === 'string'
+      );
+      state.availableRooms = rooms;
+    },
     resetGameState: () => createInitialState(), // room_left
   },
 });
@@ -176,5 +188,6 @@ export const {
   setSpectatorActive,
   setIsResultModalOpen,
   addLineClearLogEntry,
+  setAvailableRooms,
 } = gameSlice.actions;
 export default gameSlice.reducer;
