@@ -75,7 +75,9 @@ export const RoomButton = styled.button`
   align-items: flex-start;
   gap: 0.45rem;
   cursor: pointer;
-  transition: border-color 0.15s ease, background 0.15s ease,
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
     box-shadow 0.15s ease;
 
   &:hover,

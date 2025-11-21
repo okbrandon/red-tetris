@@ -172,7 +172,7 @@ describe('gameSlice reducers', () => {
     expect(notOwner.isOwner).toBe(false);
     expect(notOwner.roomMode).toBe('classic');
     expect(notOwner.players).toEqual(lobbyState.players);
-  expect(notOwner.hideCurrentPiece).toBe(false);
+    expect(notOwner.hideCurrentPiece).toBe(false);
 
     const noPayload = reducer(lobbyState, setLobbySettings());
     expect(noPayload.roomName).toBe('room-2');

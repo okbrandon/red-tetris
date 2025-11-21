@@ -52,8 +52,7 @@ export const gameSlice = createSlice({
 
       const nextRoomMode =
         (typeof room?.mode === 'string' && room.mode) || state.roomMode || '';
-      const hideCurrentPiece =
-        nextRoomMode === INVISIBLE_FALLING_PIECES_MODE;
+      const hideCurrentPiece = nextRoomMode === INVISIBLE_FALLING_PIECES_MODE;
 
       if (room) {
         state.mode = room.soloJourney ? 'solo' : 'multiplayer';
@@ -177,10 +176,11 @@ export const gameSlice = createSlice({
       const rawRooms = Array.isArray(action.payload)
         ? action.payload
         : Array.isArray(action.payload?.rooms)
-        ? action.payload.rooms
-        : [];
+          ? action.payload.rooms
+          : [];
       const rooms = rawRooms.filter(
-        (room) => room && typeof room === 'object' && typeof room.id === 'string'
+        (room) =>
+          room && typeof room === 'object' && typeof room.id === 'string'
       );
       state.availableRooms = rooms;
     },

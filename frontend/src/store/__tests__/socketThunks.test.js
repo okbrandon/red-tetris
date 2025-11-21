@@ -170,7 +170,12 @@ describe('socket thunks', () => {
     ).toBe(true);
 
     trigger(SERVER_EVENTS.AVAILABLE_ROOMS, [
-      { id: 'alpha', owner: { username: 'owner' }, currentPlayers: 1, maxPlayers: 4 },
+      {
+        id: 'alpha',
+        owner: { username: 'owner' },
+        currentPlayers: 1,
+        maxPlayers: 4,
+      },
       { id: 42 },
     ]);
     expect(
