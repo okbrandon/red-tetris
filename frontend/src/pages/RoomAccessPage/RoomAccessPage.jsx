@@ -4,7 +4,6 @@ import { useSelector } from 'react-redux';
 import {
   Wrapper,
   Card,
-  Subtitle,
   StartButton,
   LogoTitle,
   Input,
@@ -23,6 +22,7 @@ import {
   RoomBadge,
   RoomMetaRow,
   RoomsEmpty,
+  JoinTitle,
 } from './RoomAccessPage.styles.js';
 import useGameFlow from '@/hooks/useGameFlow.js';
 import { getModeDetails } from '@/utils/gameModes.js';
@@ -60,7 +60,7 @@ const RoomAccessPage = () => {
       <LogoTitle>Multiplayer</LogoTitle>
       <Card>
         <JoinSection>
-          <Subtitle>Enter a room name</Subtitle>
+          <JoinTitle>Join or Create a room</JoinTitle>
           <JoinForm onSubmit={handleJoinSubmit}>
             <Input
               type="text"
@@ -73,7 +73,9 @@ const RoomAccessPage = () => {
               Join Lobby
             </StartButton>
           </JoinForm>
-          <JoinHint>Prefer manual entry? Join by typing a room name.</JoinHint>
+          <JoinHint>
+            Prefer manual entry? Join or Create by typing a room name.
+          </JoinHint>
         </JoinSection>
 
         <RoomsSection aria-live="polite">
@@ -99,9 +101,14 @@ const RoomAccessPage = () => {
                         {modeTitle && <RoomBadge>{modeTitle}</RoomBadge>}
                       </RoomHeader>
                       <RoomMetaRow>
-                        <span>Owner: {ownerName}</span>
                         <span>
-                          {room?.currentPlayers ?? 0}/{room?.maxPlayers ?? 0}{' '}
+                          Hosted by <b>{ownerName}</b>
+                        </span>
+                        <span>···</span>
+                        <span>
+                          <b>
+                            {room?.currentPlayers ?? 0}/{room?.maxPlayers ?? 0}
+                          </b>{' '}
                           players
                         </span>
                       </RoomMetaRow>

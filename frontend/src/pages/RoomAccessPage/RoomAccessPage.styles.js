@@ -20,8 +20,15 @@ export const JoinHint = styled.span`
   opacity: 0.8;
 `;
 
+export const JoinTitle = styled.h3`
+  font-size: 1rem;
+  font-weight: 600;
+  color: #f5f2ff;
+  margin: 0;
+  text-align: left;
+`;
+
 export const RoomsSection = styled.section`
-  margin-top: 1.5rem;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -134,7 +141,6 @@ export const JoinSection = styled.section`
   margin-bottom: 0.5rem;
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 1rem;
   border-bottom: 1px solid rgba(183, 156, 255, 0.2);
 `;
