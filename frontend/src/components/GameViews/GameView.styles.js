@@ -1,6 +1,20 @@
 import styled from 'styled-components';
 
 export const Layout = styled.div`
+  --board-base-height: 690;
+  --board-base-width: 345;
+  --board-height-scale: calc(
+    (80vh - 40px) / (var(--board-base-height) * 1px)
+  );
+  --board-width-scale: calc(
+    (100vw - 320px) / (var(--board-base-width) * 1px)
+  );
+  --board-scale: clamp(
+    0.85,
+    min(var(--board-height-scale), var(--board-width-scale)),
+    1.25
+  );
+
   width: 100%;
   height: 100%;
   display: grid;
@@ -8,22 +22,59 @@ export const Layout = styled.div`
   grid-template-areas:
     'board'
     'panel';
-  gap: clamp(0.9rem, 2.4vw, 1.6rem);
-  border-radius: 20px;
-  border: 1px solid rgba(142, 107, 225, 0.26);
-  background: linear-gradient(
-    160deg,
-    rgba(26, 22, 45, 0.88),
-    rgba(13, 11, 24, 0.96)
-  );
-  box-shadow: 0 24px 46px rgba(8, 5, 18, 0.52);
-  padding: clamp(0.8rem, 2vw, 1.2rem);
+  gap: clamp(0.45rem, 1.4vw, 0.9rem);
+  padding: clamp(0.35rem, 1.2vw, 0.85rem);
   box-sizing: border-box;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  align-items: flex-start;
+
+  @media (max-width: 640px) {
+    --board-height-scale: calc(
+      (78vh - 32px) / (var(--board-base-height) * 1px)
+    );
+    --board-width-scale: calc(
+      (100vw - 40px) / (var(--board-base-width) * 1px)
+    );
+    --board-scale: clamp(
+      0.78,
+      min(var(--board-height-scale), var(--board-width-scale)),
+      0.98
+    );
+  }
 
   @media (min-width: 920px) {
-    grid-template-columns: minmax(0, 1fr) clamp(220px, 24vw, 320px);
+    grid-template-columns: minmax(0, 1.7fr) clamp(220px, 18vw, 300px);
     grid-template-areas: 'board panel';
-    align-items: stretch;
+    align-items: flex-start;
+    --board-height-scale: calc(
+      (82vh - 48px) / (var(--board-base-height) * 1px)
+    );
+    --board-width-scale: calc(
+      (100vw - 340px) / (var(--board-base-width) * 1px)
+    );
+    --board-scale: clamp(
+      0.95,
+      min(var(--board-height-scale), var(--board-width-scale)),
+      1.35
+    );
+  }
+
+  @media (min-width: 1280px) {
+    grid-template-columns: minmax(0, 1.8fr) clamp(230px, 16vw, 320px);
+    --board-height-scale: calc(
+      (84vh - 52px) / (var(--board-base-height) * 1px)
+    );
+    --board-width-scale: calc(
+      (100vw - 380px) / (var(--board-base-width) * 1px)
+    );
+    --board-scale: clamp(
+      1,
+      min(var(--board-height-scale), var(--board-width-scale)),
+      1.4
+    );
   }
 `;
 
@@ -31,17 +82,25 @@ export const BoardArea = styled.section`
   grid-area: board;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
 `;
 
 export const BoardFrame = styled.div`
   position: relative;
-  padding: clamp(0.6rem, 1.4vw, 1rem);
+  padding: clamp(0.4rem, 1vw, 0.8rem);
   border-radius: 18px;
   border: 1px solid rgba(162, 130, 235, 0.25);
   background: rgba(18, 15, 32, 0.84);
   box-shadow: inset 0 1px 0 rgba(217, 206, 255, 0.12);
   overflow: hidden;
+  transform: scale(var(--board-scale, 1));
+  transform-origin: top center;
+  margin: 0 auto;
+  max-width: 100%;
+  max-height: 82vh;
 `;
 
 export const PanelArea = styled.section`
