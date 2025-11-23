@@ -13,6 +13,6 @@ export const PageWrapper = styled(Wrapper)`
 
 export const GameLogoTitle = styled(LogoTitle)`
   font-size: clamp(2.1rem, 4vw, 2.8rem);
-  margin: 0;
+  margin: 20px 0;
   align-self: center;
 `;
