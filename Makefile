@@ -78,8 +78,8 @@ down:
 	$(DC) down
 
 restart:
-	$(MAKE) docker-down
-	$(MAKE) docker-up
+	$(MAKE) down
+	$(MAKE) up
 
 logs:
 	$(DC) logs -f
