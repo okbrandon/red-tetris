@@ -23,13 +23,13 @@ export const Layout = styled.div`
     'board'
     'panel';
   gap: clamp(0.45rem, 1.4vw, 0.9rem);
-  padding: clamp(0.35rem, 1.2vw, 0.85rem);
   box-sizing: border-box;
   background: transparent;
   border: none;
   border-radius: 0;
   box-shadow: none;
-  align-items: flex-start;
+  place-content: center;
+  place-items: center;
 
   @media (max-width: 640px) {
     --board-height-scale: calc(
@@ -48,7 +48,8 @@ export const Layout = styled.div`
   @media (min-width: 920px) {
     grid-template-columns: minmax(0, 1.7fr) clamp(220px, 18vw, 300px);
     grid-template-areas: 'board panel';
-    align-items: flex-start;
+    place-content: center;
+    place-items: center;
     --board-height-scale: calc(
       (82vh - 48px) / (var(--board-base-height) * 1px)
     );

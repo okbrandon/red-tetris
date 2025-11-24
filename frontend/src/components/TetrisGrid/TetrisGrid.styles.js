@@ -4,17 +4,14 @@ const heavyDropShake = keyframes`
   0% {
     transform: translate3d(0, 0, 0) scale(1);
   }
-  20% {
-    transform: translate3d(-3px, 2px, 0) scale(1.005);
+  25% {
+    transform: translate3d(-1.5px, 1px, 0) scale(1.0025);
   }
-  40% {
-    transform: translate3d(3px, -2px, 0) scale(0.998);
+  50% {
+    transform: translate3d(1.5px, -1px, 0) scale(0.9985);
   }
-  60% {
-    transform: translate3d(-2px, 1px, 0) scale(1.003);
-  }
-  80% {
-    transform: translate3d(2px, -1px, 0) scale(1);
+  75% {
+    transform: translate3d(-1px, 0.5px, 0) scale(1.0015);
   }
   100% {
     transform: translate3d(0, 0, 0) scale(1);
@@ -63,7 +60,7 @@ export const Board = styled.div`
   will-change: transform;
 
   &[data-shake='true'] {
-    animation: ${heavyDropShake} 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: ${heavyDropShake} 160ms cubic-bezier(0.34, 1.4, 0.64, 1);
   }
 
   @media (prefers-reduced-motion: reduce) {
