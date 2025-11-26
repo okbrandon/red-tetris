@@ -8,8 +8,10 @@ export const SpecterColumnContainer = styled.section`
   gap: clamp(0.7rem, 1.4vw, 1.1rem);
   min-height: 0;
   max-height: 100%;
+  height: 100%;
   padding: 0;
   flex: 1 1 auto;
+  overflow: hidden;
 `;
 
 export const SpecterGrid = styled.div`
@@ -26,7 +28,8 @@ export const SpecterScroller = styled.div`
   display: grid;
   flex: 1 1 auto;
   min-height: 0;
-  max-height: 90%;
+  height: 100%;
+  max-height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
   width: 100%;
@@ -133,5 +136,7 @@ export const EmptyNotice = styled.p`
   text-transform: uppercase;
   color: rgba(199, 191, 234, 0.68);
   text-align: center;
-  width: 100%;
+  width: 90%;
+  height: 20px;
+  border-radius: 20px;
 `;

@@ -3,25 +3,11 @@ import styled from 'styled-components';
 export const PlayerListContainer = styled.div`
   position: relative;
   width: 100%;
-  max-height: clamp(220px, 42vh, 340px);
+  height: 220px;
   margin: 0 0 1.25rem 0;
   padding-right: clamp(0.25rem, 0.7vw, 0.45rem);
   overflow-y: auto;
   overflow-x: hidden;
-  mask-image: linear-gradient(
-    to bottom,
-    transparent,
-    rgba(0, 0, 0, 0.92) 12%,
-    rgba(0, 0, 0, 0.92) 88%,
-    transparent
-  );
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent,
-    rgba(0, 0, 0, 0.92) 12%,
-    rgba(0, 0, 0, 0.92) 88%,
-    transparent
-  );
   scrollbar-width: thin;
   scrollbar-color: rgba(162, 89, 255, 0.45) transparent;
 
