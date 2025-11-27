@@ -58,6 +58,42 @@ const BPS_SCORING = {
 	4: { points: 1200, description: 'Tetris' }
 };
 
+/**
+ * @constant {number[]} NTSC_GRAVITY_FRAMES - Frames per row drop for each level in classic NTSC Tetris.
+ * Indexed by level number, capped at the last entry (level 29+).
+ * NTSC Gravity Table sourced from Tetris Guideline.
+ */
+const NTSC_GRAVITY_FRAMES = [
+	48, 43, 38, 33, 28, 23, 18, 13, 8, 6,
+	5, 5, 5, 4, 4, 4, 3, 3, 3, 2,
+	2, 2, 2, 2, 2, 2, 2, 2, 2, 1
+];
+
+/**
+ * @constant {number} NTSC_FRAME_DURATION_MS - Duration of a single NTSC frame in milliseconds.
+ */
+const NTSC_FRAME_DURATION_MS = 1000 / 60;
+
+/**
+ * @constant {number} NTSC_MAX_LEVEL - Highest level supported by the NTSC gravity table.
+ */
+const NTSC_MAX_LEVEL = NTSC_GRAVITY_FRAMES.length - 1;
+
+/**
+ * @constant {number} LINES_PER_LEVEL - Number of cleared lines required to advance a level.
+ */
+const LINES_PER_LEVEL = 10;
+
+/**
+ * @constant {number} FAST_PACED_GRAVITY_MULTIPLIER - Speed multiplier applied in fast-paced mode.
+ */
+const FAST_PACED_GRAVITY_MULTIPLIER = 0.5;
+
+/**
+ * @constant {number} MIN_GRAVITY_DELAY_MS - Minimum delay (in ms) allowed between automatic drops.
+ */
+const MIN_GRAVITY_DELAY_MS = NTSC_FRAME_DURATION_MS;
+
 export default {
 	FRAME_COLS,
 	FRAME_ROWS,
@@ -66,5 +102,11 @@ export default {
 	MAX_PLAYERS_PER_ROOM,
 	TAG_SINGLEPLAYER,
 	NAME_VALIDATION_REGEX,
-	BPS_SCORING
+	BPS_SCORING,
+	NTSC_GRAVITY_FRAMES,
+	NTSC_FRAME_DURATION_MS,
+	NTSC_MAX_LEVEL,
+	LINES_PER_LEVEL,
+	FAST_PACED_GRAVITY_MULTIPLIER,
+	MIN_GRAVITY_DELAY_MS
 };
