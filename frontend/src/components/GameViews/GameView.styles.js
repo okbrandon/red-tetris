@@ -160,6 +160,12 @@ export const ScoreValue = styled.span`
   color: #f6f1ff;
 `;
 
+export const InfoStats = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.3rem, 0.8vw, 0.5rem);
+`;
+
 export const PreviewSection = styled.div`
   display: flex;
   flex-direction: column;

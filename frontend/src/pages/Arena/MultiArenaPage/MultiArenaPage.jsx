@@ -57,6 +57,7 @@ const MultiArena = ({ resultModal, leaveRoom }) => {
             currentPiece={currentPiece}
             resultModal={resultModal}
             score={score}
+            you={you}
             nextPieces={nextPieces}
             lineClearLog={lineClearLog}
             hideActivePiece={hideActivePiece}

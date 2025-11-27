@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { mockUsePieceControls } = vi.hoisted(() => ({
@@ -97,6 +97,7 @@ describe('GamePlayingView', () => {
         resultModal={buildResultModalProps()}
         grid={buildGridMatrix(2, 2)}
         score={321}
+        you={{ score: 321, linesCleared: 12, level: 4 }}
         nextPieces={nextPieces}
         lineClearLog={lineClearLog}
       />
@@ -107,7 +108,12 @@ describe('GamePlayingView', () => {
     });
 
     expect(screen.getByText('Game in Progress')).toBeInTheDocument();
-    expect(screen.getByLabelText('Score overview')).toHaveTextContent('321');
+    const scoreCard = screen.getByLabelText('Score overview');
+    expect(scoreCard).toHaveTextContent('321');
+    const linesRow = within(scoreCard).getByText('Lines Cleared').closest('div');
+    const levelRow = within(scoreCard).getByText('Level').closest('div');
+    expect(linesRow).toHaveTextContent('12');
+    expect(levelRow).toHaveTextContent('4');
 
     expect(screen.getByText('Up Next')).toBeInTheDocument();
     expect(screen.getByText('ALPHA')).toBeInTheDocument();
