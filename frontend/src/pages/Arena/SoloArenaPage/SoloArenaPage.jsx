@@ -6,6 +6,7 @@ import { INVISIBLE_FALLING_PIECES_MODE } from '@/utils/gameModes';
 
 const SoloArena = ({ resultModal }) => {
   const {
+    you,
     grid,
     score,
     nextPieces,
@@ -26,6 +27,7 @@ const SoloArena = ({ resultModal }) => {
         currentPiece={currentPiece}
         resultModal={resultModal}
         score={score}
+        you={you}
         nextPieces={nextPieces}
         lineClearLog={lineClearLog}
         hideActivePiece={hideActivePiece}
