@@ -97,7 +97,6 @@ export const BoardFrame = styled.div`
   background: rgba(18, 15, 32, 0.84);
   box-shadow: inset 0 1px 0 rgba(217, 206, 255, 0.12);
   overflow: hidden;
-  transform: scale(var(--board-scale, 1));
   transform-origin: top center;
   margin: 0 auto;
   max-width: 100%;
