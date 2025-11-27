@@ -84,6 +84,8 @@ describe('Player', () => {
 		expect(p.currentPieceIndex).toBe(0);
 		expect(p.grid).toBeNull();
 		expect(p.hasLost).toBe(false);
+		expect(p.level).toBe(0);
+		expect(p.totalLinesCleared).toBe(0);
 	});
 
 	/**
@@ -1033,6 +1035,49 @@ describe('Player extra branches', () => {
 		});
 	});
 
+	test('clearFullLines increments lines cleared and levels', () => {
+		const levelingPlayer = new Player(makeConn(), 'leveler', 'Leveler');
+		levelingPlayer.room = makeRoom();
+		levelingPlayer.totalLinesCleared = 9;
+		levelingPlayer.level = 0;
+		levelingPlayer.grid = structuredClone(gameSettings.DEFAULT_EMPTY_GRID);
+		levelingPlayer.grid[0] = levelingPlayer.grid[0].map(() => ({ filled: true, color: 'red', indestructible: false, ghost: false }));
+
+		levelingPlayer.clearFullLines();
+
+		expect(levelingPlayer.totalLinesCleared).toBe(10);
+		expect(levelingPlayer.level).toBe(1);
+	});
+
+	test('getGravityDelay returns NTSC delay for current level', () => {
+		const gravityPlayer = new Player(makeConn(), 'gravity', 'Gravity');
+		gravityPlayer.room = makeRoom();
+		gravityPlayer.level = 0;
+		const expected = Math.round(gameSettings.NTSC_GRAVITY_FRAMES[0] * gameSettings.NTSC_FRAME_DURATION_MS);
+
+		expect(gravityPlayer.getGravityDelay(gameModes.CLASSIC)).toBe(expected);
+	});
+
+	test('getGravityDelay caps at max table level', () => {
+		const gravityPlayer = new Player(makeConn(), 'gravityMax', 'GravityMax');
+		gravityPlayer.room = makeRoom();
+		gravityPlayer.level = 100;
+		const frames = gameSettings.NTSC_GRAVITY_FRAMES[gameSettings.NTSC_GRAVITY_FRAMES.length - 1];
+		const expected = Math.round(frames * gameSettings.NTSC_FRAME_DURATION_MS);
+
+		expect(gravityPlayer.getGravityDelay()).toBe(expected);
+	});
+
+	test('getGravityDelay applies fast paced multiplier', () => {
+		const gravityPlayer = new Player(makeConn(), 'gravityFast', 'GravityFast');
+		gravityPlayer.room = makeRoom();
+		gravityPlayer.level = 2;
+		const classicDelay = gravityPlayer.getGravityDelay(gameModes.CLASSIC);
+		const fastDelay = gravityPlayer.getGravityDelay(gameModes.FAST_PACED);
+
+		expect(fastDelay).toBeLessThan(classicDelay);
+	});
+
 });
 
 /**
@@ -1431,6 +1476,8 @@ describe('Player runtime tests', () => {
 		player.currentPieceIndex = 5;
 		player.grid = [1];
 		player.hasLost = true;
+		player.level = 3;
+		player.totalLinesCleared = 45;
 		player.reset();
 
 		expect(player.pieces.size).toBe(0);
@@ -1438,6 +1485,8 @@ describe('Player runtime tests', () => {
 		expect(player.currentPieceIndex).toBe(0);
 		expect(player.grid).toBeNull();
 		expect(player.hasLost).toBe(false);
+		expect(player.level).toBe(0);
+		expect(player.totalLinesCleared).toBe(0);
 	});
 
 	/**

@@ -159,7 +159,9 @@ class Game {
 						id: this.owner.id,
 						username: this.owner.username,
 						hasLost: this.owner.hasLost,
-						score: this.owner.score
+						score: this.owner.score,
+						level: this.owner.level,
+						linesCleared: this.owner.totalLinesCleared
 					},
 					mode: this.mode,
 					status: this.status,
@@ -170,13 +172,17 @@ class Game {
 					id: client.id,
 					username: client.username,
 					hasLost: client.hasLost,
-					score: client.score
+					score: client.score,
+					level: client.level,
+					linesCleared: client.totalLinesCleared
 				},
 				clients: clients.map(c => ({
 					id: c.id,
 					username: c.username,
 					hasLost: c.hasLost,
-					score: c.score
+					score: c.score,
+					level: c.level,
+					linesCleared: c.totalLinesCleared
 				}))
 			}));
 		});
@@ -202,7 +208,9 @@ class Game {
 						id: this.owner.id,
 						username: this.owner.username,
 						hasLost: this.owner.hasLost,
-						score: this.owner.score
+						score: this.owner.score,
+						level: this.owner.level,
+						linesCleared: this.owner.totalLinesCleared
 					},
 					mode: this.mode,
 					status: this.status,
@@ -212,12 +220,16 @@ class Game {
 				you: {
 					id: client.id,
 					username: client.username,
-					score: client.score
+					score: client.score,
+					level: client.level,
+					linesCleared: client.totalLinesCleared
 				},
 				scorer: {
 					id: author.id,
 					username: author.username,
-					score: author.score
+					score: author.score,
+					level: author.level,
+					linesCleared: author.totalLinesCleared
 				},
 				details: details
 			}));
@@ -260,9 +272,9 @@ class Game {
 	/**
 	 * Schedules the next automatic tick for a player.
 	 * @param {Object} client - The player to schedule.
-	 * @param {number} [delay=this.tickingInterval] - Delay in milliseconds.
+	 * @param {number} [delay] - Optional delay override in milliseconds.
 	 */
-	schedulePlayerTick(client, delay = this.tickingInterval) {
+	schedulePlayerTick(client, delay = undefined) {
 		if (!client || !client.id)
 			return;
 		if (!this.clients.has(client)) {
@@ -274,7 +286,17 @@ class Game {
 			return;
 		}
 
-		const safeDelay = Math.max(0, Number(delay) || 0);
+		let resolvedDelay;
+		if (typeof delay === 'number') {
+			resolvedDelay = delay;
+		} else {
+			resolvedDelay = client.getGravityDelay(this.mode);
+		}
+
+		if (!Number.isFinite(resolvedDelay))
+			resolvedDelay = this.tickingInterval;
+
+		const safeDelay = Math.max(0, Number(resolvedDelay) || 0);
 		this.playerTickSchedule.set(client.id, Date.now() + safeDelay);
 	}
 
@@ -326,7 +348,7 @@ class Game {
 					try {
 						if (!this.clients.has(client) || this.status !== gameStatus.IN_GAME)
 							return;
-						console.log('[' + this.id + '] PLAYER ' + client.username + ' GAME TICK (' + this.ticks + ')');
+						console.log('[' + this.id + '] PLAYER ' + client.username + ' LVL (' + client.level + ') CL (' + client.totalLinesCleared + ') GAME TICK (' + this.ticks + ')');
 						await Promise.resolve().then(() => client.tickInterval());
 					} finally {
 						this.playersProcessingTick.delete(client.id);
@@ -386,7 +408,9 @@ class Game {
 						id: this.owner.id,
 						username: this.owner.username,
 						hasLost: this.owner.hasLost,
-						score: this.owner.score
+						score: this.owner.score,
+						level: this.owner.level,
+						linesCleared: this.owner.totalLinesCleared
 					},
 					mode: this.mode,
 					status: this.status,
@@ -397,13 +421,17 @@ class Game {
 					id: client.id,
 					username: client.username,
 					hasLost: client.hasLost,
-					score: client.score
+					score: client.score,
+					level: client.level,
+					linesCleared: client.totalLinesCleared
 				},
 				clients: clients.map(c => ({
 					id: c.id,
 					username: c.username,
 					hasLost: c.hasLost,
-					score: c.score
+					score: c.score,
+					level: c.level,
+					linesCleared: c.totalLinesCleared
 				})),
 				pieces: [...client.pieces].map(piece => ({
 					shape: piece.shape,

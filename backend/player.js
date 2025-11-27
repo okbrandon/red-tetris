@@ -29,6 +29,8 @@ class Player {
 		this.grid = null;
 		this.hasLost = false;
 		this.score = 0;
+		this.level = 0;
+		this.totalLinesCleared = 0;
 		this.statistics = null;
 		this.rateLimiters = {
 			[incomingEvents.MOVE_PIECE]: {
@@ -102,6 +104,8 @@ class Player {
 			username: client.username,
 			hasLost: client.hasLost,
 			score: client.score,
+			level: client.level,
+			linesCleared: client.totalLinesCleared,
 			specter: this.hasLost ? client.grid : client.getLandSpecter()
 		}));
 
@@ -112,7 +116,9 @@ class Player {
 					id: this.room.owner.id,
 					username: this.room.owner.username,
 					score: this.room.owner.score,
-					hasLost: this.room.owner.hasLost
+					hasLost: this.room.owner.hasLost,
+					level: this.room.owner.level,
+					linesCleared: this.room.owner.totalLinesCleared
 				},
 				status: this.room.status,
 				soloJourney: this.room.soloJourney,
@@ -126,6 +132,8 @@ class Player {
 				id: this.id,
 				username: this.username,
 				hasLost: this.hasLost,
+				level: this.level,
+				linesCleared: this.totalLinesCleared,
 				specter: this.getLandSpecter(),
 				score: this.score
 			},
@@ -149,7 +157,9 @@ class Player {
 					id: this.room.owner.id,
 					username: this.room.owner.username,
 					score: this.room.owner.score,
-					hasLost: this.room.owner.hasLost
+					hasLost: this.room.owner.hasLost,
+					level: this.room.owner.level,
+					linesCleared: this.room.owner.totalLinesCleared
 				},
 				status: this.room.status,
 				soloJourney: this.room.soloJourney,
@@ -160,19 +170,25 @@ class Player {
 				id: winner.id,
 				username: winner.username,
 				score: winner.score,
-				hasLost: winner.hasLost
+				hasLost: winner.hasLost,
+				level: winner.level,
+				linesCleared: winner.totalLinesCleared
 			} : null,
 			you: {
 				id: this.id,
 				username: this.username,
 				hasLost: this.hasLost,
-				score: this.score
+				score: this.score,
+				level: this.level,
+				linesCleared: this.totalLinesCleared
 			},
 			clients: clients.map(client => ({
 				id: client.id,
 				username: client.username,
 				hasLost: client.hasLost,
-				score: client.score
+				score: client.score,
+				level: client.level,
+				linesCleared: client.totalLinesCleared
 			})),
 			message: message,
 		};
@@ -202,7 +218,9 @@ class Player {
 					id: this.room.owner.id,
 					username: this.room.owner.username,
 					score: this.room.owner.score,
-					hasLost: this.room.owner.hasLost
+					hasLost: this.room.owner.hasLost,
+					level: this.room.owner.level,
+					linesCleared: this.room.owner.totalLinesCleared
 				},
 				status: this.room.status,
 				soloJourney: this.room.soloJourney,
@@ -214,7 +232,9 @@ class Player {
 				username: this.username,
 				hasLost: this.hasLost,
 				score: this.score,
-				specter: this.getLandSpecter()
+				specter: this.getLandSpecter(),
+				level: this.level,
+				linesCleared: this.totalLinesCleared
 			},
 			message: message,
 		});
@@ -514,6 +534,7 @@ class Player {
 			const bpsEntry = gameSettings.BPS_SCORING[clearedLines] || gameSettings.BPS_SCORING[4];
 			const score = bpsEntry.points;
 			const description = bpsEntry.description;
+			this.updateLevelProgress(clearedLines);
 
 			this.score += score;
 			this.room.broadcastLinesCleared(this, {
@@ -523,6 +544,58 @@ class Player {
 			});
 			console.log(`Player ${this.username} cleared ${clearedLines} line(s) (${description}) for ${score} points. Total score: ${this.score}`);
 		}
+	}
+
+	/**
+	 * Updates the player's level based on cleared lines.
+	 * @param {number} clearedLines - The number of lines cleared in the action.
+	 */
+	updateLevelProgress(clearedLines) {
+		if (!Number.isFinite(clearedLines) || clearedLines <= 0)
+			return;
+
+		const linesPerLevel = Math.max(1, gameSettings.LINES_PER_LEVEL || 10);
+		const maxLevel = Number.isFinite(gameSettings.NTSC_MAX_LEVEL) ? gameSettings.NTSC_MAX_LEVEL : Infinity;
+
+		this.totalLinesCleared += clearedLines;
+		const computedLevel = Math.floor(this.totalLinesCleared / linesPerLevel);
+		const boundedLevel = Math.min(Math.max(0, computedLevel), maxLevel);
+
+		if (boundedLevel !== this.level) {
+			this.level = boundedLevel;
+		}
+	}
+
+	/**
+	 * Returns the automatic drop delay (in ms) for the current level and mode.
+	 * @param {string} [mode=this.room?.mode] - The active game mode.
+	 * @returns {number} - Delay before the next automatic drop.
+	 */
+	getGravityDelay(mode = this.room?.mode) {
+		const framesTable = Array.isArray(gameSettings.NTSC_GRAVITY_FRAMES)
+			? gameSettings.NTSC_GRAVITY_FRAMES
+			: [];
+		const frameDuration = Number(gameSettings.NTSC_FRAME_DURATION_MS) || (1000 / 60);
+		const fallbackDelay = Number(this.room?.tickingInterval) || 1000;
+
+		if (framesTable.length === 0)
+			return fallbackDelay;
+
+		const maxIndex = framesTable.length - 1;
+		const levelIndex = Math.min(Math.max(0, Number(this.level) || 0), maxIndex);
+		const framesPerCell = Number(framesTable[levelIndex]) || framesTable[maxIndex];
+		let delay = framesPerCell * frameDuration;
+
+		if (mode === gameModes.FAST_PACED) {
+			const multiplier = Number(gameSettings.FAST_PACED_GRAVITY_MULTIPLIER) || 0.5;
+			delay *= multiplier;
+		}
+
+		if (!Number.isFinite(delay) || delay <= 0)
+			return frameDuration;
+
+		const minDelay = Number(gameSettings.MIN_GRAVITY_DELAY_MS) || frameDuration;
+		return Math.max(minDelay, Math.round(delay));
 	}
 
 	/**
@@ -777,6 +850,8 @@ class Player {
 		this.grid = null;
 		this.hasLost = false;
 		this.score = 0;
+		this.level = 0;
+		this.totalLinesCleared = 0;
 	}
 
 }
