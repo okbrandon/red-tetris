@@ -140,6 +140,10 @@ export const InfoCard = styled.div`
   gap: clamp(0.6rem, 1.6vw, 0.9rem);
 `;
 
+export const EventLogListCard = styled(InfoCard)`
+  height: 5.5rem;
+`;
+
 export const InfoLabel = styled.span`
   font-size: 0.68rem;
   letter-spacing: 0.18em;
@@ -291,7 +295,6 @@ export const EventLogList = styled.ul`
   display: flex;
   flex-direction: column;
   gap: clamp(0.35rem, 0.9vw, 0.5rem);
-  height: 4.5rem;
   max-width: 100%;
   overflow-y: auto;
   overflow-x: hidden;

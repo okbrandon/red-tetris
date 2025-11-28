@@ -38,6 +38,7 @@ import {
   EventLogTimestamp,
   EventLogMessage,
   EventLogDetails,
+  EventLogListCard,
 } from './GameView.styles.js';
 import { resultModalShape } from '../GameResultModal/GameResultModal.propTypes.js';
 
@@ -217,7 +218,7 @@ const GamePlayingView = ({
           )}
         </InfoCard>
 
-        <InfoCard aria-label="Line clear log">
+        <EventLogListCard aria-label="Line clear log">
           <InfoLabel>Line Clears</InfoLabel>
           {lineClears.length ? (
             <EventLogList>
@@ -274,7 +275,7 @@ const GamePlayingView = ({
           ) : (
             <EmptyQueue>No line clears yet</EmptyQueue>
           )}
-        </InfoCard>
+        </EventLogListCard>
       </PanelArea>
     </Layout>
   );
