@@ -291,7 +291,7 @@ export const EventLogList = styled.ul`
   display: flex;
   flex-direction: column;
   gap: clamp(0.35rem, 0.9vw, 0.5rem);
-  max-height: clamp(5.5rem, 26vh, 9rem);
+  height: 4.5rem;
   max-width: 100%;
   overflow-y: auto;
   overflow-x: hidden;
