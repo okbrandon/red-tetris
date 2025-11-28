@@ -433,6 +433,7 @@ describe('Game', () => {
 	test('startInterval sets updateInterval and calls tickInterval', async () => {
 		const player = createMockPlayer();
 
+		game.status = gameStatus.IN_GAME;
 		game.clients.add(player);
 		jest.spyOn(game, 'shouldEndGame').mockReturnValue(false);
 		jest.useFakeTimers();
@@ -487,6 +488,7 @@ describe('Game', () => {
 	test('startInterval correctly ticks for MORPHING mode', async () => {
 		const player = createMockPlayer();
 
+		game.status = gameStatus.IN_GAME;
 		game.clients.add(player);
 		game.mode = gameModes.MORPH_FALLING_PIECES;
 		jest.spyOn(game, 'shouldEndGame').mockReturnValue(false);

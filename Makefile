@@ -68,26 +68,26 @@ env:
 		printf "Appended VITE_HOST_NAME=%s to %s\n" "$(HOST_NAME)" "$(ENV_FILE)"; \
 	fi
 
-docker-build: env
+build: env
 	$(DC) build
 
-docker-up: env
+up: env
 	$(DC) up -d --remove-orphans
 
-docker-down:
+down:
 	$(DC) down
 
-docker-restart:
-	$(MAKE) docker-down
-	$(MAKE) docker-up
+restart:
+	$(MAKE) down
+	$(MAKE) up
 
-docker-logs:
+logs:
 	$(DC) logs -f
 
-docker-reset:
+reset:
 	$(DC) down -v --remove-orphans
 
-docker-clean-volumes:
+clean-volumes:
 	@if docker volume ls -q | grep -q "^$(POSTGRES_VOLUME)$$"; then \
 		docker volume rm -f "$(POSTGRES_VOLUME)"; \
 		printf "Removed volume %s\n" "$(POSTGRES_VOLUME)"; \

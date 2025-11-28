@@ -2,7 +2,7 @@ import propTypes from 'prop-types';
 import TetrisGrid from '../TetrisGrid/TetrisGrid.jsx';
 import NextPiecePreview from '../NextPiecePreview/NextPiecePreview.jsx';
 import GameResultModal from '../GameResultModal/GameResultModal.jsx';
-import { CELL_SIZE } from '@/utils/tetris.js';
+import { CELL_SIZE, computeStats } from '@/utils/tetris.js';
 import usePieceControls from '../../hooks/usePieceControls.js';
 import {
   Layout,
@@ -15,6 +15,10 @@ import {
   InfoCard,
   InfoLabel,
   ScoreValue,
+  InfoStats,
+  StatRow,
+  StatLabel,
+  StatValue,
   PreviewSection,
   PrimaryPreviewCard,
   PrimaryPreviewInfo,
@@ -40,16 +44,32 @@ import { resultModalShape } from '../GameResultModal/GameResultModal.propTypes.j
 const GamePlayingView = ({
   resultModal,
   grid,
+  currentPiece,
   score,
   nextPieces,
   lineClearLog,
+  you,
+  hideActivePiece = false,
 }) => {
   const primaryPreviewSize = Math.max(12, Math.floor(CELL_SIZE * 0.38));
   const queuePreviewSize = Math.max(10, Math.floor(CELL_SIZE * 0.3));
   const isResultModalOpen = Boolean(resultModal?.isOpen);
-  const resolvedScore = typeof score === 'number' ? score : 0;
   const upcomingPieces = Array.isArray(nextPieces) ? nextPieces : [];
   const lineClears = Array.isArray(lineClearLog) ? lineClearLog : [];
+  const statsEntries = computeStats(you);
+  const resolveStatValue = (label, explicitValue) => {
+    if (typeof explicitValue === 'number' && Number.isFinite(explicitValue)) {
+      return explicitValue;
+    }
+    const entry = statsEntries.find((stat) => stat.label === label);
+    if (typeof entry?.value === 'number' && Number.isFinite(entry.value)) {
+      return entry.value;
+    }
+    return 0;
+  };
+  const resolvedScore = resolveStatValue('Score', score);
+  const resolvedLinesCleared = resolveStatValue('Lines');
+  const resolvedLevel = resolveStatValue('Level');
 
   usePieceControls({ isResultModalOpen });
 
@@ -105,7 +125,12 @@ const GamePlayingView = ({
     <Layout>
       <BoardArea>
         <BoardFrame>
-          <TetrisGrid showGrid grid={grid} />
+          <TetrisGrid
+            showGrid
+            grid={grid}
+            currentPiece={currentPiece}
+            hideActivePiece={hideActivePiece}
+          />
           {isResultModalOpen && (
             <GameResultModal
               outcome={resultModal.outcome}
@@ -128,6 +153,16 @@ const GamePlayingView = ({
         <InfoCard aria-label="Score overview">
           <InfoLabel>Score</InfoLabel>
           <ScoreValue>{resolvedScore}</ScoreValue>
+          <InfoStats>
+            <StatRow>
+              <StatLabel as="span">Lines Cleared</StatLabel>
+              <StatValue as="span">{resolvedLinesCleared}</StatValue>
+            </StatRow>
+            <StatRow>
+              <StatLabel as="span">Level</StatLabel>
+              <StatValue as="span">{resolvedLevel}</StatValue>
+            </StatRow>
+          </InfoStats>
         </InfoCard>
 
         <InfoCard aria-label="Upcoming pieces">
@@ -248,6 +283,18 @@ const GamePlayingView = ({
 GamePlayingView.propTypes = {
   resultModal: resultModalShape.isRequired,
   grid: propTypes.arrayOf(propTypes.array).isRequired,
+  currentPiece: propTypes.shape({
+    id: propTypes.oneOfType([propTypes.number, propTypes.string]),
+    uuid: propTypes.oneOfType([propTypes.number, propTypes.string]),
+    name: propTypes.string,
+    type: propTypes.string,
+    color: propTypes.string,
+    position: propTypes.shape({
+      x: propTypes.number,
+      y: propTypes.number,
+    }),
+    shape: propTypes.arrayOf(propTypes.arrayOf(propTypes.number)),
+  }),
   score: propTypes.number,
   nextPieces: propTypes.arrayOf(propTypes.object),
   lineClearLog: propTypes.arrayOf(
@@ -256,6 +303,20 @@ GamePlayingView.propTypes = {
       message: propTypes.string.isRequired,
     })
   ),
+  you: propTypes.shape({
+    id: propTypes.oneOfType([propTypes.string, propTypes.number]),
+    username: propTypes.string,
+    score: propTypes.number,
+    linesCleared: propTypes.number,
+    level: propTypes.number,
+    stats: propTypes.shape({
+      score: propTypes.number,
+      linesCleared: propTypes.number,
+      lines: propTypes.number,
+      level: propTypes.number,
+    }),
+  }),
+  hideActivePiece: propTypes.bool,
 };
 
 export default GamePlayingView;

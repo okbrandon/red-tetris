@@ -1,4 +1,49 @@
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
+
+const heavyDropShake = keyframes`
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  25% {
+    transform: translate3d(-1.5px, 1px, 0) scale(1.0025);
+  }
+  50% {
+    transform: translate3d(1.5px, -1px, 0) scale(0.9985);
+  }
+  75% {
+    transform: translate3d(-1px, 0.5px, 0) scale(1.0015);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+`;
+
+const lockedShimmer = keyframes`
+  0% {
+    opacity: 0.9;
+    transform: translate3d(var(--locked-x, 0px), var(--locked-y, 0px), 0)
+      scale(1);
+    box-shadow: 0 0 0 rgba(255, 255, 255, 0.45);
+  }
+  28% {
+    opacity: 1;
+    transform: translate3d(var(--locked-x, 0px), var(--locked-y, 0px), 0)
+      scale(1.05);
+    box-shadow: 0 0 14px rgba(255, 255, 255, 0.6);
+  }
+  62% {
+    opacity: 0.65;
+    transform: translate3d(var(--locked-x, 0px), var(--locked-y, 0px), 0)
+      scale(1.08);
+    box-shadow: 0 0 18px rgba(255, 255, 255, 0.35);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--locked-x, 0px), var(--locked-y, 0px), 0)
+      scale(1.12);
+    box-shadow: 0 0 0 rgba(255, 255, 255, 0.18);
+  }
+`;
 
 export const Board = styled.div`
   display: grid;
@@ -12,6 +57,17 @@ export const Board = styled.div`
   border-radius: 0.2rem;
   overflow: hidden;
   position: relative;
+  will-change: transform;
+
+  &[data-shake='true'] {
+    animation: ${heavyDropShake} 160ms cubic-bezier(0.34, 1.4, 0.64, 1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &[data-shake='true'] {
+      animation: none;
+    }
+  }
 `;
 
 export const Cell = styled.div`
@@ -40,4 +96,64 @@ export const Cell = styled.div`
       ? '0 0 12px var(--cell-shadow, rgba(0,0,0,0.45)), inset 0 0 1px rgba(255,255,255,0.25)'
       : 'none';
   }};
+`;
+
+export const ActivePieceLayer = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  will-change: transform;
+  transition: ${({ $animate }) =>
+    $animate ? 'transform 120ms cubic-bezier(0.37, 0, 0.63, 1)' : 'none'};
+`;
+
+export const ActivePieceCell = styled.div`
+  position: absolute;
+  width: ${({ $size }) => $size}px;
+  height: ${({ $size }) => $size}px;
+  pointer-events: none;
+  border-radius: 3px;
+  background: linear-gradient(
+    145deg,
+    var(--piece-color, rgba(191, 90, 242, 1)) 0%,
+    rgba(255, 255, 255, 0.9) 140%
+  );
+  box-shadow:
+    0 0 12px var(--piece-shadow, rgba(0, 0, 0, 0.45)),
+    inset 0 0 1px rgba(255, 255, 255, 0.25);
+`;
+
+export const LockedPieceLayer = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+`;
+
+export const LockedPieceCell = styled.div`
+  position: absolute;
+  width: ${({ $size }) => $size}px;
+  height: ${({ $size }) => $size}px;
+  pointer-events: none;
+  border-radius: 4px;
+  background: linear-gradient(
+    145deg,
+    var(--locked-color, rgba(191, 90, 242, 1)) 0%,
+    rgba(255, 255, 255, 0.95) 160%
+  );
+  box-shadow:
+    0 0 12px var(--locked-shadow, rgba(255, 255, 255, 0.45)),
+    inset 0 0 1px rgba(255, 255, 255, 0.35);
+  transform: translate3d(var(--locked-x, 0px), var(--locked-y, 0px), 0) scale(1);
+  animation: ${lockedShimmer} 620ms ease-out forwards;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    opacity: 0.65;
+    transform: translate3d(var(--locked-x, 0px), var(--locked-y, 0px), 0)
+      scale(1);
+  }
 `;

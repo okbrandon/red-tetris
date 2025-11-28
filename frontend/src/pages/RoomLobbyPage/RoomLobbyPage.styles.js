@@ -1,9 +1,46 @@
 import styled from 'styled-components';
 
+export const PlayerListContainer = styled.div`
+  position: relative;
+  width: 100%;
+  height: 220px;
+  margin: 0 0 1.25rem 0;
+  padding-right: clamp(0.25rem, 0.7vw, 0.45rem);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(162, 89, 255, 0.45) transparent;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+      180deg,
+      rgba(162, 89, 255, 0.65) 0%,
+      rgba(93, 58, 150, 0.8) 100%
+    );
+    border-radius: 999px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(
+      180deg,
+      rgba(162, 89, 255, 0.8) 0%,
+      rgba(93, 58, 150, 0.95) 100%
+    );
+  }
+`;
+
 export const PlayerList = styled.ul`
   list-style: none;
   padding: 0;
-  margin: 0 0 1.25rem 0;
+  margin: 0;
   z-index: 2;
   width: 100%;
   display: flex;

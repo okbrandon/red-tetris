@@ -43,7 +43,13 @@ const leaveRoomMock = vi.fn();
 
 const setState = (gameState) => {
   useSelectorMock.mockImplementation((selector) =>
-    selector({ game: gameState })
+    selector({
+      game: {
+        roomMode: 'classic',
+        hideCurrentPiece: false,
+        ...gameState,
+      },
+    })
   );
 };
 
@@ -66,6 +72,7 @@ describe('MultiArenaPage', () => {
       score: 10,
       nextPieces: ['I'],
       lineClearLog: [{ id: 1, message: 'line' }],
+      currentPiece: { type: 'I', position: { x: 0, y: 0 } },
     });
 
     render(
@@ -93,6 +100,7 @@ describe('MultiArenaPage', () => {
       score: 3,
       nextPieces: ['O'],
       lineClearLog: [],
+      currentPiece: { type: 'O', position: { x: 5, y: 0 } },
     });
 
     render(
@@ -110,6 +118,8 @@ describe('MultiArenaPage', () => {
         score: 3,
         nextPieces: ['O'],
         lineClearLog: [],
+        currentPiece: { type: 'O', position: { x: 5, y: 0 } },
+        hideActivePiece: false,
       })
     );
   });
@@ -128,6 +138,7 @@ describe('MultiArenaPage', () => {
       score: 7,
       nextPieces: ['T'],
       lineClearLog: [{ id: 2, message: 'double' }],
+      currentPiece: { type: 'T', position: { x: 3, y: 4 } },
     });
 
     render(
@@ -138,7 +149,11 @@ describe('MultiArenaPage', () => {
       expect.objectContaining({ opponents })
     );
     expect(gamePlayingViewMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({ lineClearLog: [{ id: 2, message: 'double' }] })
+      expect.objectContaining({
+        lineClearLog: [{ id: 2, message: 'double' }],
+        currentPiece: { type: 'T', position: { x: 3, y: 4 } },
+        hideActivePiece: false,
+      })
     );
   });
 });

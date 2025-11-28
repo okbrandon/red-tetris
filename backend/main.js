@@ -150,6 +150,40 @@ const getRoom = (id) => rooms.get(id);
 io.on("connection", (socket) => {
 	/** @type {Player} */
 	const client = new Player(socket, socket.id);
+	/** @type {NodeJS.Timeout | null} */
+	let availableRoomsInterval = null;
+
+	/**
+	 * Stops broadcasting available rooms to the client.
+	 */
+	const stopAvailableRoomsBroadcast = () => {
+		if (!availableRoomsInterval)
+			return;
+		clearInterval(availableRoomsInterval);
+		availableRoomsInterval = null;
+	};
+
+	/**
+	 * Starts broadcasting available rooms to the client every 2 seconds.
+	 */
+	const startAvailableRoomsBroadcast = () => {
+		if (availableRoomsInterval)
+			return;
+
+		const emitAvailableRooms = async () => {
+			try {
+				await Promise.resolve(client.sendAvailableRooms(rooms));
+			} catch (error) {
+				console.error(`[${client.id}] Failed to send available rooms:`, error);
+			}
+		};
+
+		void emitAvailableRooms(); // Initial emit, not awaiting it
+		availableRoomsInterval = setInterval(() => {
+			void emitAvailableRooms();
+		}, 2000);
+	};
+
 	console.log("A user connected");
 
 	// Handle client update
@@ -168,6 +202,7 @@ io.on("connection", (socket) => {
 				username: client.username
 			}));
 			client.sendPlayerStatsBoard();
+			startAvailableRoomsBroadcast();
 			console.log(`[${client.id}] Updated username to ${client.username}`);
 		} catch (error) {
 			socket.emit(outgoingEvents.ERROR, JSON.stringify({
@@ -410,6 +445,8 @@ io.on("connection", (socket) => {
 		if (room) {
 			leaveRoom(socket, room, client);
 		}
+
+		stopAvailableRoomsBroadcast();
 
 		console.log("A user disconnected");
 		console.log(rooms);

@@ -1,18 +1,22 @@
 {
   "name": "red-tetris",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "description": "",
   "scripts": {
     "release": "standard-version",
     "release:major": "standard-version --release-as major",
     "release:minor": "standard-version --release-as minor",
-    "release:patch": "standard-version --release-as patch"
+    "release:patch": "standard-version --release-as patch",
+    "test:frontend": "cd frontend && npm install && npm run test:coverage",
+    "test:backend": "cd backend && npm install && npm run test",
+    "test": "concurrently \"npm run test:frontend\" \"npm run test:backend\""
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "concurrently": "^9.2.1",
     "conventional-changelog-cli": "^5.0.0",
     "standard-version": "^9.5.0"
   }

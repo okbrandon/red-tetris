@@ -4,17 +4,20 @@ export const ArenaContainer = styled.div`
   width: min(100%, 94vw);
   max-width: 1600px;
   height: 100%;
+  min-height: 0;
   flex: 1;
   display: flex;
   justify-content: center;
   align-items: stretch;
   margin: 0 auto;
   box-sizing: border-box;
+  overflow: hidden;
 `;
 
 export const ArenaLayout = styled.div`
   width: 100%;
   height: 100%;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   align-items: stretch;

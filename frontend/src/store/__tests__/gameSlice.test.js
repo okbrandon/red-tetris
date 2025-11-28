@@ -10,6 +10,7 @@ import reducer, {
   setIsResultModalOpen,
   addLineClearLogEntry,
   resetGameState,
+  setAvailableRooms,
 } from '../slices/gameSlice.js';
 
 const createState = () => reducer(undefined, { type: '@@INIT' });
@@ -25,6 +26,7 @@ describe('gameSlice reducers', () => {
       players: [{ id: 'p1' }],
       score: 42,
       spectator: { eligible: true, active: true },
+      hideCurrentPiece: true,
     };
 
     const next = reducer(base, setGameMode('solo'));
@@ -33,6 +35,7 @@ describe('gameSlice reducers', () => {
     expect(next.players).toEqual([]);
     expect(next.score).toBe(0);
     expect(next.spectator).toEqual({ eligible: false, active: false });
+    expect(next.hideCurrentPiece).toBe(false);
   });
 
   it('sets the game state from a server payload', () => {
@@ -61,6 +64,25 @@ describe('gameSlice reducers', () => {
     expect(next.nextPieces).toEqual([{ id: 'piece' }]);
     expect(next.score).toBe(512);
     expect(next.players).toEqual([{ id: 'self' }]);
+    expect(next.hideCurrentPiece).toBe(false);
+  });
+
+  it('flags the current piece as hidden when playing invisible falling pieces mode', () => {
+    const base = createState();
+    const payload = {
+      room: {
+        mode: 'invisible-falling-pieces',
+        soloJourney: false,
+      },
+      currentPiece: { id: 'active', shape: [[1]] },
+      you: {},
+    };
+
+    const next = reducer(base, setGameState(payload));
+
+    expect(next.roomMode).toBe('invisible-falling-pieces');
+    expect(next.hideCurrentPiece).toBe(true);
+    expect(next.currentPiece).toEqual({ id: 'active', shape: [[1]] });
   });
 
   it('updates status-specific fields when setting the game status', () => {
@@ -137,6 +159,7 @@ describe('gameSlice reducers', () => {
       { id: 'owner', username: 'Owner', score: 20 },
       { id: 'guest', username: 'Guest', score: 15 },
     ]);
+    expect(lobbyState.hideCurrentPiece).toBe(false);
 
     const notOwner = reducer(
       lobbyState,
@@ -149,6 +172,7 @@ describe('gameSlice reducers', () => {
     expect(notOwner.isOwner).toBe(false);
     expect(notOwner.roomMode).toBe('classic');
     expect(notOwner.players).toEqual(lobbyState.players);
+    expect(notOwner.hideCurrentPiece).toBe(false);
 
     const noPayload = reducer(lobbyState, setLobbySettings());
     expect(noPayload.roomName).toBe('room-2');
@@ -248,6 +272,28 @@ describe('gameSlice reducers', () => {
     const mutated = reducer(createState(), setGameMode('solo'));
     const reset = reducer(mutated, resetGameState());
     expect(reset).toEqual(createState());
+  });
+
+  it('stores and sanitises available rooms from the server', () => {
+    const base = createState();
+    const rooms = [
+      { id: 'alpha', owner: { username: 'alice' } },
+      null,
+      { id: 42 },
+      { id: 'beta' },
+    ];
+
+    const populated = reducer(base, setAvailableRooms(rooms));
+    expect(populated.availableRooms).toEqual([
+      { id: 'alpha', owner: { username: 'alice' } },
+      { id: 'beta' },
+    ]);
+
+    const nested = reducer(base, setAvailableRooms({ rooms }));
+    expect(nested.availableRooms).toEqual(populated.availableRooms);
+
+    const cleared = reducer(populated, setAvailableRooms('not-array'));
+    expect(cleared.availableRooms).toEqual([]);
   });
 
   it('gracefully handles partial game state updates', () => {

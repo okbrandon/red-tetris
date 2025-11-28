@@ -53,8 +53,10 @@ class Game {
 
 		/** @type {number} */
 		this.tickingInterval = isFastMode ? 500 : 1000;
-		/** @type {boolean} */
-		this.isProcessingTick = false;
+		/** @type {Map<string, number>} */
+		this.playerTickSchedule = new Map();
+		/** @type {Set<string>} */
+		this.playersProcessingTick = new Set();
 		/** @type {number} */
 		this.morphingTickingInterval = 2000;
 		/** @type {number} */
@@ -72,6 +74,12 @@ class Game {
 
 		this.mode = newMode;
 		this.tickingInterval = this.mode === gameModes.FAST_PACED ? 500 : 1000;
+		if (this.status === gameStatus.IN_GAME) {
+			[...this.clients].forEach(client => {
+				if (!client.hasLost)
+					this.schedulePlayerTick(client);
+			});
+		}
 		this.broadcastRoom();
 	}
 
@@ -119,6 +127,7 @@ class Game {
 		client.reset();
 		client.room = null;
 		this.clients.delete(client);
+		this.cancelPlayerTick(client);
 
 		if (this.status == gameStatus.IN_GAME) {
 			if (this.shouldEndGame()) {
@@ -150,7 +159,9 @@ class Game {
 						id: this.owner.id,
 						username: this.owner.username,
 						hasLost: this.owner.hasLost,
-						score: this.owner.score
+						score: this.owner.score,
+						level: this.owner.level,
+						linesCleared: this.owner.totalLinesCleared
 					},
 					mode: this.mode,
 					status: this.status,
@@ -161,13 +172,17 @@ class Game {
 					id: client.id,
 					username: client.username,
 					hasLost: client.hasLost,
-					score: client.score
+					score: client.score,
+					level: client.level,
+					linesCleared: client.totalLinesCleared
 				},
 				clients: clients.map(c => ({
 					id: c.id,
 					username: c.username,
 					hasLost: c.hasLost,
-					score: c.score
+					score: c.score,
+					level: c.level,
+					linesCleared: c.totalLinesCleared
 				}))
 			}));
 		});
@@ -193,7 +208,9 @@ class Game {
 						id: this.owner.id,
 						username: this.owner.username,
 						hasLost: this.owner.hasLost,
-						score: this.owner.score
+						score: this.owner.score,
+						level: this.owner.level,
+						linesCleared: this.owner.totalLinesCleared
 					},
 					mode: this.mode,
 					status: this.status,
@@ -203,12 +220,16 @@ class Game {
 				you: {
 					id: client.id,
 					username: client.username,
-					score: client.score
+					score: client.score,
+					level: client.level,
+					linesCleared: client.totalLinesCleared
 				},
 				scorer: {
 					id: author.id,
 					username: author.username,
-					score: author.score
+					score: author.score,
+					level: author.level,
+					linesCleared: author.totalLinesCleared
 				},
 				details: details
 			}));
@@ -249,6 +270,48 @@ class Game {
 	}
 
 	/**
+	 * Schedules the next automatic tick for a player.
+	 * @param {Object} client - The player to schedule.
+	 * @param {number} [delay] - Optional delay override in milliseconds.
+	 */
+	schedulePlayerTick(client, delay = undefined) {
+		if (!client || !client.id)
+			return;
+		if (!this.clients.has(client)) {
+			this.playerTickSchedule.delete(client.id);
+			return;
+		}
+		if (this.status !== gameStatus.IN_GAME) {
+			this.playerTickSchedule.delete(client.id);
+			return;
+		}
+
+		let resolvedDelay;
+		if (typeof delay === 'number') {
+			resolvedDelay = delay;
+		} else {
+			resolvedDelay = client.getGravityDelay(this.mode);
+		}
+
+		if (!Number.isFinite(resolvedDelay))
+			resolvedDelay = this.tickingInterval;
+
+		const safeDelay = Math.max(0, Number(resolvedDelay) || 0);
+		this.playerTickSchedule.set(client.id, Date.now() + safeDelay);
+	}
+
+	/**
+	 * Removes any scheduled tick for the given player.
+	 * @param {Object} client - The player whose schedule is cleared.
+	 */
+	cancelPlayerTick(client) {
+		if (!client || !client.id)
+			return;
+		this.playerTickSchedule.delete(client.id);
+		this.playersProcessingTick.delete(client.id);
+	}
+
+	/**
 	 * Starts the game update tick loop.
 	 */
 	startInterval() {
@@ -262,35 +325,49 @@ class Game {
 				return;
 			}
 
-			if (this.ticks > 0) {
-				if (this.ticks % this.tickingInterval === 0) {
-					if (!this.isProcessingTick) {
-						this.isProcessingTick = true;
+			const now = Date.now();
+			const clients = [...this.clients];
 
-						setImmediate(async () => {
-							try {
-								const clients = [...this.clients];
+			for (const client of clients) {
+				if (!client)
+					continue;
 
-								console.log('[' + this.id + '] GAME TICK (' + this.ticks + ')');
-								for (const client of clients) {
-									await Promise.resolve().then(() => client.tickInterval());
-								}
-							} finally {
-								this.isProcessingTick = false;
-							}
-						});
+				let nextTickAt = this.playerTickSchedule.get(client.id);
+				if (!nextTickAt) {
+					this.schedulePlayerTick(client, 0);
+					nextTickAt = this.playerTickSchedule.get(client.id);
+				}
+				if (!nextTickAt || now < nextTickAt)
+					continue;
+				if (this.playersProcessingTick.has(client.id))
+					continue;
+
+				this.playersProcessingTick.add(client.id);
+
+				setImmediate(async () => {
+					try {
+						if (!this.clients.has(client) || this.status !== gameStatus.IN_GAME)
+							return;
+						console.log('[' + this.id + '] PLAYER ' + client.username + ' LVL (' + client.level + ') CL (' + client.totalLinesCleared + ') GAME TICK (' + this.ticks + ')');
+						await Promise.resolve().then(() => client.tickInterval());
+					} finally {
+						this.playersProcessingTick.delete(client.id);
+						if (this.status === gameStatus.IN_GAME && this.clients.has(client)) {
+							this.schedulePlayerTick(client);
+						} else {
+							this.playerTickSchedule.delete(client.id);
+						}
 					}
-				}
+				});
+			}
 
-				if (this.mode === gameModes.MORPH_FALLING_PIECES
-					&& this.ticks % this.morphingTickingInterval === 0) {
-					const clients = [...this.clients];
-
-					console.log('[' + this.id + '] MORPHING PIECES TICK (' + this.ticks + ')');
-					clients.forEach(client => {
-						client.swapWithNext();
-					});
-				}
+			if (this.ticks > 0
+				&& this.mode === gameModes.MORPH_FALLING_PIECES
+				&& this.ticks % this.morphingTickingInterval === 0) {
+				console.log('[' + this.id + '] MORPHING PIECES TICK (' + this.ticks + ')');
+				clients.forEach(client => {
+					client.swapWithNext();
+				});
 			}
 
 			this.ticks += 1;
@@ -331,7 +408,9 @@ class Game {
 						id: this.owner.id,
 						username: this.owner.username,
 						hasLost: this.owner.hasLost,
-						score: this.owner.score
+						score: this.owner.score,
+						level: this.owner.level,
+						linesCleared: this.owner.totalLinesCleared
 					},
 					mode: this.mode,
 					status: this.status,
@@ -342,13 +421,17 @@ class Game {
 					id: client.id,
 					username: client.username,
 					hasLost: client.hasLost,
-					score: client.score
+					score: client.score,
+					level: client.level,
+					linesCleared: client.totalLinesCleared
 				},
 				clients: clients.map(c => ({
 					id: c.id,
 					username: c.username,
 					hasLost: c.hasLost,
-					score: c.score
+					score: c.score,
+					level: c.level,
+					linesCleared: c.totalLinesCleared
 				})),
 				pieces: [...client.pieces].map(piece => ({
 					shape: piece.shape,
@@ -358,6 +441,7 @@ class Game {
 			}))
 
 			client.sendGrid();
+			this.schedulePlayerTick(client);
 		});
 
 		this.startInterval();
@@ -370,6 +454,9 @@ class Game {
 	restart() {
 		if (this.status !== gameStatus.FINISHED)
 			throw new Error('Game is not finished');
+
+		this.playerTickSchedule.clear();
+		this.playersProcessingTick.clear();
 
 		const clients = [...this.clients];
 
@@ -415,6 +502,8 @@ class Game {
 		if (this.updateInterval)
 			clearInterval(this.updateInterval);
 		this.updateInterval = null;
+		this.playerTickSchedule.clear();
+		this.playersProcessingTick.clear();
 		this.status = gameStatus.FINISHED;
 
 		this.clients.forEach(client => {
