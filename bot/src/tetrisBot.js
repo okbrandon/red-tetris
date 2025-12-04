@@ -6,6 +6,9 @@ import { MOVE_DIRECTIONS, LOG_LEVELS, DEFAULT_WEIGHTS, DEFAULT_BOT_TIMING } from
 import { computeBestPlacement } from './heuristics.js';
 import { safeParse, computeQueueSignature, createLogger } from './utils/parsing.js';
 
+const BOT_IDLE_TIMEOUT_MS = 5 * 60 * 1000;
+const INACTIVITY_CHECK_INTERVAL_MS = 30 * 1000;
+
 export class TetrisBot {
 	constructor(options = {}) {
 		const {
@@ -19,8 +22,12 @@ export class TetrisBot {
 			thinkDelayMs = DEFAULT_BOT_TIMING.thinkDelayMs,
 			heuristicWeights = DEFAULT_WEIGHTS,
 			lookaheadWeight = DEFAULT_BOT_TIMING.lookaheadWeight,
-			connectTimeoutMs = DEFAULT_BOT_TIMING.connectTimeoutMs
+			connectTimeoutMs = DEFAULT_BOT_TIMING.connectTimeoutMs,
+			idleTimeoutMs = BOT_IDLE_TIMEOUT_MS
 		} = options;
+		const resolvedIdleTimeoutMs = Number.isFinite(idleTimeoutMs) && idleTimeoutMs > 0
+			? idleTimeoutMs
+			: BOT_IDLE_TIMEOUT_MS;
 
 		this.options = {
 			serverUrl,
@@ -33,7 +40,8 @@ export class TetrisBot {
 			thinkDelayMs,
 			heuristicWeights: { ...DEFAULT_WEIGHTS, ...heuristicWeights },
 			lookaheadWeight,
-			connectTimeoutMs
+			connectTimeoutMs,
+			idleTimeoutMs: resolvedIdleTimeoutMs
 		};
 
 		this.socket = null;
@@ -62,12 +70,15 @@ export class TetrisBot {
 		this.retired = false;
 		this.retireHandler = null;
 		this.retireReason = null;
+		this.markActivity();
+		this.inactivityCheckTimer = null;
 	}
 
 	async start() {
 		if (this.socket)
 			return this.connectionPromise ?? Promise.resolve();
 
+		this.lastActivityAt = Date.now();
 		const connectionPromise = this.createConnectionDeferred();
 		this.retired = false;
 		this.retireReason = null;
@@ -124,6 +135,7 @@ export class TetrisBot {
 
 		this.registerHandlers();
 		this.commandTimer = setInterval(() => this.flushCommandQueue(), this.options.commandIntervalMs);
+		this.startInactivityMonitor();
 
 		return connectionPromise;
 	}
@@ -144,6 +156,7 @@ export class TetrisBot {
 		}
 
 		this.cleanupConnectionDeferred();
+		this.clearInactivityMonitor();
 
 		this.hasJoinedRoom = false;
 		this.startRequested = false;
@@ -163,8 +176,10 @@ export class TetrisBot {
 		this.retireReason = reason;
 		const details = reason ? ` (${reason})` : '';
 		this.log('info', `Retiring bot${details}`);
-		if (this.socket && this.socket.connected)
+		if (this.socket && this.socket.connected) {
 			this.socket.emit(incomingEvents.ROOM_LEAVE);
+			this.markActivity();
+		}
 		if (this.retireHandler)
 			this.retireHandler(this, reason);
 		this.stop();
@@ -204,6 +219,7 @@ export class TetrisBot {
 		if (!this.socket)
 			return;
 		this.socket.emit(incomingEvents.CLIENT_UPDATE, { username: this.options.username });
+		this.markActivity();
 	}
 
 	createConnectionDeferred() {
@@ -245,6 +261,39 @@ export class TetrisBot {
 		this.connectionPromise = null;
 	}
 
+	markActivity(timestamp = Date.now()) {
+		this.lastActivityAt = timestamp;
+	}
+
+	startInactivityMonitor() {
+		this.clearInactivityMonitor();
+		if (!Number.isFinite(this.options.idleTimeoutMs) || this.options.idleTimeoutMs <= 0)
+			return;
+		const interval = Math.min(INACTIVITY_CHECK_INTERVAL_MS, this.options.idleTimeoutMs);
+		this.inactivityCheckTimer = setInterval(() => this.checkInactivity(), interval);
+		if (typeof this.inactivityCheckTimer?.unref === 'function')
+			this.inactivityCheckTimer.unref();
+	}
+
+	clearInactivityMonitor() {
+		if (!this.inactivityCheckTimer)
+			return;
+		clearInterval(this.inactivityCheckTimer);
+		this.inactivityCheckTimer = null;
+	}
+
+	checkInactivity() {
+		if (this.retired)
+			return;
+		if (!this.socket || this.socket.disconnected)
+			return;
+		const idleDuration = Date.now() - this.lastActivityAt;
+		if (idleDuration < this.options.idleTimeoutMs)
+			return;
+		this.log('info', 'Retiring bot after inactivity timeout');
+		this.retire('idle-timeout');
+	}
+
 	handleClientUpdated(payload) {
 		const data = safeParse(payload, false, this.log);
 		if (!data)
@@ -261,6 +310,7 @@ export class TetrisBot {
 			roomName: this.options.roomName,
 			soloJourney: false
 		});
+		this.markActivity();
 	}
 
 	handleRoomJoined(payload) {
@@ -413,8 +463,10 @@ export class TetrisBot {
 			return;
 
 		const direction = this.commandQueue.shift();
+		const now = Date.now();
 		this.socket.emit(incomingEvents.MOVE_PIECE, { direction });
-		this.lastCommandAt = Date.now();
+		this.lastCommandAt = now;
+		this.markActivity(now);
 	}
 
 	executeMovementStep(data, target) {
