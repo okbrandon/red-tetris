@@ -438,6 +438,49 @@ io.on("connection", (socket) => {
 		}
 	});
 
+	// Handle bot request
+	socket.on(incomingEvents.REQUEST_BOTS, async (data) => {
+		const room = client.room;
+		const botCount = data.botCount || 1;
+
+		if (!room) {
+			socket.emit(outgoingEvents.ERROR, JSON.stringify({
+				message: 'Not in a room'
+			}));
+			return;
+		}
+
+		try {
+			await room.requestBots(botCount);
+		} catch (error) {
+			socket.emit(outgoingEvents.ERROR, JSON.stringify({
+				message: error.message
+			}));
+			return;
+		}
+	});
+
+	// Handle bot disconnection request
+	socket.on(incomingEvents.DISCONNECT_BOTS, async () => {
+		const room = client.room;
+
+		if (!room) {
+			socket.emit(outgoingEvents.ERROR, JSON.stringify({
+				message: 'Not in a room'
+			}));
+			return;
+		}
+
+		try {
+			await room.disconnectBots();
+		} catch (error) {
+			socket.emit(outgoingEvents.ERROR, JSON.stringify({
+				message: error.message
+			}));
+			return;
+		}
+	});
+
 	// Handle disconnection
 	socket.on("disconnect", () => {
 		const room = client.room;
