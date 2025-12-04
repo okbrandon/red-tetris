@@ -5,7 +5,8 @@
   "type": "module",
   "description": "Automated Socket.IO bot client for red-tetris",
   "scripts": {
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "service": "node src/service.js"
   },
   "dependencies": {
     "socket.io-client": "^4.8.1"

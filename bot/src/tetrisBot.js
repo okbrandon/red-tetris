@@ -18,7 +18,8 @@ export class TetrisBot {
 			maxQueuedCommands = DEFAULT_BOT_TIMING.maxQueuedCommands,
 			thinkDelayMs = DEFAULT_BOT_TIMING.thinkDelayMs,
 			heuristicWeights = DEFAULT_WEIGHTS,
-			lookaheadWeight = DEFAULT_BOT_TIMING.lookaheadWeight
+			lookaheadWeight = DEFAULT_BOT_TIMING.lookaheadWeight,
+			connectTimeoutMs = DEFAULT_BOT_TIMING.connectTimeoutMs
 		} = options;
 
 		this.options = {
@@ -31,13 +32,18 @@ export class TetrisBot {
 			maxQueuedCommands,
 			thinkDelayMs,
 			heuristicWeights: { ...DEFAULT_WEIGHTS, ...heuristicWeights },
-			lookaheadWeight
+			lookaheadWeight,
+			connectTimeoutMs
 		};
 
 		this.socket = null;
 		this.commandQueue = [];
 		this.commandTimer = null;
 		this.lastCommandAt = 0;
+		this.connectionPromise = null;
+		this.resolveConnectionDeferred = null;
+		this.rejectConnectionDeferred = null;
+		this.connectionTimeoutId = null;
 
 		this.roomState = null;
 		this.hasJoinedRoom = false;
@@ -57,7 +63,9 @@ export class TetrisBot {
 
 	async start() {
 		if (this.socket)
-			return;
+			return this.connectionPromise ?? Promise.resolve();
+
+		const connectionPromise = this.createConnectionDeferred();
 
 		this.log('info', `Connecting to ${this.options.serverUrl} as ${this.options.username}, room ${this.options.roomName}`);
 		this.socket = io(this.options.serverUrl, {
@@ -67,11 +75,58 @@ export class TetrisBot {
 			transports: ['websocket']
 		});
 
+		const cleanupConnectionListeners = () => {
+			if (!this.socket)
+				return;
+			this.socket.off('connect', handleConnect);
+			this.socket.off('connect_error', handleError);
+			this.socket.off('connect_timeout', handleTimeout);
+		};
+
+		const handleConnect = () => {
+			cleanupConnectionListeners();
+			this.resolveConnectionDeferred?.();
+		};
+
+		const handleError = (error) => {
+			if (!this.connectionPromise)
+				return;
+			cleanupConnectionListeners();
+			const reason = error instanceof Error
+				? error
+				: new Error(typeof error?.message === 'string' ? error.message : 'Failed to connect');
+			this.rejectConnectionDeferred?.(reason);
+			this.stop();
+		};
+
+		const handleTimeout = () => {
+			if (!this.connectionPromise)
+				return;
+			cleanupConnectionListeners();
+			this.rejectConnectionDeferred?.(new Error('Connection timed out'));
+			this.stop();
+		};
+
+		this.socket.once('connect', handleConnect);
+		this.socket.once('connect_error', handleError);
+		this.socket.once('connect_timeout', handleTimeout);
+
+		if (this.options.connectTimeoutMs > 0) {
+			this.connectionTimeoutId = setTimeout(handleTimeout, this.options.connectTimeoutMs);
+			if (typeof this.connectionTimeoutId?.unref === 'function')
+				this.connectionTimeoutId.unref();
+		}
+
 		this.registerHandlers();
 		this.commandTimer = setInterval(() => this.flushCommandQueue(), this.options.commandIntervalMs);
+
+		return connectionPromise;
 	}
 
 	stop() {
+		if (this.connectionPromise && this.rejectConnectionDeferred)
+			this.rejectConnectionDeferred(new Error('Bot connection aborted'));
+
 		if (this.commandTimer) {
 			clearInterval(this.commandTimer);
 			this.commandTimer = null;
@@ -82,6 +137,8 @@ export class TetrisBot {
 			this.socket.disconnect();
 			this.socket = null;
 		}
+
+		this.cleanupConnectionDeferred();
 
 		this.resetMovementState();
 		this.commandQueue = [];
@@ -122,6 +179,45 @@ export class TetrisBot {
 		if (!this.socket)
 			return;
 		this.socket.emit(incomingEvents.CLIENT_UPDATE, { username: this.options.username });
+	}
+
+	createConnectionDeferred() {
+		if (this.connectionPromise)
+			return this.connectionPromise;
+
+		let settled = false;
+		this.connectionPromise = new Promise((resolve, reject) => {
+			this.resolveConnectionDeferred = () => {
+				if (settled)
+					return;
+				settled = true;
+				this.cleanupConnectionDeferred();
+				resolve();
+			};
+
+			this.rejectConnectionDeferred = (error) => {
+				if (settled)
+					return;
+				settled = true;
+				const normalized = error instanceof Error
+					? error
+					: new Error(typeof error?.message === 'string' ? error.message : String(error));
+				this.cleanupConnectionDeferred();
+				reject(normalized);
+			};
+		});
+
+		return this.connectionPromise;
+	}
+
+	cleanupConnectionDeferred() {
+		if (this.connectionTimeoutId) {
+			clearTimeout(this.connectionTimeoutId);
+			this.connectionTimeoutId = null;
+		}
+		this.resolveConnectionDeferred = null;
+		this.rejectConnectionDeferred = null;
+		this.connectionPromise = null;
 	}
 
 	handleClientUpdated(payload) {

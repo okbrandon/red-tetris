@@ -47,6 +47,15 @@ services:
     ports:
       - "8080:80"
 
+  bot-service:
+    build: ./bot
+    container_name: red-tetris-bot
+    restart: always
+    networks:
+      - public
+    depends_on:
+      - backend
+
 networks:
   public:
     driver: bridge

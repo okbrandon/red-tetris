@@ -16,7 +16,8 @@ export const DEFAULT_BOT_TIMING = {
 	commandIntervalMs: 25,
 	maxQueuedCommands: 6,
 	thinkDelayMs: 120,
-	lookaheadWeight: 0.65
+	lookaheadWeight: 0.65,
+	connectTimeoutMs: 5000
 };
 
 export const NAME_MODES = new Set(['generated', 'list']);

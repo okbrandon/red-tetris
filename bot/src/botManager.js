@@ -72,8 +72,13 @@ export class BotManager {
 		}));
 
 		const failures = results.filter(result => result.error);
-		if (failures.length === results.length)
-			throw new Error('All bot instances failed to start');
+		if (failures.length === results.length) {
+			const aggregate = new Error('All bot instances failed to start');
+			aggregate.failures = failures.map(({ error }) => error);
+			if (failures[0]?.error instanceof Error && aggregate.cause === undefined)
+				aggregate.cause = failures[0].error;
+			throw aggregate;
+		}
 
 		failures.forEach(({ bot, error }) => {
 			console.error(`[bot] Failed to start instance ${bot.options.username}:`, error);
