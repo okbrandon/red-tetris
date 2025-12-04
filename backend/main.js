@@ -450,6 +450,13 @@ io.on("connection", (socket) => {
 			return;
 		}
 
+		if (room.owner?.id !== client.id) {
+			socket.emit(outgoingEvents.ERROR, JSON.stringify({
+				message: 'Only the room owner can request bots'
+			}));
+			return;
+		}
+
 		try {
 			await room.requestBots(botCount);
 		} catch (error) {
@@ -467,6 +474,13 @@ io.on("connection", (socket) => {
 		if (!room) {
 			socket.emit(outgoingEvents.ERROR, JSON.stringify({
 				message: 'Not in a room'
+			}));
+			return;
+		}
+
+		if (room.owner?.id !== client.id) {
+			socket.emit(outgoingEvents.ERROR, JSON.stringify({
+				message: 'Only the room owner can disconnect bots'
 			}));
 			return;
 		}
