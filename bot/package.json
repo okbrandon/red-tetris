@@ -1,0 +1,13 @@
+{
+  "name": "red-tetris-bot",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Automated Socket.IO bot client for red-tetris",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "socket.io-client": "^4.8.1"
+  }
+}
