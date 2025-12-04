@@ -3,12 +3,8 @@ import styled from 'styled-components';
 export const Layout = styled.div`
   --board-base-height: 690;
   --board-base-width: 345;
-  --board-height-scale: calc(
-    (80vh - 40px) / (var(--board-base-height) * 1px)
-  );
-  --board-width-scale: calc(
-    (100vw - 320px) / (var(--board-base-width) * 1px)
-  );
+  --board-height-scale: calc((80vh - 40px) / (var(--board-base-height) * 1px));
+  --board-width-scale: calc((100vw - 320px) / (var(--board-base-width) * 1px));
   --board-scale: clamp(
     0.85,
     min(var(--board-height-scale), var(--board-width-scale)),
@@ -35,9 +31,7 @@ export const Layout = styled.div`
     --board-height-scale: calc(
       (78vh - 32px) / (var(--board-base-height) * 1px)
     );
-    --board-width-scale: calc(
-      (100vw - 40px) / (var(--board-base-width) * 1px)
-    );
+    --board-width-scale: calc((100vw - 40px) / (var(--board-base-width) * 1px));
     --board-scale: clamp(
       0.78,
       min(var(--board-height-scale), var(--board-width-scale)),
