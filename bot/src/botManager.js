@@ -20,6 +20,7 @@ export class BotManager {
 		this.baseOptions = baseOptions;
 		this.bots = [];
 		this.namePool = [];
+		this.onEmptyCallback = null;
 	}
 
 	createBots() {
@@ -28,7 +29,11 @@ export class BotManager {
 
 		this.bots = Array.from({ length: this.botCount }, (_, index) => {
 			const username = this.pickUsername(index);
-			return new TetrisBot({ ...this.baseOptions, username });
+			const bot = new TetrisBot({ ...this.baseOptions, username });
+			bot.setRetireHandler(() => {
+				this.handleBotRetired(bot);
+			});
+			return bot;
 		});
 		return this.bots;
 	}
@@ -88,7 +93,23 @@ export class BotManager {
 	}
 
 	stopAll() {
+		const stopped = this.bots.length;
 		this.bots.forEach(bot => bot.stop());
+		this.bots = [];
+		return stopped;
+	}
+
+	setOnEmpty(callback) {
+		this.onEmptyCallback = typeof callback === 'function' ? callback : null;
+	}
+
+	handleBotRetired(bot) {
+		const index = this.bots.indexOf(bot);
+		if (index === -1)
+			return;
+		this.bots.splice(index, 1);
+		if (!this.bots.length && this.onEmptyCallback)
+			this.onEmptyCallback();
 	}
 }
 

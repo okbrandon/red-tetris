@@ -59,6 +59,9 @@ export class TetrisBot {
 		this.lastQueueSignature = null;
 
 		this.log = createLogger(this.options.logLevel);
+		this.retired = false;
+		this.retireHandler = null;
+		this.retireReason = null;
 	}
 
 	async start() {
@@ -66,6 +69,8 @@ export class TetrisBot {
 			return this.connectionPromise ?? Promise.resolve();
 
 		const connectionPromise = this.createConnectionDeferred();
+		this.retired = false;
+		this.retireReason = null;
 
 		this.log('info', `Connecting to ${this.options.serverUrl} as ${this.options.username}, room ${this.options.roomName}`);
 		this.socket = io(this.options.serverUrl, {
@@ -140,9 +145,29 @@ export class TetrisBot {
 
 		this.cleanupConnectionDeferred();
 
+		this.hasJoinedRoom = false;
+		this.startRequested = false;
 		this.resetMovementState();
 		this.commandQueue = [];
 		this.log('info', 'Stopped bot');
+	}
+
+	setRetireHandler(handler) {
+		this.retireHandler = typeof handler === 'function' ? handler : null;
+	}
+
+	retire(reason = 'retired') {
+		if (this.retired)
+			return;
+		this.retired = true;
+		this.retireReason = reason;
+		const details = reason ? ` (${reason})` : '';
+		this.log('info', `Retiring bot${details}`);
+		if (this.socket && this.socket.connected)
+			this.socket.emit(incomingEvents.ROOM_LEAVE);
+		if (this.retireHandler)
+			this.retireHandler(this, reason);
+		this.stop();
 	}
 
 	registerHandlers() {
@@ -253,20 +278,12 @@ export class TetrisBot {
 
 		this.roomState = data;
 		const isOwner = data.room?.owner?.id === data.you?.id;
-		if (isOwner)
-			this.log('debug', `Owning room with ${data.clients?.length || 1} players`);
-
-		if (
-			this.options.autoStart &&
-			isOwner &&
-			data.room?.status === gameStatus.WAITING &&
-			(data.clients?.length || 1) > 1 &&
-			!this.startRequested
-		) {
-			this.log('info', 'Auto-starting game');
-			this.socket?.emit(incomingEvents.START_GAME);
-			this.startRequested = true;
+		if (isOwner) {
+			this.log('info', 'Promoted to owner, leaving room to hand control back to players');
+			this.retire('promoted-to-owner');
+			return;
 		}
+
 	}
 
 	handleGameStarted(payload) {

@@ -56,8 +56,7 @@ const disconnectRoomBots = (roomName) => {
 	let stoppedBots = 0;
 	let managerCount = 0;
 	managers.forEach((manager) => {
-		manager.stopAll();
-		stoppedBots += manager.bots?.length ?? 0;
+		stoppedBots += manager.stopAll() || 0;
 		managerCount += 1;
 	});
 	activeManagers.delete(roomName);
@@ -87,6 +86,9 @@ const createManagerOptions = (roomName, botCount) => {
 
 const spawnBots = async (roomName, botCount) => {
 	const manager = new BotManager(createManagerOptions(roomName, botCount));
+	manager.setOnEmpty(() => {
+		deregisterManager(roomName, manager);
+	});
 	registerManager(roomName, manager);
 
 	try {
