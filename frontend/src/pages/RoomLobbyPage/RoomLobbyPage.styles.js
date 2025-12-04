@@ -202,3 +202,51 @@ export const ModeDetailDescription = styled.p`
   line-height: 1.4;
   color: rgba(231, 224, 255, 0.78);
 `;
+
+export const BotActions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 1rem 0 0;
+`;
+
+export const BotActionButton = styled.button`
+  border: none;
+  border-radius: 12px;
+  padding: 0.65rem 1.4rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #fff;
+  cursor: pointer;
+  transition:
+    transform 0.14s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+  background: ${(props) =>
+    props.$variant === 'secondary'
+      ? 'rgba(255, 255, 255, 0.08)'
+      : 'linear-gradient(135deg, rgba(162, 89, 255, 0.95), rgba(93, 58, 150, 0.85))'};
+  box-shadow: ${(props) =>
+    props.$variant === 'secondary'
+      ? '0 8px 18px rgba(0, 0, 0, 0.25)'
+      : '0 12px 26px rgba(162, 89, 255, 0.25)'};
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: ${(props) =>
+      props.$variant === 'secondary'
+        ? '0 10px 22px rgba(0, 0, 0, 0.28)'
+        : '0 16px 32px rgba(162, 89, 255, 0.32)'};
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(210, 179, 255, 0.9);
+    outline-offset: 3px;
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`;

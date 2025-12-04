@@ -22,6 +22,8 @@ import {
   ModeDetailTitle,
   ModeDetailDescription,
   PlayerListContainer,
+  BotActions,
+  BotActionButton,
 } from './RoomLobbyPage.styles';
 import useGameFlow from '@/hooks/useGameFlow';
 import { GAME_MODE_OPTIONS, getModeDetails } from '@/utils/gameModes';
@@ -31,7 +33,13 @@ const RoomLobbyPage = () => {
     (state) => state.game
   );
 
-  const { startMultiplayerGame, leaveLobby, changeRoomMode } = useGameFlow({
+  const {
+    startMultiplayerGame,
+    leaveLobby,
+    changeRoomMode,
+    requestBots,
+    disconnectBots,
+  } = useGameFlow({
     roomName,
   });
   const activeMode = getModeDetails(roomMode) ?? GAME_MODE_OPTIONS[0];
@@ -49,6 +57,14 @@ const RoomLobbyPage = () => {
     const { value } = event.target;
     setSelectedMode(value);
     changeRoomMode(value);
+  };
+
+  const handleRequestBots = () => {
+    requestBots(1);
+  };
+
+  const handleDisconnectBots = () => {
+    disconnectBots();
   };
 
   return (
@@ -115,6 +131,21 @@ const RoomLobbyPage = () => {
             })}
           </PlayerList>
         </PlayerListContainer>
+
+        {isOwner && (
+          <BotActions>
+            <BotActionButton type="button" onClick={handleRequestBots}>
+              Request bots
+            </BotActionButton>
+            <BotActionButton
+              type="button"
+              $variant="secondary"
+              onClick={handleDisconnectBots}
+            >
+              Disconnect bots
+            </BotActionButton>
+          </BotActions>
+        )}
 
         <StartButton onClick={startMultiplayerGame} disabled={!isOwner}>
           {isOwner ? 'Start Game' : 'Waiting for host'}

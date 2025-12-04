@@ -5,6 +5,8 @@ import {
   requestRoomLeave,
   requestStartGame,
   requestRoomModeChange,
+  requestRoomBots,
+  requestBotDisconnect,
 } from '@/store/slices/socketThunks';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -109,12 +111,71 @@ const useGameFlow = ({ roomName }) => {
     requestRoomModeChange({ mode: newMode });
   };
 
+  const requestBots = (botCount = 1) => {
+    if (!isOwner) {
+      dispatch(
+        showNotification({
+          type: 'error',
+          message: 'Only the lobby owner can request bots.',
+        })
+      );
+      return;
+    }
+
+    if (!roomName) {
+      dispatch(
+        showNotification({
+          type: 'error',
+          message: 'Lobby name is required to request bots.',
+        })
+      );
+      return;
+    }
+
+    const parsedCount = Number.parseInt(botCount, 10);
+    const normalizedCount = Number.isFinite(parsedCount)
+      ? Math.max(1, parsedCount)
+      : 1;
+
+    requestRoomBots({ room: roomName, botCount: normalizedCount });
+    dispatch(
+      showNotification({
+        type: 'info',
+        message: `Requesting ${normalizedCount} bot${
+          normalizedCount === 1 ? '' : 's'
+        }…`,
+      })
+    );
+  };
+
+  const disconnectBots = () => {
+    if (!isOwner) {
+      dispatch(
+        showNotification({
+          type: 'error',
+          message: 'Only the lobby owner can disconnect bots.',
+        })
+      );
+      return;
+    }
+
+    requestBotDisconnect();
+    dispatch(
+      showNotification({
+        type: 'info',
+        message: 'Requested bot disconnect…',
+      })
+    );
+  };
+
   return {
     joinSoloRoom,
     joinMultiplayerRoom,
     startMultiplayerGame,
     leaveLobby,
     changeRoomMode,
+    requestBots,
+    disconnectBots,
   };
 };
 
