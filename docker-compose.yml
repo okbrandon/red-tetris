@@ -48,7 +48,9 @@ services:
       - "8080:80"
 
   bot-service:
-    build: ./bot
+    build:
+      context: .
+      dockerfile: bot/Dockerfile
     container_name: red-tetris-bot
     restart: always
     networks:
