@@ -202,3 +202,70 @@ export const ModeDetailDescription = styled.p`
   line-height: 1.4;
   color: rgba(231, 224, 255, 0.78);
 `;
+
+export const BotActions = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 1rem 0 0;
+  width: 100%;
+
+  @media (min-width: 480px) {
+    flex-direction: row;
+    justify-content: center;
+  }
+`;
+
+export const BotActionButton = styled.button`
+  --accent: ${(props) =>
+    props.$variant === 'secondary' ? 'rgba(255, 255, 255, 0.11)' : '#a259ff'};
+  border: 0;
+  border-radius: 12px;
+  padding: 0.9rem 1.5rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #ffffff;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.25s ease,
+    filter 0.2s ease;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+  min-width: 120px;
+  width: 100%;
+
+  background: ${(props) =>
+    props.$variant === 'secondary'
+      ? 'rgba(255, 255, 255, 0.08)'
+      : 'linear-gradient(135deg, #a259ff 0%, #6f42c1 100%)'};
+  box-shadow: ${(props) =>
+    props.$variant === 'secondary'
+      ? '0 6px 18px rgba(0, 0, 0, 0.28)'
+      : '0 6px 20px rgba(162, 89, 255, 0.35)'};
+
+  @media (min-width: 480px) {
+    width: auto;
+    flex: 1 1 0;
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.05);
+    box-shadow: ${(props) =>
+      props.$variant === 'secondary'
+        ? '0 10px 22px rgba(0, 0, 0, 0.32)'
+        : '0 10px 26px rgba(162, 89, 255, 0.45)'};
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(210, 179, 255, 0.9);
+    outline-offset: 3px;
+  }
+
+  &:active {
+    transform: translateY(0);
+    filter: brightness(0.98);
+  }
+`;

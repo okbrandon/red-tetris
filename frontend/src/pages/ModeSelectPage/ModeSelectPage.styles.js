@@ -153,6 +153,9 @@ export const SecondaryButton = styled.button`
   border-radius: 12px;
   cursor: pointer;
   font-size: 0.95rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
   transition:
     color 0.2s ease,
     border-color 0.2s ease,

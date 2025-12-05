@@ -9,6 +9,9 @@ import outgoingEvents from './constants/outgoing-events.js';
 import utils from './utils.js';
 import gameModes from './constants/game-modes.js';
 
+const DEFAULT_BOT_SERVICE_URL = 'http://bot-service:4000';
+const DEFAULT_BOT_SERVICE_TIMEOUT_MS = 5000;
+
 class Game {
 
 	/**
@@ -544,6 +547,67 @@ class Game {
 		clients.forEach(client => {
 			client.penalize(penalties);
 			client.sendGrid();
+		});
+	}
+
+	/**
+	 * Requests bots to join the game via the bot service.
+	 * @param {number} [botCount=1] - Number of bots to request.
+	 */
+	async requestBots(botCount = 1) {
+		const parsedCount = Number.parseInt(botCount, 10);
+		const normalizedCount = Number.isFinite(parsedCount)
+			? Math.max(1, parsedCount)
+			: 1;
+
+		if (this.clients.size + normalizedCount > this.maxPlayers)
+			throw new Error('Request exceeds maximum player limit');
+
+		const baseUrl = process.env.BOT_SERVICE_URL || DEFAULT_BOT_SERVICE_URL;
+		const timeoutOverride = Number.parseInt(process.env.BOT_SERVICE_TIMEOUT_MS ?? '', 10);
+		const timeoutMs = Number.isFinite(timeoutOverride) && timeoutOverride > 0
+			? timeoutOverride
+			: DEFAULT_BOT_SERVICE_TIMEOUT_MS;
+
+		await utils.sendBotServiceRequest({
+			roomId: this.id,
+			owner: this.owner,
+			baseUrl,
+			path: '/bots/connect',
+			payload: {
+				room: this.id,
+				botCount: normalizedCount
+			},
+			actionDescription: `Requesting ${normalizedCount} bot(s) to join the game`,
+			successDescription: 'Bot service acknowledged request',
+			failureMessage: 'Failed to request bots',
+			timeoutMs
+		});
+	}
+
+	/**
+	 * Requests bots to disconnect from the game via the bot service.
+	 */
+	async disconnectBots() {
+		if (this.status !== gameStatus.WAITING)
+			throw new Error('Can only disconnect bots while game is waiting');
+
+		const baseUrl = process.env.BOT_SERVICE_URL || DEFAULT_BOT_SERVICE_URL;
+		const timeoutOverride = Number.parseInt(process.env.BOT_SERVICE_TIMEOUT_MS ?? '', 10);
+		const timeoutMs = Number.isFinite(timeoutOverride) && timeoutOverride > 0
+			? timeoutOverride
+			: DEFAULT_BOT_SERVICE_TIMEOUT_MS;
+
+		await utils.sendBotServiceRequest({
+			roomId: this.id,
+			owner: this.owner,
+			baseUrl,
+			path: '/bots/disconnect',
+			payload: { room: this.id },
+			actionDescription: 'Requesting bot disconnect',
+			successDescription: 'Bot service acknowledged disconnect request',
+			failureMessage: 'Failed to disconnect bots',
+			timeoutMs
 		});
 	}
 

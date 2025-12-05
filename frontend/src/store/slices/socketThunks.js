@@ -382,7 +382,11 @@ const logEmit = (event, payload) => {
 const emitWithTracking = (type, payload) => {
   logEmit(type, payload);
   dispatch(socketEventReceived({ direction: 'outgoing', type, payload }));
-  socketClient.emit(type, payload);
+  if (payload === undefined) {
+    socketClient.emit(type);
+  } else {
+    socketClient.emit(type, payload);
+  }
 };
 
 export const sendClientUpdate = (payload) => {
@@ -418,4 +422,14 @@ export const requestRoomModeChange = (payload) => {
 export const requestPieceMove = (payload) => {
   ensureSocketConnection();
   emitWithTracking(CLIENT_EVENTS.MOVE_PIECE, payload);
+};
+
+export const requestRoomBots = (payload) => {
+  ensureSocketConnection();
+  emitWithTracking(CLIENT_EVENTS.REQUEST_BOTS, payload);
+};
+
+export const requestBotDisconnect = () => {
+  ensureSocketConnection();
+  emitWithTracking(CLIENT_EVENTS.DISCONNECT_BOTS);
 };

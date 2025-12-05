@@ -110,7 +110,9 @@ describe('GamePlayingView', () => {
     expect(screen.getByText('Game in Progress')).toBeInTheDocument();
     const scoreCard = screen.getByLabelText('Score overview');
     expect(scoreCard).toHaveTextContent('321');
-    const linesRow = within(scoreCard).getByText('Lines Cleared').closest('div');
+    const linesRow = within(scoreCard)
+      .getByText('Lines Cleared')
+      .closest('div');
     const levelRow = within(scoreCard).getByText('Level').closest('div');
     expect(linesRow).toHaveTextContent('12');
     expect(levelRow).toHaveTextContent('4');
