@@ -517,7 +517,7 @@ io.on("connection", (socket) => {
 });
 
 /**
- * Starts the HTTP server. Connects to PostgreSQL first.
+ * Starts the HTTP server. Connects to MongoDB first.
  */
 database.connect()
 	.then(() => {
@@ -526,6 +526,6 @@ database.connect()
 		});
 	})
 	.catch((err) => {
-		console.error('[PostgreSQL] Connection failed:', err);
+		console.error('[MongoDB] Connection failed:', err);
 		process.exit(1);
 	});

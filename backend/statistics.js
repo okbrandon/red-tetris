@@ -19,25 +19,12 @@ class Statistics {
 	 * Loads the player's statistics from the database.
 	 */
 	async load() {
-		const pool = await database.connect();
-		const { rows } = await pool.query(
-			'SELECT game_history FROM statistics WHERE username = $1',
-			[this.username]
-		);
+		const db = await database.connect();
+		const collection = db.collection('statistics');
+		const data = await collection.findOne({ username: this.username });
 
-		if (rows.length > 0) {
-			const history = rows[0].game_history ?? [];
-			let parsedHistory = history;
-			if (typeof history === 'string') {
-				try {
-					parsedHistory = JSON.parse(history);
-				} catch {
-					parsedHistory = [];
-				}
-			}
-			this.gameHistory = Array.isArray(parsedHistory) ? parsedHistory : [];
-		} else {
-			this.gameHistory = [];
+		if (data) {
+			this.gameHistory = data.gameHistory || [];
 		}
 	}
 
@@ -45,16 +32,19 @@ class Statistics {
 	 * Saves the player's statistics to the database.
 	 */
 	async save() {
-		const pool = await database.connect();
+		const db = await database.connect();
+		const collection = db.collection('statistics');
 
-		console.log('Saving statistics for', this.username, this.gameHistory);
+		console.log('Saving statistics for', this.username);
 
-		await pool.query(
-			`INSERT INTO statistics (username, game_history, updated_at)
-			 VALUES ($1, $2::jsonb, NOW())
-			 ON CONFLICT (username)
-			 DO UPDATE SET game_history = EXCLUDED.game_history, updated_at = NOW()`,
-			[this.username, JSON.stringify(this.gameHistory)]
+		await collection.updateOne(
+			{ username: this.username },
+			{
+				$set: {
+					gameHistory: this.gameHistory
+				}
+			},
+			{ upsert: true }
 		);
 	}
 

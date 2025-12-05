@@ -1,120 +1,70 @@
 /**
- * @fileoverview PostgreSQL connection manager.
- * Provides a singleton Pool instance and ensures required tables exist.
+ * @fileoverview MongoDB connection and management.
+ * Singleton pattern to ensure one connection instance.
  */
-import { Pool } from 'pg';
+import { MongoClient } from 'mongodb';
 
-const DEFAULT_USER = process.env.POSTGRES_USER || 'postgres';
-const DEFAULT_PASSWORD = process.env.POSTGRES_PASSWORD || 'postgres';
-const DEFAULT_HOST = process.env.POSTGRES_HOST || 'postgres';
-const DEFAULT_PORT = process.env.POSTGRES_PORT || '5432';
-const DEFAULT_DB = process.env.POSTGRES_DB || 'red_tetris';
+const MONGO_ADMIN = process.env.MONGO_INITDB_ROOT_USERNAME || 'mongoadmin';
+const MONGO_PASSWORD = process.env.MONGO_INITDB_ROOT_PASSWORD || 'adminpass';
+const MONGO_HOST = process.env.MONGO_HOST || 'mongodb';
+const MONGO_PORT = process.env.MONGO_PORT || '27017';
+const MONGO_URI = process.env.MONGO_URI || `mongodb://${MONGO_ADMIN}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/?authSource=admin`;
+const DB_NAME = process.env.MONGO_INITDB_DATABASE || 'red-tetris';
 
-const connectionString = process.env.POSTGRES_URI ||
-	`postgresql://${encodeURIComponent(DEFAULT_USER)}:${encodeURIComponent(DEFAULT_PASSWORD)}@${DEFAULT_HOST}:${DEFAULT_PORT}/${DEFAULT_DB}`;
+class Mongo {
 
-class Database {
+	/**
+	 * Singleton instance of Mongo class.
+	 */
 	constructor() {
-		if (Database.instance)
-			return Database.instance;
+		if (Mongo.instance)
+			return Mongo.instance;
 
-		this.pool = null;
-		Database.instance = this;
+		this.client = null;
+		this.db = null;
+
+		Mongo.instance = this;
 	}
 
 	/**
-	 * Connects to PostgreSQL if not already connected.
-	 * Ensures the statistics table exists.
-	 * Will retry up to 10 times with exponential backoff, and exit the process if all attempts fail.
-	 * @returns {Promise<Pool>} - Active connection pool.
+	 * Connects to MongoDB if not already connected.
+	 * @returns {Promise<Db>} - The connected database instance.
 	 */
 	async connect() {
-		if (this.pool) return this.pool;
+		if (this.db)
+			return this.db;
 
-		const MAX_ATTEMPTS = 10;
-		const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
+		console.log(`[MongoDB] Connecting to ${MONGO_URI}/${DB_NAME}...`);
 
-		const sanitizeConnectionString = (conn) => {
-			try {
-				const url = new URL(conn);
+		this.client = new MongoClient(MONGO_URI);
+		await this.client.connect();
 
-				if (url.password)
-					url.password = '***';
-
-				return url.toString();
-			} catch {
-				return conn.replace(/:(.*)@/, ':***@');
-			}
-		};
-
-		const createAndVerifyPool = async () => {
-			this.pool = new Pool({ connectionString });
-
-			await this.pool.query('SELECT 1');
-			await this.pool.query(`
-				CREATE TABLE IF NOT EXISTS statistics (
-					username VARCHAR(32) PRIMARY KEY,
-					game_history JSONB NOT NULL DEFAULT '[]'::jsonb,
-					updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-				)
-			`);
-		};
-
-		const closePoolIfExists = async () => {
-			if (!this.pool) return;
-			try {
-				await this.pool.end();
-			} catch {
-				// ignore
-			} finally {
-				this.pool = null;
-			}
-		};
-
-		for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-			try {
-				await createAndVerifyPool();
-				console.log(`[PostgreSQL] Connected to ${sanitizeConnectionString(connectionString)}`);
-				return this.pool;
-			} catch (err) {
-				const msg = err && err.message ? err.message : String(err);
-				console.error(`[PostgreSQL] Connection attempt ${attempt} failed: ${msg}`);
-
-				await closePoolIfExists();
-
-				if (attempt === MAX_ATTEMPTS) {
-					console.error('[PostgreSQL] Max connection attempts reached, shutting down.');
-					process.exit(1);
-				}
-
-				const backoff = Math.min(1000 * Math.pow(2, attempt - 1), 30000); // backoff
-				await sleep(backoff);
-			}
-		}
-
-		throw new Error('Failed to connect to PostgreSQL after retries');
+		this.db = this.client.db(DB_NAME);
+		console.log(`[MongoDB] Connected to ${MONGO_URI}/${DB_NAME}`);
+		return this.db;
 	}
 
 	/**
-	 * Retrieves the active connection pool.
-	 * @returns {Pool} - Active connection pool.
+	 * Gets the connected database instance.
+	 * @returns {Db} - The connected database instance.
 	 */
-	getPool() {
-		if (!this.pool)
-			throw new Error('PostgreSQL not connected. Call connect() first.');
-		return this.pool;
+	getDb() {
+		if (!this.db)
+			throw new Error('MongoDB not connected. Call connect() first.');
+		return this.db;
 	}
 
 	/**
-	 * Closes the PostgreSQL connection pool.
+	 * Closes the MongoDB connection.
 	 */
 	async close() {
-		if (this.pool) {
-			await this.pool.end();
-		}
-		this.pool = null;
+		if (this.client)
+			await this.client.close();
+		this.db = null;
+		this.client = null;
 	}
+
 }
 
-const database = new Database();
-export default database;
+const mongo = new Mongo();
+export default mongo;
