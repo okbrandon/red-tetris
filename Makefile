@@ -44,13 +44,14 @@ help:
 	@printf "    $(FG_CYAN)test-frontend$(RESET)    Run frontend tests only\n"
 	@printf "    $(FG_CYAN)test-backend$(RESET)     Run backend tests only\n"
 	@printf "  $(FG_MAGENTA)Docker lifecycle$(RESET)\n"
-	@printf "    $(FG_CYAN)docker-build$(RESET)     Build Docker images via docker compose\n"
-	@printf "    $(FG_CYAN)docker-up$(RESET)        Start the stack in the background\n"
-	@printf "    $(FG_CYAN)docker-down$(RESET)      Stop containers but keep volumes\n"
-	@printf "    $(FG_CYAN)docker-restart$(RESET)   Restart the stack cleanly\n"
-	@printf "    $(FG_CYAN)docker-logs$(RESET)      Tail Docker logs from all services\n"
-	@printf "    $(FG_CYAN)docker-reset$(RESET)     Stop containers and remove volumes\n"
-	@printf "    $(FG_CYAN)docker-clean-volumes$(RESET) Remove the MongoDB Docker volume\n"
+	@printf "    $(FG_CYAN)build$(RESET)         Build Docker images via docker compose\n"
+	@printf "    $(FG_CYAN)up$(RESET)            Start the stack in the background\n"
+	@printf "    $(FG_CYAN)up-and-build$(RESET)  Start the stack with rebuilt images\n"
+	@printf "    $(FG_CYAN)down$(RESET)          Stop containers but keep volumes\n"
+	@printf "    $(FG_CYAN)restart$(RESET)       Restart the stack cleanly\n"
+	@printf "    $(FG_CYAN)logs$(RESET)          Tail Docker logs from all services\n"
+	@printf "    $(FG_CYAN)reset$(RESET)         Stop containers and remove volumes\n"
+	@printf "    $(FG_CYAN)clean-volumes$(RESET) Remove the MongoDB Docker volume\n"
 
 env:
 	@if [ ! -f "$(ENV_FILE)" ] && [ -f "$(ENV_TEMPLATE)" ]; then \
@@ -73,6 +74,9 @@ build: env
 
 up: env
 	$(DC) up -d --remove-orphans
+
+up-and-build: env
+	$(DC) up -d --build --remove-orphans
 
 down:
 	$(DC) down
