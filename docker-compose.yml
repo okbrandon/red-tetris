@@ -7,30 +7,33 @@ services:
     networks:
       - public
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_HOST: ${POSTGRES_HOST}
-      POSTGRES_PORT: ${POSTGRES_PORT}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_HOST: ${MONGO_HOST}
+      MONGO_PORT: ${MONGO_PORT}
     depends_on:
-      - postgres
+      - mongodb
     ports:
       - "3000:3000"
 
-  postgres:
-    image: postgres:16
-    container_name: red-tetris-postgres
+  mongodb:
+    image: mongo:8.0.15-noble
+    container_name: red-tetris-mongodb
     restart: always
     networks:
       - public
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    ports:
-      - "5432:5432"
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+      MONGO_PORT: ${MONGO_PORT}
+      MONGO_HOST: ${MONGO_HOST}
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - mongo-data:/data/db
+    ports:
+      - "${MONGO_PORT}:${MONGO_PORT}"
+    command: mongod --quiet
 
   frontend:
     build:
@@ -63,5 +66,5 @@ networks:
     driver: bridge
 
 volumes:
-  postgres-data:
+  mongo-data:
     driver: local

@@ -1,6 +1,6 @@
 # Red Tetris
 
-> Multiplayer-first Tetris built for the 42 network — fast Socket.IO backend, sleek Vite/React frontend, and persistent player history backed by PostgreSQL.
+> Multiplayer-first Tetris built for the 42 network — fast Socket.IO backend, sleek Vite/React frontend, and persistent player history backed by MongoDB.
 
 ## Table of Contents
 - [Overview](#overview)
@@ -18,7 +18,7 @@
 - [Further Reading](#further-reading)
 
 ## Overview
-Red Tetris is a full-stack remake of the classic game with a focus on social play. Players can spin up private lobbies, spectate friends, or speed-run solo “journeys.” The `backend/` service implements the game engine, line-clear logic, and persistence layer, while the `frontend/` Vite app handles routing, lobby UX, notifications, and the arena views (grid, specter boards, next queue, and live line-clear feed). PostgreSQL keeps the latest five results per player so the `/history` view can recap recent runs.
+Red Tetris is a full-stack remake of the classic game with a focus on social play. Players can spin up private lobbies, spectate friends, or speed-run solo “journeys.” The `backend/` service implements the game engine, line-clear logic, and persistence layer, while the `frontend/` Vite app handles routing, lobby UX, notifications, and the arena views (grid, specter boards, next queue, and live line-clear feed). MongoDB keeps the latest five results per player so the `/history` view can recap recent runs.
 
 The project is still evolving, but the gameplay loop, lobby flow, stats storage, and CI checks are already in place.
 
@@ -27,7 +27,7 @@ The project is still evolving, but the gameplay loop, lobby flow, stats storage,
 - **Solo Journey mode** auto-starts a private arena with your preferred difficulty and routes you straight to gameplay.
 - **Lobby management** with owner-only controls, mode previews, accessible form labels, and animated background/notification system to keep players informed.
 - **Spectator view & specter columns** so eliminated players can keep watching opponents and follow the line-clear log.
-- **Persistent player history** stored in PostgreSQL via [`backend/statistics.js`](backend/statistics.js), surfaced in the `/history` page through Redux slices.
+- **Persistent player history** stored in MongoDB via [`backend/statistics.js`](backend/statistics.js), surfaced in the `/history` page through Redux slices.
 - **Automation-friendly tooling**: GitHub Actions CI, Makefile helpers, Docker Compose stack, and release automation with `standard-version`.
 
 ## Screenshots
@@ -47,12 +47,12 @@ The project is still evolving, but the gameplay loop, lobby flow, stats storage,
 ![Screenshot of the in-game board, next queue, and controls](docs/assets/in-game.png)
 
 **Recent games history**
-![Screenshot of the recent games panel with stored PostgreSQL-backed statistics](docs/assets/recent-games.png)
+![Screenshot of the recent games panel with stored MongoDB statistics](docs/assets/recent-games.png)
 
 ## Architecture
 ```
 .
-├── backend/   # Node.js + Socket.IO game server, PostgreSQL stats, Jest specs
+├── backend/   # Node.js + Socket.IO game server, MongoDB stats, Jest specs
 ├── frontend/  # React 18 + Vite + Redux Toolkit + styled-components UI
 ├── docker-compose.yml
 ├── Makefile   # Developer ergonomics (env, deps, lint, tests, docker, etc.)
@@ -85,14 +85,14 @@ cd ../backend && npm install
    ```bash
    make env                # creates .env from .env.template when missing
    ```
-2. Fill in the Postgres credentials (`POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`) and tweak `VITE_SOCKET_URL` for your setup.
+2. Fill in the Mongo credentials (`MONGO_INITDB_ROOT_USERNAME`, `MONGO_INITDB_ROOT_PASSWORD`, `MONGO_INITDB_DATABASE`) and tweak `VITE_SOCKET_URL` for your setup.
 3. Optional backend knobs:
    - `PORT` (defaults to `3000`)
    - `SOCKET_ALLOWED_ORIGINS` (comma-separated list) to lock down CORS origins.
-   - `POSTGRES_URI` if you want to override the host/port combo defined above.
+   - `MONGO_URI` if you want to override the host/port combo defined above.
 
 ### Run the Stack Locally
-Backend (Node + Socket.IO + PostgreSQL driver):
+Backend (Node + Socket.IO + MongoDB driver):
 
 ```bash
 cd backend
@@ -110,10 +110,10 @@ Key routes:
 - `/` — username onboarding + animated background.
 - `/menu` — choose Solo journey vs Multiplayer.
 - `/join` — enter or create a lobby name (owners pick the mode, others wait).
-- `/history` — last five games pulled from the stats slice/PostgreSQL.
+- `/history` — last five games pulled from the stats slice/MongoDB.
 - `/:room/:player_name` — arena router that decides Solo, Multi, or Spectator view.
 
-PostgreSQL stores player history in the `statistics` table (see `backend/statistics.js`). When running locally without Docker you can point `POSTGRES_URI` at any reachable instance.
+MongoDB stores player history in the `statistics` collection (see `backend/statistics.js`). When running locally without Docker you can point `MONGO_URI` at a local or cloud Mongo instance.
 
 ## Remote Start
 Need to host Red Tetris on a remote VM or via SSH? Use the familiar commands with a few tweaks so browsers can reach the dev servers.
@@ -131,20 +131,20 @@ Need to host Red Tetris on a remote VM or via SSH? Use the familiar commands wit
    - Run `make docker-build` and `make docker-up` on the remote host instead and skip the manual servers.
 
 ## Docker Workflow
-Everything can also run in containers (backend, frontend, PostgreSQL):
+Everything can also run in containers (backend, frontend, MongoDB):
 
 ```bash
 make docker-up         # builds images and starts the stack
 make docker-logs       # tails all services
 make docker-down       # stop containers (volumes preserved)
-make docker-reset      # stop containers and wipe the Postgres volume
+make docker-reset      # stop containers and wipe the MongoDB volume
 ```
 
 `docker-compose.yml` exposes:
 - `frontend` on `http://localhost:8080`
 - `backend` on `http://localhost:3000`
 
-The Postgres data lives in the `postgres-data` named volume so you can wipe it independently with `make docker-clean-volumes`.
+The MongoDB data lives in the `mongo-data` named volume so you can wipe it independently with `make docker-clean-volumes`.
 
 ## Further Reading
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — branching model, commit message style, and PR checklist.

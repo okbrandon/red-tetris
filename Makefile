@@ -12,7 +12,7 @@ BACKEND_DIR := backend
 ENV_FILE := .env
 ENV_TEMPLATE := .env.template
 
-POSTGRES_VOLUME := $(PROJECT_NAME)_postgres-data
+MONGO_VOLUME := $(PROJECT_NAME)_mongo-data
 
 RESET := \033[0m
 BOLD := \033[1m
@@ -50,7 +50,7 @@ help:
 	@printf "    $(FG_CYAN)docker-restart$(RESET)   Restart the stack cleanly\n"
 	@printf "    $(FG_CYAN)docker-logs$(RESET)      Tail Docker logs from all services\n"
 	@printf "    $(FG_CYAN)docker-reset$(RESET)     Stop containers and remove volumes\n"
-	@printf "    $(FG_CYAN)docker-clean-volumes$(RESET) Remove the PostgreSQL Docker volume\n"
+	@printf "    $(FG_CYAN)docker-clean-volumes$(RESET) Remove the MongoDB Docker volume\n"
 
 env:
 	@if [ ! -f "$(ENV_FILE)" ] && [ -f "$(ENV_TEMPLATE)" ]; then \
@@ -88,11 +88,11 @@ reset:
 	$(DC) down -v --remove-orphans
 
 clean-volumes:
-	@if docker volume ls -q | grep -q "^$(POSTGRES_VOLUME)$$"; then \
-		docker volume rm -f "$(POSTGRES_VOLUME)"; \
-		printf "Removed volume %s\n" "$(POSTGRES_VOLUME)"; \
+	@if docker volume ls -q | grep -q "^$(MONGO_VOLUME)$$"; then \
+		docker volume rm -f "$(MONGO_VOLUME)"; \
+		printf "Removed volume %s\n" "$(MONGO_VOLUME)"; \
 	else \
-		printf "Volume %s not present\n" "$(POSTGRES_VOLUME)"; \
+		printf "Volume %s not present\n" "$(MONGO_VOLUME)"; \
 	fi
 
 deps: deps-frontend deps-backend
