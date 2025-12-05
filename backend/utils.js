@@ -87,7 +87,7 @@ async function sendBotServiceRequest({
 				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify(payload),
-			signal: controller?.signal
+			...(controller?.signal && { signal: controller.signal })
 		});
 
 		const responseText = await response.text();

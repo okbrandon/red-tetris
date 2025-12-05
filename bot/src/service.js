@@ -56,7 +56,7 @@ const disconnectRoomBots = (roomName) => {
 	let stoppedBots = 0;
 	let managerCount = 0;
 	managers.forEach((manager) => {
-		stoppedBots += manager.stopAll() || 0;
+		stoppedBots += manager.stopAll() ?? 0;
 		managerCount += 1;
 	});
 	activeManagers.delete(roomName);

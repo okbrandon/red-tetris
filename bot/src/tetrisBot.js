@@ -210,6 +210,8 @@ export class TetrisBot {
 		this.socket.on(outgoingEvents.GAME_STATE, (payload) => this.handleGameState(payload));
 		this.socket.on(outgoingEvents.GAME_LOST, (payload) => this.handleGameLost(payload));
 		this.socket.on(outgoingEvents.GAME_OVER, (payload) => this.handleGameOver(payload));
+
+		// Empty handlers for events we don't process
 		this.socket.on(outgoingEvents.LINES_CLEARED, () => {});
 		this.socket.on(outgoingEvents.PLAYER_STATS_BOARD, () => {});
 		this.socket.on(outgoingEvents.AVAILABLE_ROOMS, () => {});

@@ -555,13 +555,14 @@ class Game {
 	 * @param {number} [botCount=1] - Number of bots to request.
 	 */
 	async requestBots(botCount = 1) {
-		if (this.clients.size + botCount > this.maxPlayers)
-			throw new Error('Request exceeds maximum player limit');
-
 		const parsedCount = Number.parseInt(botCount, 10);
 		const normalizedCount = Number.isFinite(parsedCount)
 			? Math.max(1, parsedCount)
 			: 1;
+
+		if (this.clients.size + normalizedCount > this.maxPlayers)
+			throw new Error('Request exceeds maximum player limit');
+
 		const baseUrl = process.env.BOT_SERVICE_URL || DEFAULT_BOT_SERVICE_URL;
 		const timeoutOverride = Number.parseInt(process.env.BOT_SERVICE_TIMEOUT_MS ?? '', 10);
 		const timeoutMs = Number.isFinite(timeoutOverride) && timeoutOverride > 0
