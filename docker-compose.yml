@@ -6,6 +6,7 @@ services:
     restart: always
     networks:
       - public
+      - proxy-net
     environment:
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
@@ -23,6 +24,7 @@ services:
     restart: always
     networks:
       - public
+      - proxy-net
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
@@ -44,6 +46,7 @@ services:
     restart: always
     networks:
       - public
+      - proxy-net
     environment:
       VITE_HOST_NAME: ${VITE_HOST_NAME}
       VITE_SOCKET_URL: ${VITE_SOCKET_URL}
@@ -58,12 +61,15 @@ services:
     restart: always
     networks:
       - public
+      - proxy-net
     depends_on:
       - backend
 
 networks:
   public:
     driver: bridge
+  proxy-net:
+    external: true
 
 volumes:
   mongo-data:
