@@ -68,7 +68,15 @@ help:
 	@printf "    $(FG_CYAN)npm-down$(RESET)         Stop Nginx Proxy Manager only\n"
 	@printf "    $(FG_CYAN)npm-logs$(RESET)         Tail NPM logs only\n"
 
-env:
+create-network:
+	@if ! docker network ls --format '{{.Name}}' | grep -q "^proxy-net$$"; then \
+		docker network create proxy-net; \
+		printf "Created docker network proxy-net\n"; \
+	else \
+		printf "Docker network proxy-net already exists\n"; \
+	fi
+
+env: create-network
 	@if [ ! -f "$(ENV_FILE)" ] && [ -f "$(ENV_TEMPLATE)" ]; then \
 		cp "$(ENV_TEMPLATE)" "$(ENV_FILE)"; \
 		printf "Created %s from %s\n" "$(ENV_FILE)" "$(ENV_TEMPLATE)"; \
