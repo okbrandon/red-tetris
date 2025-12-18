@@ -329,12 +329,8 @@ export class TetrisBot {
 			return;
 
 		this.roomState = data;
-		const isOwner = data.room?.owner?.id === data.you?.id;
-		if (isOwner) {
-			this.log('info', 'Promoted to owner, leaving room to hand control back to players');
-			this.retire('promoted-to-owner');
+		if (this.maybeRetireAsOwner(data, 'broadcast'))
 			return;
-		}
 
 	}
 
@@ -347,7 +343,11 @@ export class TetrisBot {
 
 	handleGameState(payload) {
 		const data = safeParse(payload, true, this.log);
-		if (!data || !data.currentPiece || !Array.isArray(data.grid))
+		if (!data)
+			return;
+		if (this.maybeRetireAsOwner(data, 'game-state'))
+			return;
+		if (!data.currentPiece || !Array.isArray(data.grid))
 			return;
 
 		if (data.you?.hasLost) {
@@ -427,6 +427,21 @@ export class TetrisBot {
 		this.startRequested = false;
 		this.hasActivePiece = false;
 		this.awaitingNewPiece = false;
+	}
+
+	maybeRetireAsOwner(data, context) {
+		const ownerId = data?.room?.owner?.id;
+		const selfId = data?.you?.id;
+		if (!ownerId || !selfId || ownerId !== selfId)
+			return false;
+		if (this.retired)
+			return true;
+		const message = context === 'game-state'
+			? 'Promoted to owner while the game is running, leaving room to hand control back to players'
+			: 'Promoted to owner, leaving room to hand control back to players';
+		this.log('info', message);
+		this.retire('promoted-to-owner');
+		return true;
 	}
 
 	handleError(payload) {
