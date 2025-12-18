@@ -53,6 +53,9 @@ export const StartButton = styled.button`
   color: #ffffff;
   padding: 0.9rem 1.5rem;
   font-size: 1.05rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
   border-radius: 12px;
   cursor: pointer;
   transition:

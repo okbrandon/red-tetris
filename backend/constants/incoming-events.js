@@ -94,6 +94,20 @@ const PIECE_SPAWN = 'piece-spawn';
  */
 const ROOM_MODE = 'room-mode';
 
+/**
+ * @constant {string} REQUEST_BOTS - Sent when requesting bots to join a room.
+ *
+ * @description This event is sent by the client to the server when they want to request a certain number of bots to join the game room.
+ */
+const REQUEST_BOTS = 'request-bots';
+
+/**
+ * @constant {string} DISCONNECT_BOTS - Sent when requesting bots to disconnect from a room.
+ *
+ * @description This event is sent by the client to the server when they want to request that all bots disconnect from the game room.
+ */
+const DISCONNECT_BOTS = 'disconnect-bots';
+
 export default {
 	CLIENT_UPDATE,
 	ROOM_JOIN,
@@ -102,5 +116,7 @@ export default {
 	RESET_GAME,
 	MOVE_PIECE,
 	PIECE_SPAWN,
-	ROOM_MODE
+	ROOM_MODE,
+	REQUEST_BOTS,
+	DISCONNECT_BOTS
 };

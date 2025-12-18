@@ -82,7 +82,8 @@ export const ActionButton = styled.button`
   padding: 0.85rem 1.6rem;
   border-radius: 12px;
   font-size: 0.95rem;
-  letter-spacing: 0.12em;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #190f32;
   background: linear-gradient(135deg, #f9d8ff 0%, #c9a9ff 100%);

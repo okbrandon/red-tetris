@@ -1,66 +1,109 @@
 import { jest, expect } from '@jest/globals';
 
-const { mockPool, Pool } = await import('../__mocks__/_mockPg.js');
+jest.unstable_mockModule('mongodb', async () => {
+	return await import('../__mocks__/_mockMongo.js');
+});
 
-jest.unstable_mockModule('pg', async () => ({
-	Pool
-}));
+const { mockClient, mockDb } = await import('../__mocks__/_mockMongo.js');
 
-const databaseModule = await import('../database.js');
-const database = databaseModule.default;
+const mongoModule = await import('../database.js');
+const mongo = mongoModule.default;
 
-describe('Database singleton wrapper', () => {
-	beforeEach(async () => {
-		Pool.mockClear();
-		mockPool.query.mockReset();
-		mockPool.end.mockReset();
-		mockPool.query.mockResolvedValue({ rows: [] });
-		mockPool.end.mockResolvedValue();
+describe('Mongo singleton wrapper', () => {
 
-		await database.close();
+	/**
+	 * Reset mocks and mongo state before each test.
+	 */
+	beforeEach(() => {
+		mockClient.connect.mockClear();
+		mockClient.db.mockClear();
+		mockClient.close.mockClear();
+
+		if (mongo.client) mongo.client = null;
+		if (mongo.db) mongo.db = null;
 	});
 
+	/**
+	 * Test that singleton instance is returned.
+	 */
 	test('singleton instance is returned if constructed multiple times', () => {
-		const DatabaseClass = database.constructor;
-		const db1 = new DatabaseClass();
-		const db2 = new DatabaseClass();
+		const MongoClass = mongoModule.default.constructor;
+		const mongo1 = new MongoClass();
+		const mongo2 = new MongoClass();
 
-		expect(db1).toBe(db2);
+		expect(mongo1).toBe(mongo2);
 	});
 
-	test('connect establishes a connection and ensures schema', async () => {
-		const pool = await database.connect();
+	/**
+	 * Test connecting to the database.
+	 */
+	test('connect establishes a connection and returns db', async () => {
+		const db = await mongo.connect();
 
-		expect(Pool).toHaveBeenCalledTimes(1);
-		expect(mockPool.query).toHaveBeenNthCalledWith(1, 'SELECT 1');
-		expect(mockPool.query.mock.calls[1][0]).toContain('CREATE TABLE IF NOT EXISTS statistics');
-		expect(pool).toBe(mockPool);
+		expect(mockClient.connect).toHaveBeenCalled();
+		expect(mockClient.db).toHaveBeenCalled();
+		expect(db).toBe(mockDb);
 	});
 
-	test('connect is idempotent and does not recreate the pool', async () => {
-		const first = await database.connect();
-		const second = await database.connect();
+	/**
+	 * Test that connect is idempotent.
+	 */
+	test('connect is idempotent and does not reconnect when already connected', async () => {
+		const first = await mongo.connect();
+		const second = await mongo.connect();
 
-		expect(Pool).toHaveBeenCalledTimes(1);
+		expect(mockClient.connect).toHaveBeenCalledTimes(1);
 		expect(first).toBe(second);
 	});
 
-	test('getPool throws when not connected', () => {
-		expect(() => database.getPool()).toThrow('PostgreSQL not connected. Call connect() first.');
+	/**
+	 * Test getDb behavior.
+	 */
+	test('getDb throws when not connected', () => {
+		mongo.db = null;
+
+		expect(() => mongo.getDb()).toThrow('MongoDB not connected. Call connect() first.');
 	});
 
-	test('getPool returns the active pool when connected', async () => {
-		await database.connect();
-		const pool = database.getPool();
+	/**
+	 * Test getDb returns the connected db.
+	 */
+	test('getDb returns the connected db', async () => {
+		await mongo.connect();
+		const db = mongo.getDb();
 
-		expect(pool).toBe(mockPool);
+		expect(db).toBe(mockDb);
 	});
 
-	test('close shuts down the pool and resets state', async () => {
-		await database.connect();
-		await database.close();
+	/**
+	 * Test closing the connection.
+	 */
+	test('close closes the client and resets state', async () => {
+		await mongo.connect();
+		await mongo.close();
 
-		expect(mockPool.end).toHaveBeenCalled();
-		expect(() => database.getPool()).toThrow('PostgreSQL not connected. Call connect() first.');
+		expect(mockClient.close).toHaveBeenCalled();
+		expect(mongo.client).toBeNull();
+		expect(mongo.db).toBeNull();
 	});
+
+	/**
+	 * Test closing the connection checks if client exists before closing.
+	 */
+	test('closing the connection checks if client exists before closing', async () => {
+		mongo.client = null;
+		mongo.db = null;
+
+		await expect(mongo.close()).resolves.toBeUndefined();
+
+		await mongo.connect();
+		expect(mongo.client).not.toBeNull();
+		expect(mongo.db).not.toBeNull();
+
+		await mongo.close();
+		expect(mockClient.close).toHaveBeenCalled();
+		expect(mongo.client).toBeNull();
+		expect(mongo.db).toBeNull();
+	});
+
 });

@@ -146,12 +146,24 @@ const leaveRoom = (socket, room, client) => {
  */
 const getRoom = (id) => rooms.get(id);
 
-// Socket.IO connection handler
-io.on("connection", (socket) => {
-	/** @type {Player} */
-	const client = new Player(socket, socket.id);
+/**
+ * Attaches event handlers to a client socket.
+ * @param {Socket} socket - The client socket.
+ * @param {Player} client - The Player instance.
+ */
+const attachClientEventHandlers = (socket, client) => {
 	/** @type {NodeJS.Timeout | null} */
 	let availableRoomsInterval = null;
+
+	/**
+	 * Emits an error message to the client.
+	 * @param {string} message - The error message.
+	 */
+	const emitError = (message) => {
+		socket.emit(outgoingEvents.ERROR, JSON.stringify({
+			message
+		}));
+	};
 
 	/**
 	 * Stops broadcasting available rooms to the client.
@@ -159,12 +171,13 @@ io.on("connection", (socket) => {
 	const stopAvailableRoomsBroadcast = () => {
 		if (!availableRoomsInterval)
 			return;
+
 		clearInterval(availableRoomsInterval);
 		availableRoomsInterval = null;
 	};
 
 	/**
-	 * Starts broadcasting available rooms to the client every 2 seconds.
+	 * Starts broadcasting available rooms to the client.
 	 */
 	const startAvailableRoomsBroadcast = () => {
 		if (availableRoomsInterval)
@@ -178,20 +191,41 @@ io.on("connection", (socket) => {
 			}
 		};
 
-		void emitAvailableRooms(); // Initial emit, not awaiting it
+		void emitAvailableRooms();
 		availableRoomsInterval = setInterval(() => {
 			void emitAvailableRooms();
 		}, 2000);
 	};
 
-	console.log("A user connected");
+	/**
+	 * Confirms the client is in a room.
+	 */
+	const ensureInRoom = () => {
+		const room = client.room;
 
-	// Handle client update
-	socket.on(incomingEvents.CLIENT_UPDATE, (data) => {
+		if (!room)
+			emitError('Not in a room');
+		return room;
+	};
+
+	/**
+	 * Confirms the client is the owner of the room.
+	 */
+	const ensureIsOwner = (room, message) => {
+		if (room.owner?.id !== client.id) {
+			emitError(message);
+			return false;
+		}
+		return true;
+	};
+
+	/**
+	 * Handles client update events.
+	 * @param {Object} data - The event data.
+	 */
+	const handleClientUpdate = (data = {}) => {
 		if (!data.username) {
-			socket.emit(outgoingEvents.ERROR, JSON.stringify({
-				message: 'Username is required'
-			}));
+			emitError('Username is required');
 			return;
 		}
 
@@ -205,257 +239,285 @@ io.on("connection", (socket) => {
 			startAvailableRoomsBroadcast();
 			console.log(`[${client.id}] Updated username to ${client.username}`);
 		} catch (error) {
-			socket.emit(outgoingEvents.ERROR, JSON.stringify({
-				message: error.message
-			}));
-			return;
+			emitError(error.message);
 		}
-	});
+	};
 
-	// Handle room joining
-	socket.on(incomingEvents.ROOM_JOIN, (data) => {
-		const roomName = data.roomName;
-		const soloJourney = data.soloJourney || false;
-		const mode = data.mode || null;
+	/**
+	 * Handles room join events.
+	 * @param {Object} data - The event data.
+	 */
+	const handleRoomJoin = (data = {}) => {
+		const {
+			roomName,
+			soloJourney = false,
+			mode = null
+		} = data;
 
 		if (!roomName) {
-			socket.emit(outgoingEvents.ERROR, JSON.stringify({
-				message: 'Room name is required'
-			}));
+			emitError('Room name is required');
 			return;
 		}
 		if (!client.username) {
-			socket.emit(outgoingEvents.ERROR, JSON.stringify({
-				message: 'Username is required'
-			}));
+			emitError('Username is required');
 			return;
 		}
 		if (roomName.length < 3 || roomName.length > 16) {
-			socket.emit(outgoingEvents.ERROR, JSON.stringify({
-				message: 'Room name must be between 3 and 16 characters'
-			}));
+			emitError('Room name must be between 3 and 16 characters');
 			return;
 		}
 		if (!gameSettings.NAME_VALIDATION_REGEX.test(roomName)) {
-			socket.emit(outgoingEvents.ERROR, JSON.stringify({
-				message: 'Room name can only contain letters, numbers, underscores, and dashes'
-			}));
+			emitError('Room name can only contain letters, numbers, underscores, and dashes');
 			return;
 		}
 		if (roomName.includes(gameSettings.TAG_SINGLEPLAYER)) {
-			socket.emit(outgoingEvents.ERROR, JSON.stringify({
-				message: 'Room name has a private tag'
-			}));
+			emitError('Room name has a private tag');
 			return;
 		}
 
-		const room = getRoom(roomName);
+		const existingRoom = getRoom(roomName);
 
-		if (!room) {
+		if (!existingRoom) {
 			try {
-				const room = createRoom(roomName, soloJourney, mode);
+				const createdRoom = createRoom(roomName, soloJourney, mode);
 
-				room.assignOwner(client);
-				room.playerJoin(client);
+				createdRoom.assignOwner(client);
+				createdRoom.playerJoin(client);
 
-				socket.join(room.id);
+				socket.join(createdRoom.id);
 				socket.emit(outgoingEvents.ROOM_CREATED, JSON.stringify({
-					roomName: room.id,
-					soloJourney: soloJourney,
-					maxPlayers: room.maxPlayers,
-					mode: room.mode
+					roomName: createdRoom.id,
+					soloJourney,
+					maxPlayers: createdRoom.maxPlayers,
+					mode: createdRoom.mode
 				}));
-				room.broadcastRoom();
+				createdRoom.broadcastRoom();
 			} catch (error) {
-				socket.emit(outgoingEvents.ERROR, JSON.stringify({
-					message: error.message
-				}));
+				emitError(error.message);
 			}
 			console.log(rooms);
 			return;
 		}
 
 		try {
-			joinRoom(socket, room, client);
+			joinRoom(socket, existingRoom, client);
 		} catch (error) {
-			socket.emit(outgoingEvents.ERROR, JSON.stringify({
-				message: error.message
-			}));
-			return;
+			emitError(error.message);
 		}
 		console.log(rooms);
-	});
+	};
 
-	// Handle room leaving
-	socket.on(incomingEvents.ROOM_LEAVE, () => {
-		const room = client.room;
+	/**
+	 * Handles room leave events.
+	 */
+	const handleRoomLeave = () => {
+		const room = ensureInRoom();
 
-		if (!room) {
-			socket.emit(outgoingEvents.ERROR, JSON.stringify({
-				message: 'Not in a room'
-			}));
+		if (!room)
 			return;
-		}
 
 		leaveRoom(socket, room, client);
 		console.log(rooms);
-	});
+	};
 
-	// Handle game starting
-	socket.on(incomingEvents.START_GAME, () => {
-		const room = client.room;
+	/**
+	 * Handles start game events.
+	 */
+	const handleStartGame = () => {
+		const room = ensureInRoom();
 
-		if (!room) {
-			socket.emit(outgoingEvents.ERROR, JSON.stringify({
-				message: 'Not in a room'
-			}));
+		if (!room)
 			return;
-		}
 
 		if (room.status === gameStatus.IN_GAME) {
-			socket.emit(outgoingEvents.ERROR, JSON.stringify({
-				message: 'Game already started'
-			}));
+			emitError('Game already started');
 			return;
 		}
 
 		if (room.owner !== client) {
-			socket.emit(outgoingEvents.ERROR, JSON.stringify({
-				message: 'You are not the owner'
-			}));
+			emitError('You are not the owner');
 			return;
 		}
 
 		try {
 			room.start();
 		} catch (error) {
-			socket.emit(outgoingEvents.ERROR, JSON.stringify({
-				message: error.message
-			}));
-			return;
+			emitError(error.message);
 		}
-	});
+	};
 
-	// Handle game restarting
-	socket.on(incomingEvents.RESET_GAME, () => {
-		const room = client.room;
+	/**
+	 * Handles reset game events.
+	 */
+	const handleResetGame = () => {
+		const room = ensureInRoom();
 
-		if (!room) {
-			socket.emit(outgoingEvents.ERROR, JSON.stringify({
-				message: 'Not in a room'
-			}));
+		if (!room)
 			return;
-		}
 
 		if (room.status === gameStatus.IN_GAME) {
-			socket.emit(outgoingEvents.ERROR, JSON.stringify({
-				message: 'Game already started'
-			}));
+			emitError('Game already started');
 			return;
 		}
 
 		if (room.owner !== client) {
-			socket.emit(outgoingEvents.ERROR, JSON.stringify({
-				message: 'You are not the owner'
-			}));
+			emitError('You are not the owner');
 			return;
 		}
 
 		try {
 			room.restart();
 		} catch (error) {
-			socket.emit(outgoingEvents.ERROR, JSON.stringify({
-				message: error.message
-			}));
-			return;
+			emitError(error.message);
 		}
-	})
+	};
 
-	// Handle piece movement
-	socket.on(incomingEvents.MOVE_PIECE, (data) => {
-		const room = client.room;
+	/**
+	 * Handles move piece events.
+	 * @param {Object} data - The event data.
+	 */
+	const handleMovePiece = (data = {}) => {
+		const room = ensureInRoom();
 
-		if (!room) {
-			socket.emit(outgoingEvents.ERROR, JSON.stringify({
-				message: 'Not in a room'
-			}));
+		if (!room)
 			return;
-		}
 
-		const direction = data.direction;
+		const { direction } = data;
 
 		if (!direction) {
-			socket.emit(outgoingEvents.ERROR, JSON.stringify({
-				message: 'Direction is required'
-			}));
+			emitError('Direction is required');
 			return;
 		}
 
 		try {
 			room.handlePieceMove(client, direction);
 		} catch (error) {
-			socket.emit(outgoingEvents.ERROR, JSON.stringify({
-				message: error.message
-			}));
-			return;
+			emitError(error.message);
 		}
-	});
+	};
 
-	// Handle room mode change
-	socket.on(incomingEvents.ROOM_MODE, (data) => {
-		const room = client.room;
+	/**
+	 * Handles room mode change events.
+	 * @param {Object} data - The event data.
+	 */
+	const handleRoomModeChange = (data = {}) => {
+		const room = ensureInRoom();
 
-		if (!room) {
-			socket.emit(outgoingEvents.ERROR, JSON.stringify({
-				message: 'Not in a room'
-			}));
+		if (!room)
 			return;
-		}
 
-		if (room.owner?.id !== client.id) {
-			socket.emit(outgoingEvents.ERROR, JSON.stringify({
-				message: 'Only the room owner can change the mode'
-			}));
+		if (!ensureIsOwner(room, 'Only the room owner can change the mode'))
 			return;
-		}
 
-		const mode = data.mode;
+		const { mode } = data;
 
 		if (!mode) {
-			socket.emit(outgoingEvents.ERROR, JSON.stringify({
-				message: 'Mode is required'
-			}));
+			emitError('Mode is required');
 			return;
 		}
 
 		try {
 			room.changeMode(mode);
 		} catch (error) {
-			socket.emit(outgoingEvents.ERROR, JSON.stringify({
-				message: error.message
-			}));
-			return;
+			emitError(error.message);
 		}
-	});
+	};
 
-	// Handle disconnection
-	socket.on("disconnect", () => {
+	/**
+	 * Handles request bots events.
+	 * @param {Object} data - The event data.
+	 */
+	const handleRequestBots = async (data = {}) => {
+		const room = ensureInRoom();
+
+		if (!room)
+			return;
+
+		if (!ensureIsOwner(room, 'Only the room owner can request bots'))
+			return;
+
+		const botCount = data.botCount || 1;
+
+		try {
+			await room.requestBots(botCount);
+		} catch (error) {
+			emitError(error.message);
+		}
+	};
+
+	/**
+	 * Handles disconnect bots events.
+	 */
+	const handleDisconnectBots = async () => {
+		const room = ensureInRoom();
+
+		if (!room)
+			return;
+
+		if (!ensureIsOwner(room, 'Only the room owner can disconnect bots'))
+			return;
+
+		try {
+			await room.disconnectBots();
+		} catch (error) {
+			emitError(error.message);
+		}
+	};
+
+	/**
+	 * Handles client disconnect events.
+	 */
+	const handleDisconnect = () => {
 		const room = client.room;
 
-		if (room) {
+		if (room)
 			leaveRoom(socket, room, client);
-		}
 
 		stopAvailableRoomsBroadcast();
 
-		console.log("A user disconnected");
+		console.log('A user disconnected');
 		console.log(rooms);
+	};
+
+	/**
+	 * Event handlers mapping.
+	 */
+	const handlers = {
+		[incomingEvents.CLIENT_UPDATE]: handleClientUpdate,
+		[incomingEvents.ROOM_JOIN]: handleRoomJoin,
+		[incomingEvents.ROOM_LEAVE]: handleRoomLeave,
+		[incomingEvents.START_GAME]: handleStartGame,
+		[incomingEvents.RESET_GAME]: handleResetGame,
+		[incomingEvents.MOVE_PIECE]: handleMovePiece,
+		[incomingEvents.ROOM_MODE]: handleRoomModeChange,
+		[incomingEvents.REQUEST_BOTS]: handleRequestBots,
+		[incomingEvents.DISCONNECT_BOTS]: handleDisconnectBots
+	};
+
+	/**
+	 * Attaching event handlers to the socket.
+	 */
+	Object.entries(handlers).forEach(([event, handler]) => {
+		socket.on(event, handler);
 	});
+
+	/**
+	 * Handles client disconnect events.
+	 */
+	socket.on('disconnect', handleDisconnect);
+};
+
+// Socket.IO connection handler
+io.on("connection", (socket) => {
+	/** @type {Player} */
+	const client = new Player(socket, socket.id);
+
+	console.log("A user connected");
+	attachClientEventHandlers(socket, client);
 });
 
-
 /**
- * Starts the HTTP server. Connects to PostgreSQL first.
+ * Starts the HTTP server. Connects to MongoDB first.
  */
 database.connect()
 	.then(() => {
@@ -464,6 +526,6 @@ database.connect()
 		});
 	})
 	.catch((err) => {
-		console.error('[PostgreSQL] Connection failed:', err);
+		console.error('[MongoDB] Connection failed:', err);
 		process.exit(1);
 	});
