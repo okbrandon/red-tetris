@@ -2,6 +2,9 @@
 
 > Multiplayer-first Tetris built for the 42 network — fast Socket.IO backend, sleek Vite/React frontend, and persistent player history backed by MongoDB.
 
+> [!CAUTION]
+> The latest release of the project is not intended to be submitted at 42.
+
 ## Table of Contents
 - [Overview](#overview)
 - [Feature Highlights](#feature-highlights)
